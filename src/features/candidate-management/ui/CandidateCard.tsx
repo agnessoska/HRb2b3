@@ -20,7 +20,7 @@ function getTestStatus(lastUpdatedAt: string | null) {
   if (!lastUpdatedAt) {
     return {
       textKey: 'statuses.relevant',
-      color: 'bg-slate-500',
+      color: 'bg-gradient-to-r from-slate-500 to-slate-600',
       icon: Clock,
     }
   }
@@ -32,11 +32,11 @@ function getTestStatus(lastUpdatedAt: string | null) {
     (now.getMonth() - lastUpdateDate.getMonth())
 
   if (monthsDiff < 1) {
-    return { textKey: 'statuses.relevant', color: 'bg-green-500', icon: CheckCircle2 }
+    return { textKey: 'statuses.relevant', color: 'bg-gradient-to-r from-emerald-500 to-green-600', icon: CheckCircle2 }
   } else if (monthsDiff <= 2) {
-    return { textKey: 'statuses.expiring', color: 'bg-yellow-500', icon: Clock }
+    return { textKey: 'statuses.expiring', color: 'bg-gradient-to-r from-amber-500 to-orange-500', icon: Clock }
   } else {
-    return { textKey: 'statuses.outdated', color: 'bg-red-500', icon: AlertCircle }
+    return { textKey: 'statuses.outdated', color: 'bg-gradient-to-r from-red-500 to-rose-600', icon: AlertCircle }
   }
 }
 

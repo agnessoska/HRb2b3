@@ -74,9 +74,15 @@ export function CandidateList() {
         <GenerateInviteLinkDialog />
       </div>
       {candidates && candidates.length > 0 ? (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {candidates.map((candidate) => (
-            <CandidateCard key={candidate.id} candidate={candidate} />
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          {candidates.map((candidate, index) => (
+            <div
+              key={candidate.id}
+              className="animate-in fade-in slide-in-from-bottom-2"
+              style={{ animationDelay: `${index * 50}ms`, animationFillMode: 'backwards' }}
+            >
+              <CandidateCard candidate={candidate} />
+            </div>
           ))}
         </div>
       ) : (

@@ -13,13 +13,13 @@ type Vacancy = Database['public']['Tables']['vacancies']['Row']
 function getStatusColor(status: string) {
   switch (status) {
     case 'active':
-      return 'bg-green-500'
+      return 'bg-gradient-to-r from-emerald-500 to-green-600'
     case 'closed':
-      return 'bg-gray-500'
+      return 'bg-gradient-to-r from-gray-500 to-slate-600'
     case 'archived':
-      return 'bg-red-500'
+      return 'bg-gradient-to-r from-red-500 to-rose-600'
     default:
-      return 'bg-blue-500'
+      return 'bg-gradient-to-r from-blue-500 to-blue-600'
   }
 }
 
@@ -157,9 +157,15 @@ export function VacancyList() {
         <CreateVacancyDialog />
       </div>
       {vacancies && vacancies.length > 0 ? (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {vacancies.map((vacancy) => (
-            <VacancyCard key={vacancy.id} vacancy={vacancy} />
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          {vacancies.map((vacancy, index) => (
+            <div
+              key={vacancy.id}
+              className="animate-in fade-in slide-in-from-bottom-2"
+              style={{ animationDelay: `${index * 50}ms`, animationFillMode: 'backwards' }}
+            >
+              <VacancyCard vacancy={vacancy} />
+            </div>
           ))}
         </div>
       ) : (
