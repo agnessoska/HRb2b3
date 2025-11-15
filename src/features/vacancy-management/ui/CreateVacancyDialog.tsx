@@ -34,6 +34,7 @@ import { createVacancy } from '../api/createVacancy'
 import { useOrganization } from '@/shared/hooks/useOrganization'
 import { useAuthStore } from '@/app/store/auth'
 import { useTranslation } from 'react-i18next'
+import { Plus, Loader2 } from 'lucide-react'
 
 const vacancySchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -84,12 +85,17 @@ export function CreateVacancyDialog() {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button>{t('create_new')}</Button>
+        <Button className="gap-2">
+          <Plus className="h-4 w-4" />
+          {t('create_new')}
+        </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle>{t('dialog.create_title')}</DialogTitle>
-          <DialogDescription>{t('dialog.description')}</DialogDescription>
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+        <DialogHeader className="space-y-3">
+          <DialogTitle className="text-2xl">{t('dialog.create_title')}</DialogTitle>
+          <DialogDescription className="text-base">
+            {t('dialog.description')}
+          </DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -176,18 +182,27 @@ export function CreateVacancyDialog() {
                 </FormItem>
               )}
             />
-            <DialogFooter>
+            <DialogFooter className="gap-2 sm:gap-0">
               <Button
                 type="button"
-                variant="ghost"
+                variant="outline"
                 onClick={() => setIsOpen(false)}
+                disabled={isPending}
               >
                 {t('dialog.form.cancel')}
               </Button>
-              <Button type="submit" disabled={isPending}>
-                {isPending
-                  ? t('dialog.form.creating')
-                  : t('dialog.form.submit')}
+              <Button type="submit" disabled={isPending} className="gap-2">
+                {isPending ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    {t('dialog.form.creating')}
+                  </>
+                ) : (
+                  <>
+                    <Plus className="h-4 w-4" />
+                    {t('dialog.form.submit')}
+                  </>
+                )}
               </Button>
             </DialogFooter>
           </form>

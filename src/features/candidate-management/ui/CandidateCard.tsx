@@ -8,6 +8,7 @@ import {
 import type { Database } from '@/shared/types/database'
 import { Button } from '@/components/ui/button'
 import { useTranslation } from 'react-i18next'
+import { User, ArrowRight, CheckCircle2, Clock, AlertCircle } from 'lucide-react'
 
 type Candidate = Database['public']['Tables']['candidates']['Row']
 
@@ -18,8 +19,9 @@ interface CandidateCardProps {
 function getTestStatus(lastUpdatedAt: string | null) {
   if (!lastUpdatedAt) {
     return {
-      textKey: 'statuses.relevant', // Default for new candidates
-      color: 'bg-gray-500',
+      textKey: 'statuses.relevant',
+      color: 'bg-slate-500',
+      icon: Clock,
     }
   }
 
@@ -30,11 +32,11 @@ function getTestStatus(lastUpdatedAt: string | null) {
     (now.getMonth() - lastUpdateDate.getMonth())
 
   if (monthsDiff < 1) {
-    return { textKey: 'statuses.relevant', color: 'bg-green-500' }
+    return { textKey: 'statuses.relevant', color: 'bg-green-500', icon: CheckCircle2 }
   } else if (monthsDiff <= 2) {
-    return { textKey: 'statuses.expiring', color: 'bg-yellow-500' }
+    return { textKey: 'statuses.expiring', color: 'bg-yellow-500', icon: Clock }
   } else {
-    return { textKey: 'statuses.outdated', color: 'bg-red-500' }
+    return { textKey: 'statuses.outdated', color: 'bg-red-500', icon: AlertCircle }
   }
 }
 
@@ -46,47 +48,62 @@ export function CandidateCard({ candidate }: CandidateCardProps) {
   const categoryName = candidate.category_id || 'N/A'
 
   const testStatus = getTestStatus(candidate.tests_last_updated_at)
+  const StatusIcon = testStatus.icon
+  const progressPercentage = (testsCompleted / 6) * 100
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{candidate.full_name}</CardTitle>
-        <p className="text-sm text-muted-foreground">{categoryName}</p>
-      </CardHeader>
-      <CardContent>
-        <div className="mb-2">
-          <p className="mb-1 text-sm font-medium">
-            {t('card.testing_progress')}
-          </p>
-          <div className="flex items-center gap-1">
-            <div className="h-2 w-full rounded-full bg-muted">
-              <div
-                className="h-2 rounded-full bg-primary"
-                style={{ width: `${(testsCompleted / 6) * 100}%` }}
-              />
+    <Card className="group overflow-hidden">
+      <CardHeader className="pb-3">
+        <div className="flex items-start justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <User className="h-5 w-5" />
             </div>
-            <span className="text-xs font-semibold">
-              {testsCompleted}/6
-            </span>
+            <div>
+              <CardTitle className="text-lg">{candidate.full_name}</CardTitle>
+              <p className="text-sm text-muted-foreground">{categoryName}</p>
+            </div>
           </div>
         </div>
-        {testsCompleted > 0 && (
+      </CardHeader>
+      <CardContent className="pb-3">
+        <div className="space-y-3">
           <div>
-            <span
-              className={`rounded-full px-2 py-0.5 text-xs text-primary-foreground ${testStatus.color}`}
-            >
-              {t('card.test_status_label', {
-                status: t(testStatus.textKey),
-              })}
-            </span>
+            <div className="mb-2 flex items-center justify-between text-sm">
+              <span className="font-medium text-muted-foreground">
+                {t('card.testing_progress')}
+              </span>
+              <span className="font-semibold tabular-nums">
+                {testsCompleted}/6
+              </span>
+            </div>
+            <div className="h-2 overflow-hidden rounded-full bg-muted">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-primary to-chart-1 transition-all duration-500"
+                style={{ width: `${progressPercentage}%` }}
+              />
+            </div>
           </div>
-        )}
+          {testsCompleted > 0 && (
+            <div className="flex items-center gap-2">
+              <div
+                className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium text-white ${testStatus.color}`}
+              >
+                <StatusIcon className="h-3 w-3" />
+                {t(testStatus.textKey)}
+              </div>
+            </div>
+          )}
+        </div>
       </CardContent>
-      <CardFooter className="flex justify-end gap-2">
-        <Button variant="outline" size="sm">
+      <CardFooter className="flex gap-2 border-t bg-muted/30 pt-4">
+        <Button variant="outline" size="sm" className="flex-1">
           {t('card.profile_button')}
         </Button>
-        <Button size="sm">{t('card.assign_button')}</Button>
+        <Button size="sm" className="flex-1 gap-1">
+          {t('card.assign_button')}
+          <ArrowRight className="h-3 w-3" />
+        </Button>
       </CardFooter>
     </Card>
   )
