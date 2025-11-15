@@ -1,0 +1,31 @@
+{
+  "title": "Candidates",
+  "generate_invite_link": "Generate invitation link",
+  "loading": "Loading...",
+  "error": "Error loading candidates.",
+  "empty": {
+    "title": "No candidates yet",
+    "description": "Get started by generating an invitation link."
+  },
+  "card": {
+    "testing_progress": "Testing Progress",
+    "test_status_label": "Tests are {status}",
+    "statuses": {
+      "relevant": "relevant",
+      "expiring": "expiring",
+      "outdated": "outdated"
+    },
+    "profile_button": "Profile",
+    "assign_button": "Assign"
+  },
+  "invite_dialog": {
+    "description": "Generating a link will cost 500 tokens. This link can be used once by a candidate to register.",
+    "initial_prompt": "Click the button below to generate a new invitation link.",
+    "success_prompt": "Link generated successfully! Share it with a candidate.",
+    "generate_button": "Generate",
+    "generating_button": "Generating...",
+    "close_button": "Close",
+    "copy_button": "Copy",
+    "copy_success_toast": "Link copied to clipboard!"
+  }
+}

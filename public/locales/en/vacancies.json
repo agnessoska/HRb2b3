@@ -1,0 +1,43 @@
+{
+  "title": "Vacancies",
+  "create_new": "Create Vacancy",
+  "dialog": {
+    "create_title": "Create a new vacancy",
+    "edit_title": "Edit Vacancy",
+    "form": {
+      "title": "Position Title",
+      "title_placeholder": "e.g., Frontend Developer",
+      "description": "Description",
+      "description_placeholder": "Describe the tasks and the project...",
+      "requirements": "Requirements",
+      "requirements_placeholder": "Describe the requirements for the candidate...",
+      "salary_min": "Salary from",
+      "salary_max": "Salary to",
+      "location": "Location",
+      "location_placeholder": "e.g., Almaty, Kazakhstan",
+      "employment_type": "Employment Type",
+      "employment_type_placeholder": "Select an employment type",
+      "employment_types": {
+        "full-time": "Full-time",
+        "part-time": "Part-time",
+        "remote": "Remote"
+      },
+      "submit": "Create Vacancy",
+      "creating": "Creating...",
+      "cancel": "Cancel"
+    },
+    "description": "Fill in the details below to post a new job opening."
+  },
+  "loading": "Loading vacancies...",
+  "error": "Error fetching vacancies",
+  "list": {
+    "header": "Your Vacancies",
+    "empty_title": "No vacancies yet",
+    "empty_description": "Get started by creating your first vacancy."
+  },
+  "statuses": {
+    "active": "Active",
+    "closed": "Closed",
+    "archived": "Archived"
+  }
+}

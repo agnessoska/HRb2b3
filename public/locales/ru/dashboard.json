@@ -1,0 +1,8 @@
+{
+  "title": "HR Панель",
+  "tabs": {
+    "resume_analysis": "Анализ резюме",
+    "candidates": "Кандидаты",
+    "vacancies": "Вакансии"
+  }
+}

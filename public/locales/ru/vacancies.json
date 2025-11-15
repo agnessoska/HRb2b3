@@ -1,0 +1,43 @@
+{
+  "title": "Вакансии",
+  "create_new": "Создать вакансию",
+  "dialog": {
+    "create_title": "Создать новую вакансию",
+    "edit_title": "Редактировать вакансию",
+    "form": {
+      "title": "Название должности",
+      "title_placeholder": "Например, Frontend-разработчик",
+      "description": "Описание",
+      "description_placeholder": "Расскажите о задачах и проекте...",
+      "requirements": "Требования",
+      "requirements_placeholder": "Опишите требования к кандидату...",
+      "salary_min": "Зарплата от",
+      "salary_max": "Зарплата до",
+      "location": "Локация",
+      "location_placeholder": "Например, Алматы, Казахстан",
+      "employment_type": "Тип занятости",
+      "employment_type_placeholder": "Выберите тип занятости",
+      "employment_types": {
+        "full-time": "Полная занятость",
+        "part-time": "Частичная занятость",
+        "remote": "Удаленная работа"
+      },
+      "submit": "Создать вакансию",
+      "creating": "Создание...",
+      "cancel": "Отмена"
+    },
+    "description": "Заполните детали ниже, чтобы разместить новую вакансию."
+  },
+  "loading": "Загрузка вакансий...",
+  "error": "Ошибка загрузки вакансий",
+  "list": {
+    "header": "Ваши вакансии",
+    "empty_title": "Вакансий пока нет",
+    "empty_description": "Начните, создав свою первую вакансию."
+  },
+  "statuses": {
+    "active": "Активна",
+    "closed": "Закрыта",
+    "archived": "В архиве"
+  }
+}
