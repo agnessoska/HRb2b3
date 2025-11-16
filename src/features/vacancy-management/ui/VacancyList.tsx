@@ -1,7 +1,9 @@
-import { useQuery } from '@tanstack/react-query'
+import { useState } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getVacancies } from '../api/getVacancies'
 import { useOrganization } from '@/shared/hooks/useOrganization'
 import { CreateVacancyDialog } from './CreateVacancyDialog'
+import { EditVacancyDialog } from './EditVacancyDialog'
 import type { Database } from '@/shared/types/database'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
@@ -14,6 +16,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Briefcase, MapPin, DollarSign, Users, MoreVertical, Eye, Edit, Archive } from 'lucide-react'
+import { supabase } from '@/shared/lib/supabase'
+import { toast } from 'sonner'
 
 type Vacancy = Database['public']['Tables']['vacancies']['Row']
 
@@ -30,13 +34,13 @@ function getStatusColor(status: string) {
   }
 }
 
-function VacancyCard({ vacancy }: { vacancy: Vacancy }) {
+function VacancyCard({ vacancy, onEdit, onArchive }: { vacancy: Vacancy; onEdit: (vacancy: Vacancy) => void; onArchive: (vacancyId: string) => void }) {
   const { t } = useTranslation('vacancies')
   const navigate = useNavigate()
   const statusColor = getStatusColor(vacancy.status || 'active')
 
   return (
-    <Card className="group overflow-hidden">
+    <Card className="group overflow-hidden hover:shadow-md transition-shadow">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3 flex-1">
@@ -61,16 +65,16 @@ function VacancyCard({ vacancy }: { vacancy: Vacancy }) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => console.log('Edit clicked')}>
+              <DropdownMenuItem onClick={() => onEdit(vacancy)}>
                 <Edit className="mr-2 h-4 w-4" />
-                <span>Edit</span>
+                <span>{t('card.edit')}</span>
               </DropdownMenuItem>
               <DropdownMenuItem
-                onClick={() => console.log('Archive clicked')}
+                onClick={() => onArchive(vacancy.id)}
                 className="text-destructive"
               >
                 <Archive className="mr-2 h-4 w-4" />
-                <span>Archive</span>
+                <span>{t('card.archive')}</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -101,7 +105,7 @@ function VacancyCard({ vacancy }: { vacancy: Vacancy }) {
             <span className="text-xs">
               {vacancy.funnel_counts ?
                 Object.values(vacancy.funnel_counts as Record<string, number>).reduce((a, b) => a + b, 0) : 0
-              } candidates
+              } {t('card.candidates')}
             </span>
           </div>
         </div>
@@ -114,14 +118,14 @@ function VacancyCard({ vacancy }: { vacancy: Vacancy }) {
           onClick={() => navigate(`/hr/vacancy/${vacancy.id}/funnel`)}
         >
           <Eye className="h-3 w-3" />
-          View
+          {t('card.view')}
         </Button>
         <Button
           size="sm"
           className="flex-1"
           onClick={() => navigate(`/hr/vacancy/${vacancy.id}/profile`)}
         >
-          Manage
+          {t('card.manage')}
         </Button>
       </CardFooter>
     </Card>
@@ -130,8 +134,10 @@ function VacancyCard({ vacancy }: { vacancy: Vacancy }) {
 
 export function VacancyList() {
   const { t } = useTranslation('vacancies')
+  const queryClient = useQueryClient()
   const { data: organization, isLoading: isLoadingOrg } = useOrganization()
   const organizationId = organization?.id
+  const [editingVacancy, setEditingVacancy] = useState<Vacancy | null>(null)
 
   const {
     data: vacancies,
@@ -142,6 +148,32 @@ export function VacancyList() {
     queryFn: () => getVacancies(organizationId!),
     enabled: !!organizationId,
   })
+
+  const archiveMutation = useMutation({
+    mutationFn: async (vacancyId: string) => {
+      const { error } = await supabase
+        .from('vacancies')
+        .update({ status: 'archived' })
+        .eq('id', vacancyId)
+
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['vacancies', organizationId] })
+      toast.success(t('card.archived_successfully'))
+    },
+    onError: (error: Error) => {
+      toast.error(t('error'), { description: error.message })
+    },
+  })
+
+  const handleEdit = (vacancy: Vacancy) => {
+    setEditingVacancy(vacancy)
+  }
+
+  const handleArchive = (vacancyId: string) => {
+    archiveMutation.mutate(vacancyId)
+  }
 
   if (isLoadingOrg || isLoadingVacancies) {
     return (
@@ -180,44 +212,57 @@ export function VacancyList() {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">{t('list.header')}</h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            Manage your open positions and recruitment pipeline
-          </p>
-        </div>
-        <CreateVacancyDialog />
-      </div>
-      {vacancies && vacancies.length > 0 ? (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          {vacancies.map((vacancy, index) => (
-            <div
-              key={vacancy.id}
-              className="animate-in fade-in slide-in-from-bottom-2"
-              style={{ animationDelay: `${index * 50}ms`, animationFillMode: 'backwards' }}
-            >
-              <VacancyCard vacancy={vacancy} />
-            </div>
-          ))}
-        </div>
-      ) : (
-        <Card className="border-dashed">
-          <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-              <Briefcase className="h-6 w-6 text-primary" />
-            </div>
-            <h3 className="mt-4 text-lg font-semibold">{t('list.empty_title')}</h3>
-            <p className="mt-2 text-sm text-muted-foreground max-w-sm">
-              {t('list.empty_description')}
+    <>
+      <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight">{t('list.header')}</h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              {t('list.description')}
             </p>
-            <div className="mt-6">
-              <CreateVacancyDialog />
-            </div>
-          </CardContent>
-        </Card>
+          </div>
+          <CreateVacancyDialog />
+        </div>
+        {vacancies && vacancies.length > 0 ? (
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {vacancies.map((vacancy, index) => (
+              <div
+                key={vacancy.id}
+                className="animate-in fade-in slide-in-from-bottom-2"
+                style={{ animationDelay: `${index * 50}ms`, animationFillMode: 'backwards' }}
+              >
+                <VacancyCard
+                  vacancy={vacancy}
+                  onEdit={handleEdit}
+                  onArchive={handleArchive}
+                />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <Card className="border-dashed">
+            <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                <Briefcase className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="mt-4 text-lg font-semibold">{t('list.empty_title')}</h3>
+              <p className="mt-2 text-sm text-muted-foreground max-w-sm">
+                {t('list.empty_description')}
+              </p>
+              <div className="mt-6">
+                <CreateVacancyDialog />
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+      {editingVacancy && (
+        <EditVacancyDialog
+          vacancy={editingVacancy}
+          open={!!editingVacancy}
+          onOpenChange={(open) => !open && setEditingVacancy(null)}
+        />
       )}
-    </div>
+    </>
   )
 }
