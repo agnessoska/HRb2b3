@@ -1363,5 +1363,14 @@ export const Constants = {
   public: {
     Enums: {},
   },
-} as const
+} as const;
 
+// Custom application types
+export type TestQuestion = Tables<'test_questions'>;
+export type Test = Tables<'tests'>;
+export type TestScale = Tables<'test_scales'>;
+
+export type TestWithQuestions = Test & {
+  test_questions: TestQuestion[];
+  test_scales: TestScale[];
+};

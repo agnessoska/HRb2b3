@@ -39,5 +39,56 @@
     "active": "Active",
     "closed": "Closed",
     "archived": "Archived"
-  }
+  },
+  "idealProfile": {
+    "subtitle": "Manage the ideal AI profile for this vacancy.",
+    "generateButton": "Generate Ideal Profile",
+    "generating": "Generating...",
+    "noProfileData": "No ideal profile data available.",
+    "saveChanges": "Save Changes",
+    "saving": "Saving...",
+    "bigFive": {
+      "title": "Big Five",
+      "openness": "Openness",
+      "conscientiousness": "Conscientiousness",
+      "extraversion": "Extraversion",
+      "agreeableness": "Agreeableness",
+      "neuroticism": "Neuroticism"
+    },
+    "eq": {
+      "title": "EQ (Emotional Intelligence)",
+      "self_awareness": "Self-Awareness",
+      "self_management": "Self-Management",
+      "social_awareness": "Social Awareness",
+      "relationship_management": "Relationship Management"
+    },
+    "softSkills": {
+      "title": "Soft Skills",
+      "communication": "Communication",
+      "teamwork": "Teamwork",
+      "critical_thinking": "Critical Thinking",
+      "adaptability": "Adaptability",
+      "initiative": "Initiative"
+    },
+    "motivation": {
+      "title": "Motivation Profile",
+      "achievement": "Achievement",
+      "power": "Power",
+      "affiliation": "Affiliation",
+      "autonomy": "Autonomy",
+      "security": "Security",
+      "growth": "Growth"
+    },
+    "disc": {
+      "title": "DISC",
+      "type": "Type",
+      "placeholder": "e.g., D or DI"
+    },
+    "mbti": {
+      "title": "MBTI",
+      "type": "Type",
+      "placeholder": "e.g., ENTJ"
+    }
+  },
+  "vacancyNotFound": "Vacancy not found."
 }

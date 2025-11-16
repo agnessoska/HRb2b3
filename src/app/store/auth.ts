@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware'
 import { supabase } from '@/shared/lib/supabase'
 import type { AuthChangeEvent, Session, User } from '@supabase/supabase-js'
 
-interface AuthState {
+export interface AuthState {
   user: User | null
   session: Session | null
   loading: boolean

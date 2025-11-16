@@ -39,5 +39,56 @@
     "active": "Активна",
     "closed": "Закрыта",
     "archived": "В архиве"
-  }
+  },
+  "idealProfile": {
+    "subtitle": "Управляйте идеальным AI-профилем для этой вакансии.",
+    "generateButton": "Сгенерировать идеальный профиль",
+    "generating": "Генерация...",
+    "noProfileData": "Нет данных об идеальном профиле.",
+    "saveChanges": "Сохранить изменения",
+    "saving": "Сохранение...",
+    "bigFive": {
+      "title": "Big Five (Большая пятерка)",
+      "openness": "Открытость опыту",
+      "conscientiousness": "Добросовестность",
+      "extraversion": "Экстраверсия",
+      "agreeableness": "Доброжелательность",
+      "neuroticism": "Нейротизм"
+    },
+    "eq": {
+      "title": "EQ (Эмоциональный интеллект)",
+      "self_awareness": "Самосознание",
+      "self_management": "Самоуправление",
+      "social_awareness": "Социальная осведомленность",
+      "relationship_management": "Управление отношениями"
+    },
+    "softSkills": {
+      "title": "Soft Skills (Мягкие навыки)",
+      "communication": "Коммуникация",
+      "teamwork": "Работа в команде",
+      "critical_thinking": "Критическое мышление",
+      "adaptability": "Адаптивность",
+      "initiative": "Инициативность"
+    },
+    "motivation": {
+      "title": "Мотивационный профиль",
+      "achievement": "Достижение",
+      "power": "Власть",
+      "affiliation": "Принадлежность",
+      "autonomy": "Автономность",
+      "security": "Безопасность",
+      "growth": "Рост"
+    },
+    "disc": {
+      "title": "DISC",
+      "type": "Тип",
+      "placeholder": "Напр., D или DI"
+    },
+    "mbti": {
+      "title": "MBTI",
+      "type": "Тип",
+      "placeholder": "Напр., ENTJ"
+    }
+  },
+  "vacancyNotFound": "Вакансия не найдена."
 }

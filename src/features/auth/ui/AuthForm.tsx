@@ -72,6 +72,16 @@ export function AuthForm() {
   async function onRegister(values: z.infer<typeof registerSchema>) {
     setLoading(true)
     setError(null)
+
+    if (role === 'hr' && (!values.organizationName || values.organizationName.trim().length < 2)) {
+      registerForm.setError('organizationName', {
+        type: 'manual',
+        message: 'Organization name is required for HR specialists.',
+      })
+      setLoading(false)
+      return
+    }
+
     const { data, error } = await supabase.auth.signUp({
       email: values.email,
       password: values.password,

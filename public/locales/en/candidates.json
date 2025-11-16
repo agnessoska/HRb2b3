@@ -1,31 +1,48 @@
 {
-  "title": "Candidates",
-  "generate_invite_link": "Generate invitation link",
-  "loading": "Loading...",
-  "error": "Error loading candidates.",
-  "empty": {
-    "title": "No candidates yet",
-    "description": "Get started by generating an invitation link."
+  "list": {
+    "title": "Candidates",
+    "generateInvite": "Generate invite link",
+    "inviteDialog": {
+      "title": "Invite Candidate",
+      "description": "The link is valid for 24 hours. Cost: 500 tokens.",
+      "copy": "Copy",
+      "copied": "Copied!",
+      "close": "Close"
+    }
   },
   "card": {
-    "testing_progress": "Testing Progress",
-    "test_status_label": "Tests are {status}",
-    "statuses": {
-      "relevant": "relevant",
-      "expiring": "expiring",
-      "outdated": "outdated"
+    "testsCompleted": "{{count}} of 6 tests completed",
+    "status": {
+      "ok": "Up-to-date",
+      "expiring": "Expiring soon",
+      "expired": "Outdated"
     },
-    "profile_button": "Profile",
-    "assign_button": "Assign"
+    "viewProfile": "Profile"
   },
-  "invite_dialog": {
-    "description": "Generating a link will cost 500 tokens. This link can be used once by a candidate to register.",
-    "initial_prompt": "Click the button below to generate a new invitation link.",
-    "success_prompt": "Link generated successfully! Share it with a candidate.",
-    "generate_button": "Generate",
-    "generating_button": "Generating...",
-    "close_button": "Close",
-    "copy_button": "Copy",
-    "copy_success_toast": "Link copied to clipboard!"
+  "profile": {
+    "title": "Candidate Profile",
+    "aiAnalysisCard": {
+      "title": "AI Analysis",
+      "empty": {
+        "title": "Analysis not generated yet",
+        "description": "The full analysis of the candidate will be displayed here once generated."
+      }
+    },
+    "actionsCard": {
+      "title": "Actions",
+      "analysisDisabledTooltip": "Full analysis is available only after the candidate completes all 6 tests.",
+      "invite": "Invite to Interview",
+      "offer": "Send Offer",
+      "reject": "Send Rejection"
+    },
+    "detailsCard": {
+      "title": "Candidate Details",
+      "email": "Email",
+      "phone": "Phone",
+      "experience": "Experience",
+      "education": "Education",
+      "about": "About",
+      "testsCompleted": "Tests Completed"
+    }
   }
 }

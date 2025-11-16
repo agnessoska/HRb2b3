@@ -1,4 +1,3 @@
-import { Outlet } from 'react-router-dom'
 import { LanguageSwitcher } from '../LanguageSwitcher'
 import { ModeToggle } from '../ModeToggle'
 import { Briefcase, User } from 'lucide-react'
@@ -12,8 +11,14 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useAuthStore } from '@/app/store/auth'
+import React from 'react'
+import { Toaster } from '@/components/ui/sonner'
 
-export function DashboardLayout() {
+interface DashboardLayoutProps {
+  children: React.ReactNode
+}
+
+export function DashboardLayout({ children }: DashboardLayoutProps) {
   const user = useAuthStore((state) => state.user)
 
   return (
@@ -56,9 +61,8 @@ export function DashboardLayout() {
           </div>
         </div>
       </header>
-      <main className="flex-1">
-        <Outlet />
-      </main>
+      <main className="flex-1">{children}</main>
+      <Toaster />
     </div>
   )
 }

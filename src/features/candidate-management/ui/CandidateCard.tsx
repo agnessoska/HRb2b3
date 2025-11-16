@@ -9,6 +9,7 @@ import type { Database } from '@/shared/types/database'
 import { Button } from '@/components/ui/button'
 import { useTranslation } from 'react-i18next'
 import { User, ArrowRight, CheckCircle2, Clock, AlertCircle } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
 type Candidate = Database['public']['Tables']['candidates']['Row']
 
@@ -97,8 +98,8 @@ export function CandidateCard({ candidate }: CandidateCardProps) {
         </div>
       </CardContent>
       <CardFooter className="flex gap-2 border-t bg-muted/30 pt-4">
-        <Button variant="outline" size="sm" className="flex-1">
-          {t('card.profile_button')}
+        <Button variant="outline" size="sm" className="flex-1" asChild>
+          <Link to={`/hr/candidate/${candidate.id}`}>{t('card.profile_button')}</Link>
         </Button>
         <Button size="sm" className="flex-1 gap-1">
           {t('card.assign_button')}

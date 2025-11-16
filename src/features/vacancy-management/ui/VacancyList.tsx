@@ -4,9 +4,16 @@ import { useOrganization } from '@/shared/hooks/useOrganization'
 import { CreateVacancyDialog } from './CreateVacancyDialog'
 import type { Database } from '@/shared/types/database'
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Briefcase, MapPin, DollarSign, Users, MoreVertical, Eye } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { Briefcase, MapPin, DollarSign, Users, MoreVertical, Eye, Edit, Archive } from 'lucide-react'
 
 type Vacancy = Database['public']['Tables']['vacancies']['Row']
 
@@ -25,6 +32,7 @@ function getStatusColor(status: string) {
 
 function VacancyCard({ vacancy }: { vacancy: Vacancy }) {
   const { t } = useTranslation('vacancies')
+  const navigate = useNavigate()
   const statusColor = getStatusColor(vacancy.status || 'active')
 
   return (
@@ -46,9 +54,26 @@ function VacancyCard({ vacancy }: { vacancy: Vacancy }) {
               </div>
             </div>
           </div>
-          <Button variant="ghost" size="icon" className="h-8 w-8">
-            <MoreVertical className="h-4 w-4" />
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => console.log('Edit clicked')}>
+                <Edit className="mr-2 h-4 w-4" />
+                <span>Edit</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => console.log('Archive clicked')}
+                className="text-destructive"
+              >
+                <Archive className="mr-2 h-4 w-4" />
+                <span>Archive</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </CardHeader>
       <CardContent className="pb-3">
@@ -82,11 +107,20 @@ function VacancyCard({ vacancy }: { vacancy: Vacancy }) {
         </div>
       </CardContent>
       <CardFooter className="flex gap-2 border-t bg-muted/30 pt-4">
-        <Button variant="outline" size="sm" className="flex-1 gap-1">
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex-1 gap-1"
+          onClick={() => navigate(`/hr/vacancy/${vacancy.id}/funnel`)}
+        >
           <Eye className="h-3 w-3" />
           View
         </Button>
-        <Button size="sm" className="flex-1">
+        <Button
+          size="sm"
+          className="flex-1"
+          onClick={() => navigate(`/hr/vacancy/${vacancy.id}/profile`)}
+        >
           Manage
         </Button>
       </CardFooter>

@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { VacancyList } from '@/features/vacancy-management/ui/VacancyList'
 import { CandidateList } from '@/features/candidate-management/ui/CandidateList'
+import { ResumeAnalysis } from '@/features/ai-analysis/ui/ResumeAnalysis'
 import { FileSearch, Users, Briefcase } from 'lucide-react'
 
 export default function HRDashboardPage() {
@@ -37,23 +37,7 @@ export default function HRDashboardPage() {
         </TabsList>
 
         <TabsContent value="resume-analysis" className="space-y-4">
-          <Card className="border-dashed">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <FileSearch className="h-5 w-5 text-muted-foreground" />
-                <CardTitle>{t('tabs.resume_analysis')}</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <FileSearch className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Resume Analysis</h3>
-                <p className="text-sm text-muted-foreground max-w-md">
-                  Upload and analyze resumes with AI-powered insights. This feature will be available soon.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          <ResumeAnalysis />
         </TabsContent>
 
         <TabsContent value="candidates" className="space-y-4">

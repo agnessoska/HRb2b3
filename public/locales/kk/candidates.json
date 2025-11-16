@@ -1,31 +1,48 @@
 {
-  "title": "Үміткерлер",
-  "generate_invite_link": "Шақыру сілтемесін жасау",
-  "loading": "Жүктелуде...",
-  "error": "Үміткерлерді жүктеу қатесі.",
-  "empty": {
-    "title": "Әзірге үміткерлер жоқ",
-    "description": "Шақыру сілтемесін жасаудан бастаңыз."
+  "list": {
+    "title": "Үміткерлер",
+    "generateInvite": "Шақыру сілтемесін жасау",
+    "inviteDialog": {
+      "title": "Үміткерді шақыру",
+      "description": "Сілтеме 24 сағат жарамды. Құны: 500 токен.",
+      "copy": "Көшіру",
+      "copied": "Көшірілді!",
+      "close": "Жабу"
+    }
   },
   "card": {
-    "testing_progress": "Тестілеу барысы",
-    "test_status_label": "Тесттер {status}",
-    "statuses": {
-      "relevant": "өзекті",
-      "expiring": "жақында ескіреді",
-      "outdated": "ескірген"
+    "testsCompleted": "6 тесттің {{count}} аяқталды",
+    "status": {
+      "ok": "Өзекті",
+      "expiring": "Жақында ескіреді",
+      "expired": "Ескірген"
     },
-    "profile_button": "Профиль",
-    "assign_button": "Тағайындау"
+    "viewProfile": "Профиль"
   },
-  "invite_dialog": {
-    "description": "Сілтеме жасау 500 токен тұрады. Бұл сілтемені үміткерді тіркеу үшін бір рет пайдалануға болады.",
-    "initial_prompt": "Жаңа шақыру сілтемесін жасау үшін төмендегі түймені басыңыз.",
-    "success_prompt": "Сілтеме сәтті жасалды! Оны үміткермен бөлісіңіз.",
-    "generate_button": "Жасау",
-    "generating_button": "Жасалуда...",
-    "close_button": "Жабу",
-    "copy_button": "Көшіру",
-    "copy_success_toast": "Сілтеме алмасу буферіне көшірілді!"
+  "profile": {
+    "title": "Үміткер профилі",
+    "aiAnalysisCard": {
+      "title": "AI-талдау",
+      "empty": {
+        "title": "Талдау әлі жасалмады",
+        "description": "Үміткердің толық талдауы жасалғаннан кейін осында көрсетіледі."
+      }
+    },
+    "actionsCard": {
+      "title": "Әрекеттер",
+      "analysisDisabledTooltip": "Толық талдау үміткер барлық 6 тестті аяқтағаннан кейін ғана қолжетімді болады.",
+      "invite": "Сұхбатқа шақыру",
+      "offer": "Ұсыныс жіберу",
+      "reject": "Бас тарту жіберу"
+    },
+    "detailsCard": {
+      "title": "Үміткер деректері",
+      "email": "Email",
+      "phone": "Телефон",
+      "experience": "Тәжірибе",
+      "education": "Білім",
+      "about": "Өзі туралы",
+      "testsCompleted": "Аяқталған тесттер"
+    }
   }
 }

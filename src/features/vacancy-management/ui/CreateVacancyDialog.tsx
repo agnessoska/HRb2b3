@@ -32,7 +32,7 @@ import {
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { createVacancy } from '../api/createVacancy'
 import { useOrganization } from '@/shared/hooks/useOrganization'
-import { useAuthStore } from '@/app/store/auth'
+import { useHrProfile } from '@/shared/hooks/useHrProfile'
 import { useTranslation } from 'react-i18next'
 import { Plus, Loader2 } from 'lucide-react'
 
@@ -51,7 +51,7 @@ export function CreateVacancyDialog() {
   const [isOpen, setIsOpen] = useState(false)
   const queryClient = useQueryClient()
   const { data: organization } = useOrganization()
-  const { user } = useAuthStore()
+  const { data: hrProfile } = useHrProfile()
 
   const form = useForm<z.infer<typeof vacancySchema>>({
     resolver: zodResolver(vacancySchema),
@@ -73,11 +73,11 @@ export function CreateVacancyDialog() {
   })
 
   function onSubmit(values: z.infer<typeof vacancySchema>) {
-    if (!organization || !user) return
+    if (!organization || !hrProfile) return
     mutate({
       ...values,
       organization_id: organization.id,
-      created_by_hr_id: user.id,
+      created_by_hr_id: hrProfile.id, // Use the correct ID from the hr_specialists table
       status: 'active',
     })
   }

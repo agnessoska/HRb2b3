@@ -39,5 +39,56 @@
     "active": "Белсенді",
     "closed": "Жабық",
     "archived": "Мұрағатта"
-  }
+  },
+  "idealProfile": {
+    "subtitle": "Осы бос орын үшін идеалды AI профилін басқарыңыз.",
+    "generateButton": "Идеалды профильді құру",
+    "generating": "Құрылуда...",
+    "noProfileData": "Идеалды профиль туралы деректер жоқ.",
+    "saveChanges": "Өзгерістерді сақтау",
+    "saving": "Сақталуда...",
+    "bigFive": {
+      "title": "Big Five (Үлкен бестік)",
+      "openness": "Тәжірибеге ашықтық",
+      "conscientiousness": "Жауапкершілік",
+      "extraversion": "Экстраверсия",
+      "agreeableness": "Келісімділік",
+      "neuroticism": "Нейротизм"
+    },
+    "eq": {
+      "title": "EQ (Эмоционалды интеллект)",
+      "self_awareness": "Өзін-өзі тану",
+      "self_management": "Өзін-өзі басқару",
+      "social_awareness": "Әлеуметтік хабардарлық",
+      "relationship_management": "Қарым-қатынасты басқару"
+    },
+    "softSkills": {
+      "title": "Soft Skills (Икемді дағдылар)",
+      "communication": "Коммуникация",
+      "teamwork": "Командада жұмыс істеу",
+      "critical_thinking": "Сыни ойлау",
+      "adaptability": "Бейімделгіштік",
+      "initiative": "Бастамашылдық"
+    },
+    "motivation": {
+      "title": "Мотивациялық профиль",
+      "achievement": "Жетістік",
+      "power": "Билік",
+      "affiliation": "Тиесілілік",
+      "autonomy": "Автономдылық",
+      "security": "Қауіпсіздік",
+      "growth": "Өсу"
+    },
+    "disc": {
+      "title": "DISC",
+      "type": "Түрі",
+      "placeholder": "Мыс., D немесе DI"
+    },
+    "mbti": {
+      "title": "MBTI",
+      "type": "Түрі",
+      "placeholder": "Мыс., ENTJ"
+    }
+  },
+  "vacancyNotFound": "Бос орын табылмады."
 }
