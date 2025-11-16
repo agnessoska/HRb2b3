@@ -63,14 +63,14 @@ function VacancyCard({ vacancy }: { vacancy: Vacancy }) {
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => console.log('Edit clicked')}>
                 <Edit className="mr-2 h-4 w-4" />
-                <span>Edit</span>
+                <span>{t('actions.edit')}</span>
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => console.log('Archive clicked')}
                 className="text-destructive"
               >
                 <Archive className="mr-2 h-4 w-4" />
-                <span>Archive</span>
+                <span>{t('actions.archive')}</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -91,8 +91,8 @@ function VacancyCard({ vacancy }: { vacancy: Vacancy }) {
                 {vacancy.salary_min && vacancy.salary_max
                   ? `$${vacancy.salary_min} - $${vacancy.salary_max}`
                   : vacancy.salary_min
-                  ? `From $${vacancy.salary_min}`
-                  : `Up to $${vacancy.salary_max}`}
+                  ? `${t('salary.from')} $${vacancy.salary_min}`
+                  : `${t('salary.upTo')} $${vacancy.salary_max}`}
               </span>
             </div>
           )}
@@ -101,7 +101,7 @@ function VacancyCard({ vacancy }: { vacancy: Vacancy }) {
             <span className="text-xs">
               {vacancy.funnel_counts ?
                 Object.values(vacancy.funnel_counts as Record<string, number>).reduce((a, b) => a + b, 0) : 0
-              } candidates
+              } {t('common.candidates')}
             </span>
           </div>
         </div>
@@ -114,14 +114,14 @@ function VacancyCard({ vacancy }: { vacancy: Vacancy }) {
           onClick={() => navigate(`/hr/vacancy/${vacancy.id}/funnel`)}
         >
           <Eye className="h-3 w-3" />
-          View
+          {t('actions.view')}
         </Button>
         <Button
           size="sm"
           className="flex-1"
           onClick={() => navigate(`/hr/vacancy/${vacancy.id}/profile`)}
         >
-          Manage
+          {t('actions.manage')}
         </Button>
       </CardFooter>
     </Card>
@@ -185,7 +185,7 @@ export function VacancyList() {
         <div>
           <h2 className="text-2xl font-bold tracking-tight">{t('list.header')}</h2>
           <p className="text-sm text-muted-foreground mt-1">
-            Manage your open positions and recruitment pipeline
+            {t('list.description')}
           </p>
         </div>
         <CreateVacancyDialog />

@@ -90,5 +90,25 @@
       "placeholder": "Мыс., ENTJ"
     }
   },
-  "vacancyNotFound": "Бос орын табылмады."
+  "vacancyNotFound": "Бос орын табылмады.",
+  "actions": {
+    "edit": "Өңдеу",
+    "archive": "Мұрағатқа салу",
+    "view": "Қарау",
+    "manage": "Басқару",
+    "manageCandidate": "Үміткерлер"
+  },
+  "salary": {
+    "from": "Бастап",
+    "upTo": "Дейін"
+  },
+  "validation": {
+    "titleRequired": "Атауы міндетті",
+    "descriptionRequired": "Сипаттама міндетті",
+    "requirementsRequired": "Талаптар міндетті"
+  },
+  "funnel": {
+    "noCandidates": "Үміткерлер жоқ",
+    "vacancyIdNotFound": "Бос орын ID табылмады"
+  }
 }

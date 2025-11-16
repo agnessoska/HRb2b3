@@ -17,8 +17,10 @@ import { ArrowLeft, Download } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
+import { useTranslation } from 'react-i18next'
 
 const TestResultsPage = () => {
+  const { t } = useTranslation('tests')
   const { testId } = useParams<{ testId: string }>()
   const user = useAuthStore((state: AuthState) => state.user)
 
@@ -64,7 +66,7 @@ const TestResultsPage = () => {
     return (
       <DashboardLayout>
         <div className="container mx-auto py-10 text-center">
-          <p className="text-destructive">Не удалось загрузить результаты теста.</p>
+          <p className="text-destructive">{t('results.failedToLoad')}</p>
         </div>
       </DashboardLayout>
     )
@@ -72,7 +74,7 @@ const TestResultsPage = () => {
 
   const renderTestResult = () => {
     if (!currentResult) {
-      return <p>Результаты для этого теста не найдены.</p>
+      return <p>{t('results.noResults')}</p>
     }
 
     const normalizedScores = currentResult.normalized_scores as Record<string, number>
@@ -93,7 +95,7 @@ const TestResultsPage = () => {
       case 'motivation':
         return <MotivationResults results={normalizedScores} />
       default:
-        return <p>Визуализация для этого теста еще не готова.</p>
+        return <p>{t('results.notAvailable')}</p>
     }
   }
 
@@ -104,15 +106,15 @@ const TestResultsPage = () => {
           <Button asChild variant="outline" className="self-start">
             <Link to="/candidate/dashboard">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Назад к тестам
+              {t('results.backToTests')}
             </Link>
           </Button>
           <div className="flex items-center gap-2 self-start md:self-center">
             <Button variant="outline">
               <Download className="mr-2 h-4 w-4" />
-              Скачать PDF
+              {t('results.downloadPDF')}
             </Button>
-            <Button variant="secondary">Пересдать тест</Button>
+            <Button variant="secondary">{t('results.retakeTest')}</Button>
           </div>
         </header>
 
@@ -123,11 +125,11 @@ const TestResultsPage = () => {
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
                 {currentResult?.completed_at && (
                   <span>
-                    Тест пройден: {format(new Date(currentResult.completed_at), 'd MMMM yyyy', { locale: ru })}
+                    {t('results.testTakenOn')}: {format(new Date(currentResult.completed_at), 'd MMMM yyyy', { locale: ru })}
                   </span>
                 )}
                 <Badge variant="secondary" className="bg-green-100 text-green-800">
-                  🟢 Актуально
+                  {t('results.currentStatus')}
                 </Badge>
               </div>
             </CardHeader>

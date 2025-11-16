@@ -1,7 +1,10 @@
 import { Outlet } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Briefcase } from 'lucide-react'
 
 export function AuthLayout() {
+  const { t } = useTranslation('common')
+
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 p-4">
       {/* Decorative elements */}
@@ -15,7 +18,7 @@ export function AuthLayout() {
         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-md">
           <Briefcase className="h-6 w-6" />
         </div>
-        <span className="text-xl font-bold tracking-tight">HR Platform</span>
+        <span className="text-xl font-bold tracking-tight">{t('appName')}</span>
       </div>
 
       {/* Content */}

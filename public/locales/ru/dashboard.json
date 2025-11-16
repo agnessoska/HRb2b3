@@ -1,5 +1,7 @@
 {
   "title": "HR Панель",
+  "description": "Управляйте процессом найма эффективно",
+  "resume": "Резюме",
   "tabs": {
     "resume_analysis": "Анализ резюме",
     "candidates": "Кандидаты",

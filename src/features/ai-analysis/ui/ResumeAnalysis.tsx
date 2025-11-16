@@ -55,8 +55,7 @@ export const ResumeAnalysis = () => {
 
   const onDrop = (acceptedFiles: File[]) => {
     if (files.length + acceptedFiles.length > 20) {
-      // TODO: Show toast with error
-      console.error("You can upload a maximum of 20 files.")
+      toast.error(t('maxFilesError'))
       return
     }
     setFiles(prevFiles => [...prevFiles, ...acceptedFiles.filter(af => !prevFiles.some(pf => pf.name === af.name))])
@@ -236,9 +235,9 @@ export const ResumeAnalysis = () => {
                   <SelectValue placeholder={t('resumeAnalysis.resultLanguage.placeholder')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="ru">Русский</SelectItem>
-                  <SelectItem value="en">English</SelectItem>
-                  <SelectItem value="kk">Қазақша</SelectItem>
+                  <SelectItem value="ru">{t('languages.ru')}</SelectItem>
+                  <SelectItem value="en">{t('languages.en')}</SelectItem>
+                  <SelectItem value="kk">{t('languages.kk')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>

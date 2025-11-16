@@ -90,5 +90,25 @@
       "placeholder": "e.g., ENTJ"
     }
   },
-  "vacancyNotFound": "Vacancy not found."
+  "vacancyNotFound": "Vacancy not found.",
+  "actions": {
+    "edit": "Edit",
+    "archive": "Archive",
+    "view": "View",
+    "manage": "Manage",
+    "manageCandidate": "Candidates"
+  },
+  "salary": {
+    "from": "From",
+    "upTo": "Up to"
+  },
+  "validation": {
+    "titleRequired": "Title is required",
+    "descriptionRequired": "Description is required",
+    "requirementsRequired": "Requirements are required"
+  },
+  "funnel": {
+    "noCandidates": "No candidates",
+    "vacancyIdNotFound": "Vacancy ID not found"
+  }
 }

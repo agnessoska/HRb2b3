@@ -1,4 +1,5 @@
 import { useOrganization } from '@/shared/hooks/useOrganization';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { DashboardLayout } from '@/shared/ui/layouts';
@@ -10,30 +11,31 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { RobokassaForm } from '@/features/payments/ui/RobokassaForm';
 
-const tokenPackages = [
-  { name: 'Starter', tokens: 50000, price: 5000, description: 'For small teams and startups' },
-  { name: 'Professional', tokens: 200000, price: 18000, description: 'For growing businesses' },
-  { name: 'Enterprise', tokens: 500000, price: 40000, description: 'For large-scale hiring' },
-];
-
 const BuyTokensPage = () => {
+  const { t } = useTranslation('payments');
   const { data: organization, isLoading: isLoadingOrg } = useOrganization();
   const [paymentParams, setPaymentParams] = useState<RobokassaParams | null>(null);
+
+  const tokenPackages = [
+    { name: 'Starter', tokens: 50000, price: 5000, description: t('buyTokens.packages.small.description') },
+    { name: 'Professional', tokens: 200000, price: 18000, description: t('buyTokens.packages.medium.description') },
+    { name: 'Enterprise', tokens: 500000, price: 40000, description: t('buyTokens.packages.large.description') },
+  ];
 
   const { mutate: createInvoice, isPending } = useMutation({
     mutationFn: createRobokassaInvoice,
     onSuccess: (data) => {
-      toast.success('Redirecting to payment gateway...');
+      toast.success(t('buyTokens.redirecting'));
       setPaymentParams(data);
     },
     onError: (error) => {
-      toast.error(`Failed to create invoice: ${error.message}`);
+      toast.error(t('buyTokens.errors.invoiceFailed', { error: error.message }));
     },
   });
 
   const handlePayment = (amount: number, tokens: number) => {
     if (!organization) {
-      toast.error('Organization data is not loaded yet.');
+      toast.error(t('buyTokens.errors.organizationNotLoaded'));
       return;
     }
     createInvoice({
@@ -51,12 +53,12 @@ const BuyTokensPage = () => {
     <DashboardLayout>
       <div className="space-y-8">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold tracking-tight">Buy Tokens</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t('buyTokens.title')}</h1>
           {isLoadingOrg ? (
             <Skeleton className="h-8 w-48" />
           ) : (
             <div className="text-lg">
-              Current Balance: <span className="font-semibold text-primary">{organization?.token_balance?.toLocaleString() ?? 0}</span> tokens
+              {t('buyTokens.currentBalance')}: <span className="font-semibold text-primary">{organization?.token_balance?.toLocaleString() ?? 0}</span> {t('buyTokens.tokens')}
             </div>
           )}
         </div>
@@ -72,7 +74,7 @@ const BuyTokensPage = () => {
                 <div className="text-4xl font-bold">
                   {pkg.tokens.toLocaleString()}
                 </div>
-                <div className="text-muted-foreground">tokens</div>
+                <div className="text-muted-foreground">{t('buyTokens.tokens')}</div>
               </CardContent>
               <CardFooter>
                 <Button
@@ -80,7 +82,7 @@ const BuyTokensPage = () => {
                   onClick={() => handlePayment(pkg.price, pkg.tokens)}
                   disabled={isPending || isLoadingOrg}
                 >
-                  {isPending ? 'Processing...' : `Buy for ${pkg.price.toLocaleString()} RUB`}
+                  {isPending ? t('buyTokens.processingButton') : t('buyTokens.buyButton', { price: pkg.price.toLocaleString() })}
                 </Button>
               </CardFooter>
             </Card>

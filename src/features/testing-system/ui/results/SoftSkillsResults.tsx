@@ -1,43 +1,45 @@
 import { Card } from '@/components/ui/card'
+import { useTranslation } from 'react-i18next'
 
 interface SoftSkillsResultsProps {
   results: Record<string, number>
 }
 
 export const SoftSkillsResults = ({ results }: SoftSkillsResultsProps) => {
+  const { t } = useTranslation('tests')
   const skills = [
     {
       key: 'communication',
-      name: 'Коммуникация',
-      shortName: 'Комм.',
+      name: t('psychometric.softSkills.communication.name'),
+      shortName: t('psychometric.softSkills.communication.shortName'),
       icon: '💬',
       color: 'bg-blue-500',
     },
     {
       key: 'teamwork',
-      name: 'Работа в команде',
-      shortName: 'Команда',
+      name: t('psychometric.softSkills.teamwork.name'),
+      shortName: t('psychometric.softSkills.teamwork.shortName'),
       icon: '👥',
       color: 'bg-green-500',
     },
     {
       key: 'critical_thinking',
-      name: 'Критическое мышление',
-      shortName: 'Мышление',
+      name: t('psychometric.softSkills.criticalThinking.name'),
+      shortName: t('psychometric.softSkills.criticalThinking.shortName'),
       icon: '🧠',
       color: 'bg-purple-500',
     },
     {
       key: 'adaptability',
-      name: 'Адаптивность',
-      shortName: 'Адапт.',
+      name: t('psychometric.softSkills.adaptability.name'),
+      shortName: t('psychometric.softSkills.adaptability.shortName'),
       icon: '🔄',
       color: 'bg-amber-500',
     },
     {
       key: 'initiative',
-      name: 'Инициативность',
-      shortName: 'Иниц.',
+      name: t('psychometric.softSkills.initiative.name'),
+      shortName: t('psychometric.softSkills.initiative.shortName'),
       icon: '🚀',
       color: 'bg-red-500',
     },
@@ -47,7 +49,7 @@ export const SoftSkillsResults = ({ results }: SoftSkillsResultsProps) => {
     <div className="space-y-8">
       {/* Столбчатая диаграмма */}
       <Card className="p-6">
-        <h3 className="text-lg font-semibold mb-6">Ваш профиль Soft Skills</h3>
+        <h3 className="text-lg font-semibold mb-6">{t('results.yourSoftSkillsProfile')}</h3>
 
         <div className="grid grid-cols-5 gap-3">
           {skills.map((skill) => {
@@ -81,7 +83,7 @@ export const SoftSkillsResults = ({ results }: SoftSkillsResultsProps) => {
 
       {/* Детальное описание */}
       <div className="space-y-3">
-        <h3 className="text-lg font-semibold">Детализация</h3>
+        <h3 className="text-lg font-semibold">{t('results.breakdown')}</h3>
 
         {skills.map((skill) => {
           const value = results[skill.key as keyof typeof results]

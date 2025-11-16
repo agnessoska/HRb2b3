@@ -93,7 +93,7 @@ export function GenerateInviteLinkDialog() {
                 <p className="font-medium">{t('invite_dialog.success_prompt')}</p>
               </div>
               <p className="text-sm text-muted-foreground">
-                Share this link with candidates to invite them to register.
+                {t('invite_dialog.shareLink')}
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -121,9 +121,9 @@ export function GenerateInviteLinkDialog() {
             {mutation.data && (
               <div className="rounded-lg bg-muted p-3 text-sm">
                 <p className="text-muted-foreground">
-                  Cost: <span className="font-semibold text-foreground">{mutation.data.tokens_spent} tokens</span>
+                  {t('invite_dialog.cost')}: <span className="font-semibold text-foreground">{mutation.data.tokens_spent} {t('invite_dialog.tokens')}</span>
                   {' • '}
-                  Balance: <span className="font-semibold text-foreground">{mutation.data.new_balance} tokens</span>
+                  {t('invite_dialog.balance')}: <span className="font-semibold text-foreground">{mutation.data.new_balance} {t('invite_dialog.tokens')}</span>
                 </p>
               </div>
             )}
@@ -135,7 +135,7 @@ export function GenerateInviteLinkDialog() {
               {t('invite_dialog.initial_prompt')}
             </p>
             <p className="text-xs text-muted-foreground">
-              Cost: 500 tokens per link
+              {t('invite_dialog.costPerLink')}
             </p>
           </div>
         )}
@@ -157,7 +157,7 @@ export function GenerateInviteLinkDialog() {
             </Button>
           )}
           <Button variant="outline" onClick={() => handleOpenChange(false)}>
-            {generatedLink ? 'Done' : t('invite_dialog.close_button')}
+            {generatedLink ? t('invite_dialog.done') : t('invite_dialog.close_button')}
           </Button>
         </DialogFooter>
       </DialogContent>

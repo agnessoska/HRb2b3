@@ -46,7 +46,7 @@ export function CandidateCard({ candidate }: CandidateCardProps) {
   const testsCompleted = candidate.tests_completed || 0
 
   // TODO: Get category name from professional_categories table
-  const categoryName = candidate.category_id || 'N/A'
+  const categoryName = candidate.category_id || t('common.notAvailable')
 
   const testStatus = getTestStatus(candidate.tests_last_updated_at)
   const StatusIcon = testStatus.icon

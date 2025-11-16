@@ -50,5 +50,18 @@
       "about": "About",
       "testsCompleted": "Tests Completed"
     }
+  },
+  "common": {
+    "notAvailable": "N/A",
+    "candidates": "Candidates"
+  },
+  "invite": {
+    "shareLink": "Share this link with candidates to invite them.",
+    "cost": "Cost:",
+    "balance": "Balance:",
+    "tokens": "tokens",
+    "costPerLink": "Cost: 500 tokens per link",
+    "done": "Done",
+    "description": "View and manage your candidate pool"
   }
 }

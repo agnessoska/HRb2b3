@@ -1,52 +1,54 @@
 import { Card } from '@/components/ui/card'
+import { useTranslation } from 'react-i18next'
 
 interface MotivationResultsProps {
   results: Record<string, number>
 }
 
 export const MotivationResults = ({ results }: MotivationResultsProps) => {
+  const { t } = useTranslation('tests')
   const drivers = [
     {
       key: 'achievement',
-      name: 'Достижение',
+      name: t('psychometric.motivation.achievement.name'),
       icon: '🎯',
       color: 'bg-emerald-500',
-      description: 'Стремление к успеху, результативность',
+      description: t('psychometric.motivation.achievement.description'),
     },
     {
       key: 'power',
-      name: 'Власть',
+      name: t('psychometric.motivation.power.name'),
       icon: '👑',
       color: 'bg-purple-500',
-      description: 'Влияние, контроль, лидерство',
+      description: t('psychometric.motivation.power.description'),
     },
     {
       key: 'affiliation',
-      name: 'Принадлежность',
+      name: t('psychometric.motivation.affiliation.name'),
       icon: '🤝',
       color: 'bg-blue-500',
-      description: 'Социальные связи, принятие',
+      description: t('psychometric.motivation.affiliation.description'),
     },
     {
       key: 'autonomy',
-      name: 'Автономность',
+      name: t('psychometric.motivation.autonomy.name'),
       icon: '🦅',
       color: 'bg-amber-500',
-      description: 'Независимость, самостоятельность',
+      description: t('psychometric.motivation.autonomy.description'),
     },
     {
       key: 'security',
-      name: 'Безопасность',
+      name: t('psychometric.motivation.security.name'),
       icon: '🛡️',
       color: 'bg-cyan-500',
-      description: 'Стабильность, предсказуемость',
+      description: t('psychometric.motivation.security.description'),
     },
     {
       key: 'growth',
-      name: 'Рост',
+      name: t('psychometric.motivation.growth.name'),
       icon: '📈',
       color: 'bg-rose-500',
-      description: 'Развитие, обучение, самосовершенствование',
+      description: t('psychometric.motivation.growth.description'),
     },
   ]
 
@@ -59,7 +61,7 @@ export const MotivationResults = ({ results }: MotivationResultsProps) => {
     <div className="space-y-8">
       {/* Топ-3 драйвера */}
       <Card className="p-6">
-        <h3 className="text-lg font-semibold mb-4">Ваши главные драйверы мотивации</h3>
+        <h3 className="text-lg font-semibold mb-4">{t('results.yourTopMotivationDrivers')}</h3>
         <div className="grid grid-cols-3 gap-4">
           {topDrivers.map((driver, index) => {
             const value = results[driver.key as keyof typeof results]
@@ -69,7 +71,7 @@ export const MotivationResults = ({ results }: MotivationResultsProps) => {
                 <div className="text-2xl font-bold">{value}%</div>
                 <div className="font-medium">{driver.name}</div>
                 <div className={`inline-block px-3 py-1 rounded-full text-white text-sm ${driver.color}`}>
-                  #{index + 1} приоритет
+                  {t('results.priorityNumber', { number: index + 1 })}
                 </div>
               </div>
             )
@@ -79,7 +81,7 @@ export const MotivationResults = ({ results }: MotivationResultsProps) => {
 
       {/* Полная диаграмма */}
       <Card className="p-6">
-        <h3 className="text-lg font-semibold mb-6">Полный мотивационный профиль</h3>
+        <h3 className="text-lg font-semibold mb-6">{t('results.fullMotivationProfile')}</h3>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           {drivers.map((driver) => {

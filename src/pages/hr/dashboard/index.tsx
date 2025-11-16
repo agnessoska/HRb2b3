@@ -13,7 +13,7 @@ export default function HRDashboardPage() {
       <div className="mb-8">
         <h1 className="text-4xl font-bold tracking-tight">{t('title')}</h1>
         <p className="mt-2 text-muted-foreground">
-          Manage your recruitment process efficiently
+          {t('description')}
         </p>
       </div>
 
@@ -22,17 +22,17 @@ export default function HRDashboardPage() {
           <TabsTrigger value="resume-analysis" className="gap-2">
             <FileSearch className="h-4 w-4" />
             <span className="hidden sm:inline">{t('tabs.resume_analysis')}</span>
-            <span className="sm:hidden">Resume</span>
+            <span className="sm:hidden">{t('resume')}</span>
           </TabsTrigger>
           <TabsTrigger value="candidates" className="gap-2">
             <Users className="h-4 w-4" />
             <span className="hidden sm:inline">{t('tabs.candidates')}</span>
-            <span className="sm:hidden">Candidates</span>
+            <span className="sm:hidden">{t('tabs.candidatesShort')}</span>
           </TabsTrigger>
           <TabsTrigger value="vacancies" className="gap-2">
             <Briefcase className="h-4 w-4" />
             <span className="hidden sm:inline">{t('tabs.vacancies')}</span>
-            <span className="sm:hidden">Vacancies</span>
+            <span className="sm:hidden">{t('tabs.vacanciesShort')}</span>
           </TabsTrigger>
         </TabsList>
 

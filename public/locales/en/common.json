@@ -11,5 +11,18 @@
   "error": "An error occurred",
   "success": "Success",
   "close": "Close",
-  "confirm": "Confirm"
+  "confirm": "Confirm",
+  "appName": "HR Platform",
+  "theme": {
+    "toggle": "Toggle theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "language": {
+    "toggle": "Toggle language"
+  },
+  "chat": {
+    "loading": "Loading chat..."
+  }
 }
