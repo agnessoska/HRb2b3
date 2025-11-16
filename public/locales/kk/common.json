@@ -11,5 +11,19 @@
   "error": "Қате пайда болды",
   "success": "Сәтті",
   "close": "Жабу",
-  "confirm": "Растау"
+  "confirm": "Растау",
+  "hrPlatform": "HR Платформа",
+  "noResults": "Нәтиже жоқ",
+  "navigation": {
+    "dashboard": "Басқару панелі",
+    "talentMarket": "Таланттар нарығы",
+    "chat": "Чат",
+    "buyTokens": "Токендер сатып алу"
+  },
+  "userMenu": {
+    "profile": "Профиль",
+    "settings": "Баптаулар",
+    "organization": "Ұйым",
+    "logout": "Шығу"
+  }
 }

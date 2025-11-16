@@ -9,11 +9,11 @@ export default function HRDashboardPage() {
   const { t } = useTranslation('dashboard')
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="mb-8">
+    <div className="space-y-8">
+      <div>
         <h1 className="text-4xl font-bold tracking-tight">{t('title')}</h1>
         <p className="mt-2 text-muted-foreground">
-          Manage your recruitment process efficiently
+          {t('description')}
         </p>
       </div>
 
@@ -21,18 +21,15 @@ export default function HRDashboardPage() {
         <TabsList className="grid w-full grid-cols-3 h-12">
           <TabsTrigger value="resume-analysis" className="gap-2">
             <FileSearch className="h-4 w-4" />
-            <span className="hidden sm:inline">{t('tabs.resume_analysis')}</span>
-            <span className="sm:hidden">Resume</span>
+            <span>{t('tabs.resume_analysis')}</span>
           </TabsTrigger>
           <TabsTrigger value="candidates" className="gap-2">
             <Users className="h-4 w-4" />
-            <span className="hidden sm:inline">{t('tabs.candidates')}</span>
-            <span className="sm:hidden">Candidates</span>
+            <span>{t('tabs.candidates')}</span>
           </TabsTrigger>
           <TabsTrigger value="vacancies" className="gap-2">
             <Briefcase className="h-4 w-4" />
-            <span className="hidden sm:inline">{t('tabs.vacancies')}</span>
-            <span className="sm:hidden">Vacancies</span>
+            <span>{t('tabs.vacancies')}</span>
           </TabsTrigger>
         </TabsList>
 

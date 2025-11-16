@@ -11,5 +11,19 @@
   "error": "An error occurred",
   "success": "Success",
   "close": "Close",
-  "confirm": "Confirm"
+  "confirm": "Confirm",
+  "hrPlatform": "HR Platform",
+  "noResults": "No results",
+  "navigation": {
+    "dashboard": "Dashboard",
+    "talentMarket": "Talent Market",
+    "chat": "Chat",
+    "buyTokens": "Buy Tokens"
+  },
+  "userMenu": {
+    "profile": "Profile",
+    "settings": "Settings",
+    "organization": "Organization",
+    "logout": "Logout"
+  }
 }

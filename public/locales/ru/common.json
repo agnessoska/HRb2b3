@@ -11,5 +11,19 @@
   "error": "Произошла ошибка",
   "success": "Успешно",
   "close": "Закрыть",
-  "confirm": "Подтвердить"
+  "confirm": "Подтвердить",
+  "hrPlatform": "HR Платформа",
+  "noResults": "Нет результатов",
+  "navigation": {
+    "dashboard": "Панель управления",
+    "talentMarket": "Рынок талантов",
+    "chat": "Чат",
+    "buyTokens": "Купить токены"
+  },
+  "userMenu": {
+    "profile": "Профиль",
+    "settings": "Настройки",
+    "organization": "Организация",
+    "logout": "Выйти"
+  }
 }

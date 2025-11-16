@@ -1,5 +1,6 @@
 {
   "title": "HR Dashboard",
+  "description": "Manage your recruitment process efficiently",
   "tabs": {
     "resume_analysis": "Resume Analysis",
     "candidates": "Candidates",
