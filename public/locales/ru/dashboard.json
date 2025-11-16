@@ -4,5 +4,7 @@
     "resume_analysis": "Анализ резюме",
     "candidates": "Кандидаты",
     "vacancies": "Вакансии"
-  }
+  },
+  "myTests": "Мои тесты",
+  "errorLoadingTests": "Ошибка при загрузке тестов."
 }

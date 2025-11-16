@@ -4,5 +4,7 @@
     "resume_analysis": "Resume Analysis",
     "candidates": "Candidates",
     "vacancies": "Vacancies"
-  }
+  },
+  "myTests": "My Tests",
+  "errorLoadingTests": "Error loading tests."
 }

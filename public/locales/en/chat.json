@@ -1,0 +1,13 @@
+{
+  "messages": "Messages",
+  "searchPlaceholder": "Search...",
+  "noChats": "No chats",
+  "noMessages": "No messages",
+  "startConversation": "Start a conversation",
+  "typePlaceholder": "Type a message...",
+  "pressEnter": "Enter to send, Shift+Enter for new line",
+  "sendError": "Error sending message",
+  "viewProfile": "Profile",
+  "newMessageReceived": "New message received",
+  "typing": "is typing..."
+}

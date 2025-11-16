@@ -7,9 +7,11 @@ export interface AuthState {
   user: User | null
   session: Session | null
   loading: boolean
+  role: 'hr' | 'candidate' | null
   setSession: (session: Session | null) => void
   setUser: (user: User | null) => void
   setLoading: (loading: boolean) => void
+  setRole: (role: 'hr' | 'candidate' | null) => void
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -18,9 +20,11 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       session: null,
       loading: true,
+      role: null,
       setSession: (session) => set({ session }),
       setUser: (user) => set({ user }),
       setLoading: (loading) => set({ loading }),
+      setRole: (role) => set({ role }),
     }),
     {
       name: 'auth-storage',
@@ -29,7 +33,9 @@ export const useAuthStore = create<AuthState>()(
 )
 
 supabase.auth.onAuthStateChange((_event: AuthChangeEvent, session: Session | null) => {
-  useAuthStore.getState().setSession(session)
-  useAuthStore.getState().setUser(session?.user ?? null)
-  useAuthStore.getState().setLoading(false)
+  const state = useAuthStore.getState();
+  state.setSession(session);
+  state.setUser(session?.user ?? null);
+  state.setRole(session?.user?.user_metadata?.role ?? null);
+  state.setLoading(false);
 })

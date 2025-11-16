@@ -1,0 +1,13 @@
+{
+  "messages": "Хабарламалар",
+  "searchPlaceholder": "Іздеу...",
+  "noChats": "Чаттар жоқ",
+  "noMessages": "Хабарламалар жоқ",
+  "startConversation": "Әңгімені бастаңыз",
+  "typePlaceholder": "Хабарлама жазыңыз...",
+  "pressEnter": "Жіберу үшін Enter, жаңа жол үшін Shift+Enter",
+  "sendError": "Хабарламаны жіберу қатесі",
+  "viewProfile": "Профиль",
+  "newMessageReceived": "Жаңа хабарлама",
+  "typing": "жазып жатыр..."
+}

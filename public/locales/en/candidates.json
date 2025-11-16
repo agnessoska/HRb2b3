@@ -1,7 +1,7 @@
 {
   "list": {
     "title": "Candidates",
-    "generateInvite": "Generate invite link",
+    "generateInvite": "Generate Invite Link",
     "inviteDialog": {
       "title": "Invite Candidate",
       "description": "The link is valid for 24 hours. Cost: 500 tokens.",
@@ -24,19 +24,25 @@
     "aiAnalysisCard": {
       "title": "AI Analysis",
       "empty": {
-        "title": "Analysis not generated yet",
-        "description": "The full analysis of the candidate will be displayed here once generated."
+        "title": "Analysis not yet generated",
+        "description": "The full analysis of the candidate will be displayed here after it is generated."
       }
+    },
+    "documentsCard": {
+      "title": "Generated Documents",
+      "empty": "No documents have been generated for this candidate yet."
     },
     "actionsCard": {
       "title": "Actions",
       "analysisDisabledTooltip": "Full analysis is available only after the candidate completes all 6 tests.",
       "invite": "Invite to Interview",
       "offer": "Send Offer",
-      "reject": "Send Rejection"
+      "reject": "Send Rejection",
+      "generateDocument": "Generate Document",
+      "interviewDisabledTooltip": "First, generate the full AI analysis."
     },
     "detailsCard": {
-      "title": "Candidate Details",
+      "title": "Candidate Data",
       "email": "Email",
       "phone": "Phone",
       "experience": "Experience",

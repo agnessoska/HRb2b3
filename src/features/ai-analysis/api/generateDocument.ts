@@ -1,48 +1,45 @@
-import { useMutation } from '@tanstack/react-query';
-import { toast } from 'sonner';
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 
-import { supabase } from '@/shared/lib/supabase';
-import { useTranslation } from 'react-i18next';
+import { supabase } from '@/shared/lib/supabase'
+import type { Database } from '@/shared/types/database'
 
-export type DocumentType = 'interview_invitation' | 'job_offer' | 'rejection_letter';
+export type DocumentType = 'interview_invitation' | 'job_offer' | 'rejection_letter'
 
-interface GenerateDocumentPayload {
-  candidate_id: string;
-  vacancy_id?: string;
-  document_type: DocumentType;
-  additional_info: string;
-  language: 'ru' | 'kk' | 'en';
+export interface GenerateDocumentParams {
+  candidate_id: string
+  vacancy_id?: string
+  organization_id: string
+  hr_specialist_id: string
+  document_type: DocumentType
+  additional_info: string
+  language: 'ru' | 'kk' | 'en'
 }
 
-const generateDocument = async (payload: GenerateDocumentPayload) => {
+export const generateDocument = async (params: GenerateDocumentParams) => {
   const { data, error } = await supabase.functions.invoke('generate-document', {
-    body: payload,
-  });
+    body: params,
+  })
 
   if (error) {
-    throw new Error(error.message);
+    throw new Error(`Failed to generate document: ${error.message}`)
   }
 
-  return data;
-};
+  return data.data as Database['public']['Tables']['generated_documents']['Row']
+}
 
-export const useGenerateDocument = (options?: {
-  onSuccess?: (data: any) => void;
-}) => {
-  const { t } = useTranslation('ai-analysis');
+export const useGenerateDocument = () => {
+  const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: generateDocument,
     onSuccess: (data) => {
-      toast.success(t('generateDocument.notifications.success'));
-      if (options?.onSuccess) {
-        options.onSuccess(data);
-      }
+      toast.success('Document generated successfully!')
+      // Invalidate queries to refetch the list of documents for the candidate
+      queryClient.invalidateQueries({ queryKey: ['documents', data.candidate_id] })
     },
     onError: (error) => {
-      toast.error(t('generateDocument.notifications.error'), {
-        description: error.message,
-      });
+      toast.error(error.message)
     },
-  });
-};
+  })
+}

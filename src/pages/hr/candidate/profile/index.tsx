@@ -5,10 +5,13 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Bot, Download, Share2 } from 'lucide-react'
+import { Bot, Download, Share2, FileText, PlusCircle } from 'lucide-react'
 import { GenerateFullAnalysisDialog } from '@/features/ai-analysis/ui/GenerateFullAnalysisDialog'
+import { GenerateStructuredInterviewDialog } from '@/features/ai-analysis/ui/GenerateStructuredInterviewDialog'
 import { useOrganization } from '@/shared/hooks/useOrganization'
 import { useGetFullAnalysisByCandidate } from '@/features/ai-analysis/api/getFullAnalysisByCandidate'
+import { useGetGeneratedDocumentsByCandidate } from '@/features/ai-analysis/api/getGeneratedDocuments'
+import { GenerateDocumentDialog } from '@/features/ai-analysis/ui/GenerateDocumentDialog'
 import { marked } from 'marked'
 import { useTranslation } from 'react-i18next'
 
@@ -31,6 +34,11 @@ export default function CandidateProfilePage() {
     error: errorAnalysis
   } = useGetFullAnalysisByCandidate(id!, organization?.id)
 
+  const {
+    data: documents,
+    isLoading: isLoadingDocuments,
+  } = useGetGeneratedDocumentsByCandidate(id!, organization?.id)
+
   const analysisHtml = useMemo(() => {
     if (analysis?.content_markdown) {
       return marked.parse(analysis.content_markdown)
@@ -38,7 +46,7 @@ export default function CandidateProfilePage() {
     return ''
   }, [analysis])
 
-  const isLoading = isLoadingCandidate || (organization && isLoadingAnalysis)
+  const isLoading = isLoadingCandidate || (organization && (isLoadingAnalysis || isLoadingDocuments))
 
   if (isLoading) {
     return (
@@ -48,6 +56,7 @@ export default function CandidateProfilePage() {
         <div className="mt-8 grid gap-6 md:grid-cols-3">
           <div className="md:col-span-2 space-y-6">
             <Skeleton className="h-64 w-full" />
+            <Skeleton className="h-80 w-full" />
           </div>
           <div className="space-y-6">
             <Skeleton className="h-48 w-full" />
@@ -109,6 +118,34 @@ export default function CandidateProfilePage() {
               )}
             </CardContent>
           </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('profile.documentsCard.title')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {documents && documents.length > 0 ? (
+                <ul className="space-y-3">
+                  {documents.map((doc) => (
+                    <li key={doc.id} className="flex items-center justify-between p-2 rounded-md border hover:bg-muted/50">
+                      <div className="flex items-center gap-3">
+                        <FileText className="h-5 w-5 text-muted-foreground" />
+                        <div>
+                          <p className="font-medium">{doc.title}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {t('common:createdAt')} {new Date(doc.created_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                      <Button variant="ghost" size="sm">{t('common:view')}</Button>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">{t('profile.documentsCard.empty')}</p>
+              )}
+            </CardContent>
+          </Card>
         </div>
         <div className="space-y-6">
           <Card>
@@ -125,9 +162,23 @@ export default function CandidateProfilePage() {
                   {t('profile.actionsCard.analysisDisabledTooltip')}
                 </p>
               )}
-              <Button variant="outline" className="w-full" disabled>{t('profile.actionsCard.invite')}</Button>
-              <Button variant="outline" className="w-full" disabled>{t('profile.actionsCard.offer')}</Button>
-              <Button variant="destructive" className="w-full" disabled>{t('profile.actionsCard.reject')}</Button>
+              <GenerateDocumentDialog>
+                <Button className="w-full gap-2">
+                  <PlusCircle className="h-4 w-4" />
+                  {t('profile.actionsCard.generateDocument')}
+                </Button>
+              </GenerateDocumentDialog>
+              <GenerateStructuredInterviewDialog
+                candidateId={id!}
+                // TODO: Pass a relevant vacancy ID. Using a placeholder for now.
+                vacancyId={documents?.[0]?.vacancy_id || ''}
+                disabled={!analysis}
+              />
+              {!analysis && (
+                <p className="text-xs text-muted-foreground pt-1">
+                  {t('profile.actionsCard.interviewDisabledTooltip')}
+                </p>
+              )}
             </CardContent>
           </Card>
           

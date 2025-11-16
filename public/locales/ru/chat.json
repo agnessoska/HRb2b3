@@ -1,0 +1,13 @@
+{
+  "messages": "Сообщения",
+  "searchPlaceholder": "Поиск...",
+  "noChats": "Нет чатов",
+  "noMessages": "Нет сообщений",
+  "startConversation": "Начните разговор",
+  "typePlaceholder": "Введите сообщение...",
+  "pressEnter": "Enter для отправки, Shift+Enter для новой строки",
+  "sendError": "Ошибка отправки сообщения",
+  "viewProfile": "Профиль",
+  "newMessageReceived": "Новое сообщение",
+  "typing": "печатает..."
+}

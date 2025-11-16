@@ -3,61 +3,111 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useNavigate } from 'react-router-dom';
 import type { TestWithResult } from '../api/getTests';
 import { Badge } from '@/components/ui/badge';
-import { differenceInMonths, formatDistanceToNow } from 'date-fns';
-import { ru } from 'date-fns/locale';
+import { differenceInDays, format } from 'date-fns';
+import { useTranslation } from 'react-i18next';
+import { Calendar, Clock, FileQuestion } from 'lucide-react';
 
 interface TestCardProps {
   test: TestWithResult;
+  onRetake: (testId: string, testName: string) => void;
 }
 
-export const TestCard = ({ test }: TestCardProps) => {
+export const TestCard = ({ test, onRetake }: TestCardProps) => {
+  const { t, i18n } = useTranslation('tests');
   const navigate = useNavigate();
+  const lang = i18n.language as 'ru' | 'kk' | 'en';
 
   const getStatus = () => {
     if (!test.result?.completed_at) {
-      return { text: 'Не пройден', color: 'bg-gray-500', canRetake: false };
+      return {
+        type: 'not_taken',
+        badge: 'default',
+        label: t('status.notTaken'),
+        canRetake: false,
+      };
     }
 
-    const completedDate = new Date(test.result.completed_at);
-    const monthsPassed = differenceInMonths(new Date(), completedDate);
+    const daysPassed = differenceInDays(new Date(), new Date(test.result.completed_at));
+    const monthsPassed = daysPassed / 30;
 
     if (monthsPassed < 1) {
-      return { text: `Пройден ${formatDistanceToNow(completedDate, { addSuffix: true, locale: ru })}`, color: 'bg-green-500', canRetake: false };
+      return {
+        type: 'current',
+        badge: 'success',
+        label: t('status.current'),
+        canRetake: false,
+      };
+    } else if (monthsPassed < 2) {
+      return {
+        type: 'expiring',
+        badge: 'warning',
+        label: t('status.expiringSoon'),
+        canRetake: true,
+      };
+    } else {
+      return {
+        type: 'expired',
+        badge: 'destructive',
+        label: t('status.expired'),
+        canRetake: true,
+      };
     }
-    if (monthsPassed <= 2) {
-      return { text: 'Можно пересдать', color: 'bg-yellow-500', canRetake: true };
-    }
-    return { text: 'Результат устарел', color: 'bg-red-500', canRetake: true };
   };
 
   const status = getStatus();
 
   const handleAction = () => {
-    if (status.canRetake || !test.result) {
-      // TODO: Add retake logic (delete old result) before navigating
+    if (!test.result) {
       navigate(`/candidate/test/${test.id}`);
+    } else if (status.canRetake) {
+      onRetake(test.id, test[`name_${lang}`] as string);
     } else {
       navigate(`/candidate/test/${test.id}/results`);
     }
   };
 
   return (
-    <Card className="flex flex-col">
+    <Card className="h-full flex flex-col">
       <CardHeader>
-        <div className="flex justify-between items-start">
-          <CardTitle>{test.name_ru}</CardTitle>
-          <Badge className={`${status.color} text-white`}>{status.text}</Badge>
+        <div className="flex items-start justify-between">
+          <CardTitle className="text-xl">{test[`name_${lang}`]}</CardTitle>
+          <Badge variant={status.badge as "default" | "destructive" | "outline" | "secondary" | "success" | "warning"}>{status.label}</Badge>
         </div>
-        <CardDescription>{test.description_ru}</CardDescription>
+        <CardDescription className="line-clamp-2 h-10">
+          {test[`description_${lang}`]}
+        </CardDescription>
       </CardHeader>
-      <CardContent className="flex-grow">
-        <div className="text-sm text-muted-foreground">
-          {test.total_questions} вопросов
+
+      <CardContent className="flex-1">
+        <div className="space-y-2 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <FileQuestion className="h-4 w-4" />
+            <span>{test.total_questions} {t('questions')}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Clock className="h-4 w-4" />
+            <span>~{test.time_limit_minutes || 30} {t('minutes')}</span>
+          </div>
+          {test.result?.completed_at && (
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              <span>
+                {t('completed')}: {format(new Date(test.result.completed_at), 'dd.MM.yyyy')}
+              </span>
+            </div>
+          )}
         </div>
       </CardContent>
+
       <CardFooter>
-        <Button onClick={handleAction} className="w-full">
-          {test.result && !status.canRetake ? 'Посмотреть результат' : status.canRetake ? 'Пересдать' : 'Пройти тест'}
+        <Button
+          onClick={handleAction}
+          className="w-full"
+          variant={!test.result ? "default" : status.canRetake ? "outline" : "secondary"}
+        >
+          {!test.result && t('startTest')}
+          {test.result && !status.canRetake && t('viewResults')}
+          {test.result && status.canRetake && t('retakeTest')}
         </Button>
       </CardFooter>
     </Card>

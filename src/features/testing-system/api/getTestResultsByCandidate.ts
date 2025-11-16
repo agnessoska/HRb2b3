@@ -1,9 +1,7 @@
 import { supabase } from '@/shared/lib/supabase';
-import { useAuthStore } from '@/app/store/auth';
 import type { Tables } from '@/shared/types/database';
 
-export const getTestResultsByCandidate = async (): Promise<Tables<'candidate_test_results'>[] | null> => {
-  const userId = useAuthStore.getState().user?.id;
+export const getTestResultsByCandidate = async (userId: string): Promise<Tables<'candidate_test_results'>[] | null> => {
   if (!userId) return null;
 
   // We need the profile to get the candidate_id, which is different from user_id

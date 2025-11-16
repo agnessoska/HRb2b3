@@ -1,3 +1,15 @@
 {
-  "welcome": "Welcome"
+  "welcome": "Welcome",
+  "back": "Back",
+  "save": "Save",
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "edit": "Edit",
+  "create": "Create",
+  "submit": "Submit",
+  "loading": "Loading...",
+  "error": "An error occurred",
+  "success": "Success",
+  "close": "Close",
+  "confirm": "Confirm"
 }

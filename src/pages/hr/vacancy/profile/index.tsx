@@ -1,7 +1,11 @@
+import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { getVacancyById } from '@/features/vacancy-management/api/getVacancyById'
+import { useGetApplicationsByVacancy } from '@/features/vacancy-management/api/getApplicationsByVacancy'
+import { CompareCandidatesDialog } from '@/features/ai-analysis/ui/CompareCandidatesDialog'
+import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { IdealProfileGenerator } from '@/features/vacancy-management/ui/IdealProfileGenerator'
 import { IdealProfileEditor } from '@/features/vacancy-management/ui/IdealProfileEditor'
@@ -9,8 +13,9 @@ import { updateVacancyProfile } from '@/features/vacancy-management/api/updateVa
 
 const VacancyProfilePage = () => {
   const { id } = useParams<{ id: string }>()
-  const { t } = useTranslation('vacancies')
+  const { t } = useTranslation(['vacancies', 'ai-analysis'])
   const queryClient = useQueryClient()
+  const [isCompareDialogOpen, setIsCompareDialogOpen] = useState(false)
 
   const {
     data: vacancy,
@@ -21,6 +26,8 @@ const VacancyProfilePage = () => {
     queryFn: () => getVacancyById(id!),
     enabled: !!id,
   })
+
+  const { data: applications } = useGetApplicationsByVacancy(id!)
 
   const { mutate: saveProfile, isPending: isSaving } = useMutation({
     mutationFn: updateVacancyProfile,
@@ -50,14 +57,29 @@ const VacancyProfilePage = () => {
     return <div>{t('vacancyNotFound')}</div>
   }
 
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">{vacancy.title}</h1>
-        <p className="text-muted-foreground">{t('idealProfile.subtitle')}</p>
-      </div>
+  const candidatesForComparison =
+    applications
+      ?.map((app) => app.candidates)
+      .filter((c) => c !== null)
+      .map((c) => ({ id: c!.id, full_name: c!.full_name || 'Unnamed Candidate' })) || []
 
-      {vacancy.ideal_profile ? (
+  return (
+    <>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">{vacancy.title}</h1>
+            <p className="text-muted-foreground">{t('idealProfile.subtitle')}</p>
+          </div>
+          <Button
+            onClick={() => setIsCompareDialogOpen(true)}
+            disabled={(candidatesForComparison.length ?? 0) < 2}
+          >
+            {t('ai-analysis:compareCandidates.title')}
+          </Button>
+        </div>
+
+        {vacancy.ideal_profile ? (
         <IdealProfileEditor
           vacancy={vacancy}
           onSave={(data) => saveProfile({ vacancyId: vacancy.id, idealProfile: data })}
@@ -66,7 +88,14 @@ const VacancyProfilePage = () => {
       ) : (
         <IdealProfileGenerator vacancy={vacancy} />
       )}
-    </div>
+      </div>
+      <CompareCandidatesDialog
+        isOpen={isCompareDialogOpen}
+        onOpenChange={setIsCompareDialogOpen}
+        vacancyId={vacancy.id}
+        candidates={candidatesForComparison}
+      />
+    </>
   )
 }
 
