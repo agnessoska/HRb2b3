@@ -1,43 +1,21 @@
 {
-  "buyTokens": {
-    "title": "Buy Tokens",
-    "currentBalance": "Current Balance:",
-    "tokens": "tokens",
-    "packages": {
-      "small": {
-        "name": "Starter",
-        "description": "For small teams and startups"
-      },
-      "medium": {
-        "name": "Professional",
-        "description": "For growing businesses"
-      },
-      "large": {
-        "name": "Enterprise",
-        "description": "For large-scale hiring"
-      }
-    },
-    "buyButton": "Buy for {{price}} RUB",
-    "processingButton": "Processing...",
-    "redirecting": "Redirecting to payment gateway...",
-    "errors": {
-      "invoiceFailed": "Failed to create invoice: {{error}}",
-      "organizationNotLoaded": "Organization data is not loaded yet."
-    }
-  },
-  "success": {
-    "title": "Payment Successful",
-    "subtitle": "Your transaction has been completed.",
-    "thankYou": "Thank you for your purchase. The tokens have been added to your account.",
-    "amountPaid": "Amount Paid",
-    "invoiceId": "Invoice ID",
-    "notAvailable": "N/A",
-    "returnToDashboard": "Return to Dashboard"
-  },
-  "cancel": {
-    "title": "Payment Canceled",
-    "subtitle": "Your transaction was not completed.",
-    "message": "The payment was canceled. If you believe this is an error, please try again or contact support.",
-    "tryAgain": "Try Again"
+  "title": "Billing & Payments",
+  "currentBalance": "Current Balance",
+  "tokens": "tokens",
+  "paymentHistory": "Payment History",
+  "tokenExpenses": "Token Expenses History",
+  "loading": "Loading...",
+  "noTransactions": "No transactions yet.",
+  "noOperations": "No operations yet.",
+  "date": "Date",
+  "amount": "Amount",
+  "status": "Status",
+  "operation": "Operation",
+  "tokensSpent": "Tokens Spent",
+  "statuses": {
+    "pending": "Pending",
+    "success": "Success",
+    "failed": "Failed",
+    "cancelled": "Cancelled"
   }
 }
