@@ -1,0 +1,21 @@
+{
+  "title": "Биллинг и платежи",
+  "currentBalance": "Текущий баланс",
+  "tokens": "токенов",
+  "paymentHistory": "История платежей",
+  "tokenExpenses": "История расходов токенов",
+  "loading": "Загрузка...",
+  "noTransactions": "Транзакций пока нет.",
+  "noOperations": "Операций пока нет.",
+  "date": "Дата",
+  "amount": "Сумма",
+  "status": "Статус",
+  "operation": "Операция",
+  "tokensSpent": "Потрачено токенов",
+  "statuses": {
+    "pending": "В ожидании",
+    "success": "Успешно",
+    "failed": "Ошибка",
+    "cancelled": "Отменено"
+  }
+}

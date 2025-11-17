@@ -1,58 +1,32 @@
 import { Card } from '@/components/ui/card'
+import { useTranslation } from 'react-i18next'
 
 interface MBTIResultsProps {
   result: string // например "ENTJ"
   rawScores: Record<string, number>
 }
 
-// Mock functions, replace with real data/logic
-const getTypeName = (type: string) => {
-  const names: Record<string, string> = {
-    ENTJ: 'Командир',
-    INTJ: 'Стратег',
-    ENTP: 'Полемист',
-    INTP: 'Ученый',
-    ENFJ: 'Тренер',
-    INFJ: 'Активист',
-    ENFP: 'Борец',
-    INFP: 'Посредник',
-    ESTJ: 'Менеджер',
-    ISTJ: 'Администратор',
-    ESFJ: 'Консул',
-    ISFJ: 'Защитник',
-    ESTP: 'Делец',
-    ISTP: 'Виртуоз',
-    ESFP: 'Развлекатель',
-    ISFP: 'Артист',
-  }
-  return names[type] || 'Неизвестный тип'
-}
-
-const getTypeDescription = (type: string) => {
-  // Replace with real, detailed descriptions
-  return `Описание для типа ${type} будет добавлено позже. Это энергичные и решительные лидеры, которые любят брать на себя ответственность и решать сложные задачи.`
-}
-
 export const MBTIResults = ({ result, rawScores }: MBTIResultsProps) => {
+  const { t } = useTranslation('tests')
   const dichotomies = [
     {
-      left: { code: 'E', name: 'Экстраверсия', description: 'Энергия из внешнего мира' },
-      right: { code: 'I', name: 'Интроверсия', description: 'Энергия изнутри' },
+      left: { code: 'E', name: t('psychometric.mbti.dichotomies.E.name'), description: t('psychometric.mbti.dichotomies.E.description') },
+      right: { code: 'I', name: t('psychometric.mbti.dichotomies.I.name'), description: t('psychometric.mbti.dichotomies.I.description') },
       score: rawScores.EI,
     },
     {
-      left: { code: 'S', name: 'Сенсорика', description: 'Конкретность, факты' },
-      right: { code: 'N', name: 'Интуиция', description: 'Абстракция, концепции' },
+      left: { code: 'S', name: t('psychometric.mbti.dichotomies.S.name'), description: t('psychometric.mbti.dichotomies.S.description') },
+      right: { code: 'N', name: t('psychometric.mbti.dichotomies.N.name'), description: t('psychometric.mbti.dichotomies.N.description') },
       score: rawScores.SN,
     },
     {
-      left: { code: 'T', name: 'Мышление', description: 'Логика, объективность' },
-      right: { code: 'F', name: 'Чувство', description: 'Эмоции, субъективность' },
+      left: { code: 'T', name: t('psychometric.mbti.dichotomies.T.name'), description: t('psychometric.mbti.dichotomies.T.description') },
+      right: { code: 'F', name: t('psychometric.mbti.dichotomies.F.name'), description: t('psychometric.mbti.dichotomies.F.description') },
       score: rawScores.TF,
     },
     {
-      left: { code: 'J', name: 'Суждение', description: 'Планирование, структура' },
-      right: { code: 'P', name: 'Восприятие', description: 'Гибкость, спонтанность' },
+      left: { code: 'J', name: t('psychometric.mbti.dichotomies.J.name'), description: t('psychometric.mbti.dichotomies.J.description') },
+      right: { code: 'P', name: t('psychometric.mbti.dichotomies.P.name'), description: t('psychometric.mbti.dichotomies.P.description') },
       score: rawScores.JP,
     },
   ]
@@ -62,15 +36,15 @@ export const MBTIResults = ({ result, rawScores }: MBTIResultsProps) => {
       {/* Большая карточка с типом */}
       <Card className="p-8 text-center bg-gradient-to-br from-primary/5 to-primary/10">
         <div className="space-y-2">
-          <p className="text-sm text-muted-foreground uppercase tracking-wider">Ваш тип личности</p>
+          <p className="text-sm text-muted-foreground uppercase tracking-wider">{t('results.yourPersonalityType')}</p>
           <h1 className="text-6xl font-bold tracking-tight">{result}</h1>
-          <p className="text-lg text-muted-foreground">{getTypeName(result)}</p>
+          <p className="text-lg text-muted-foreground">{t(`psychometric.mbti.types.${result}`)}</p>
         </div>
       </Card>
 
       {/* Дихотомии */}
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold">Детализация по дихотомиям</h2>
+        <h2 className="text-xl font-semibold">{t('results.dichotomiesBreakdown')}</h2>
 
         {dichotomies.map((dich, index) => {
           const leftPercent = dich.score
@@ -153,8 +127,8 @@ export const MBTIResults = ({ result, rawScores }: MBTIResultsProps) => {
 
       {/* Описание типа */}
       <Card className="p-6">
-        <h2 className="text-xl font-semibold mb-4">Описание типа {result}</h2>
-        <div className="prose prose-sm max-w-none">{getTypeDescription(result)}</div>
+        <h2 className="text-xl font-semibold mb-4">{t('results.typeDescription', { type: result })}</h2>
+        <div className="prose prose-sm max-w-none">{t(`psychometric.mbti.descriptions.${result}`)}</div>
       </Card>
     </div>
   )

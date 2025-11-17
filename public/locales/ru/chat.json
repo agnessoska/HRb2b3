@@ -9,5 +9,6 @@
   "sendError": "Ошибка отправки сообщения",
   "viewProfile": "Профиль",
   "newMessageReceived": "Новое сообщение",
-  "typing": "печатает..."
+  "typing": "печатает...",
+  "loading": "Загрузка чата..."
 }

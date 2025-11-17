@@ -160,7 +160,7 @@ export const ChatArea = ({ chatRoomId, userType, onBack }: ChatAreaProps) => {
   };
 
   if (isLoading || !chatRoom) {
-    return <div>Loading chat...</div>; // Placeholder for skeleton
+    return <div>{t('loading')}</div>;
   }
 
   const otherPerson =

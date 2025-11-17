@@ -1,10 +1,42 @@
 {
   "title": "HR Dashboard",
+  "description": "Manage your hiring process effectively",
+  "resume": "Resume",
   "tabs": {
     "resume_analysis": "Resume Analysis",
     "candidates": "Candidates",
     "vacancies": "Vacancies"
   },
   "myTests": "My Tests",
-  "errorLoadingTests": "Error loading tests."
+  "errorLoadingTests": "Error loading tests.",
+  "welcome": "Welcome",
+  "hrSpecialist": "HR Specialist",
+  "you": "You",
+  "testingProgress": {
+    "title": "Testing Progress",
+    "completed": "{{count}} of 6 tests completed",
+    "button": "Go to Tests"
+  },
+  "profileVisibility": {
+    "title": "Profile Status",
+    "label": "Visible in Talent Market",
+    "error": "Failed to change status",
+    "success": "Status changed successfully"
+  },
+  "activeApplications": {
+    "title": "Active Applications",
+    "empty": "You have no active applications yet."
+  },
+  "recentMessages": {
+    "title": "Recent Messages",
+    "empty": "You have no messages yet.",
+    "button": "All Messages"
+  },
+  "statuses": {
+    "invited": "Invited",
+    "testing": "Testing",
+    "evaluated": "Evaluated",
+    "interview": "Interview",
+    "offer": "Offer"
+  }
 }

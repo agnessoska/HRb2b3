@@ -90,5 +90,25 @@
       "placeholder": "Напр., ENTJ"
     }
   },
-  "vacancyNotFound": "Вакансия не найдена."
+  "vacancyNotFound": "Вакансия не найдена.",
+  "actions": {
+    "edit": "Редактировать",
+    "archive": "Архивировать",
+    "view": "Просмотр",
+    "manage": "Управление",
+    "manageCandidate": "Кандидаты"
+  },
+  "salary": {
+    "from": "От",
+    "upTo": "До"
+  },
+  "validation": {
+    "titleRequired": "Название обязательно",
+    "descriptionRequired": "Описание обязательно",
+    "requirementsRequired": "Требования обязательны"
+  },
+  "funnel": {
+    "noCandidates": "Нет кандидатов",
+    "vacancyIdNotFound": "ID вакансии не найден"
+  }
 }

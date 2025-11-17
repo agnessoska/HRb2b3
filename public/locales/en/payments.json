@@ -1,0 +1,21 @@
+{
+  "title": "Billing & Payments",
+  "currentBalance": "Current Balance",
+  "tokens": "tokens",
+  "paymentHistory": "Payment History",
+  "tokenExpenses": "Token Expenses History",
+  "loading": "Loading...",
+  "noTransactions": "No transactions yet.",
+  "noOperations": "No operations yet.",
+  "date": "Date",
+  "amount": "Amount",
+  "status": "Status",
+  "operation": "Operation",
+  "tokensSpent": "Tokens Spent",
+  "statuses": {
+    "pending": "Pending",
+    "success": "Success",
+    "failed": "Failed",
+    "cancelled": "Cancelled"
+  }
+}

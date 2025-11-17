@@ -1,0 +1,21 @@
+{
+  "title": "Биллинг және төлемдер",
+  "currentBalance": "Ағымдағы баланс",
+  "tokens": "токен",
+  "paymentHistory": "Төлемдер тарихы",
+  "tokenExpenses": "Токен шығындарының тарихы",
+  "loading": "Жүктелуде...",
+  "noTransactions": "Әзірге транзакциялар жоқ.",
+  "noOperations": "Әзірге операциялар жоқ.",
+  "date": "Күні",
+  "amount": "Сомасы",
+  "status": "Мәртебесі",
+  "operation": "Операция",
+  "tokensSpent": "Жұмсалған токендер",
+  "statuses": {
+    "pending": "Күтілуде",
+    "success": "Сәтті",
+    "failed": "Қате",
+    "cancelled": "Болдырылды"
+  }
+}

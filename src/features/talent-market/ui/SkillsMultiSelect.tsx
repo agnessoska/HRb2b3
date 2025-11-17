@@ -7,6 +7,7 @@ import { supabase } from "@/shared/lib/supabase";
 import { Badge } from "@/components/ui/badge";
 import { X, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from 'react-i18next';
 
 interface SkillsMultiSelectProps {
   selectedSkills: string[];
@@ -14,6 +15,7 @@ interface SkillsMultiSelectProps {
 }
 
 export const SkillsMultiSelect = ({ selectedSkills, onChange }: SkillsMultiSelectProps) => {
+  const { t } = useTranslation('talent-market');
   const [searchQuery, setSearchQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
 
@@ -61,22 +63,22 @@ export const SkillsMultiSelect = ({ selectedSkills, onChange }: SkillsMultiSelec
       <PopoverTrigger asChild>
         <Button variant="outline" className="w-full justify-start">
           {selectedSkills.length === 0 ? (
-            <span className="text-muted-foreground">Выберите навыки...</span>
+            <span className="text-muted-foreground">{t('skillsSelect.placeholder')}</span>
           ) : (
-            <span>{selectedSkills.length} выбрано</span>
+            <span>{selectedSkills.length} {t('skillsSelect.selected')}</span>
           )}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-80 p-0" align="start">
         <div className="p-2 border-b">
           <Input
-            placeholder="Поиск навыков..."
+            placeholder={t('skillsSelect.searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             autoFocus
           />
         </div>
-        
+
         {selectedSkills.length > 0 && (
           <div className="p-2 border-b">
             <div className="flex flex-wrap gap-1">
@@ -94,26 +96,26 @@ export const SkillsMultiSelect = ({ selectedSkills, onChange }: SkillsMultiSelec
             </div>
           </div>
         )}
-        
+
         <div className="max-h-60 overflow-auto p-2">
           {isLoading && (
             <div className="text-center py-4 text-sm text-muted-foreground">
-              Поиск...
+              {t('skillsSelect.searching')}
             </div>
           )}
-          
+
           {!isLoading && debouncedSearch.length < 2 && (
             <div className="text-center py-4 text-sm text-muted-foreground">
-              Введите минимум 2 символа
+              {t('skillsSelect.minCharacters')}
             </div>
           )}
-          
+
           {!isLoading && debouncedSearch.length >= 2 && skillSuggestions?.length === 0 && (
             <div className="text-center py-4 text-sm text-muted-foreground">
-              Навыки не найдены
+              {t('skillsSelect.noSkillsFound')}
             </div>
           )}
-          
+
           {skillSuggestions?.map((skill) => (
             <button
               key={skill.canonical_name}

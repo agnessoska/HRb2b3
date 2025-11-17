@@ -1,4 +1,5 @@
 import { Card } from '@/components/ui/card'
+import { useTranslation } from 'react-i18next'
 
 interface DISCResultsProps {
   results: Record<string, number>
@@ -6,45 +7,46 @@ interface DISCResultsProps {
 }
 
 export const DISCResults = ({ results, dominantStyle }: DISCResultsProps) => {
+  const { t } = useTranslation('tests')
   const styles = [
     {
       code: 'D',
-      name: 'Доминирование',
+      name: t('psychometric.disc.D.name'),
       color: 'bg-red-500',
-      description: 'Напористость, ориентация на результат',
+      description: t('psychometric.disc.D.description'),
       interpretation: {
-        high: 'Решительный лидер, берет инициативу, прямолинеен',
-        low: 'Осторожный, предпочитает сотрудничество',
+        high: t('psychometric.disc.D.high'),
+        low: t('psychometric.disc.D.low'),
       },
     },
     {
       code: 'I',
-      name: 'Влияние',
+      name: t('psychometric.disc.I.name'),
       color: 'bg-yellow-500',
-      description: 'Общительность, оптимизм, убедительность',
+      description: t('psychometric.disc.I.description'),
       interpretation: {
-        high: 'Энтузиаст, мотиватор команды, коммуникабелен',
-        low: 'Сдержанный, ориентирован на задачи',
+        high: t('psychometric.disc.I.high'),
+        low: t('psychometric.disc.I.low'),
       },
     },
     {
       code: 'S',
-      name: 'Постоянство',
+      name: t('psychometric.disc.S.name'),
       color: 'bg-green-500',
-      description: 'Надежность, терпение, стабильность',
+      description: t('psychometric.disc.S.description'),
       interpretation: {
-        high: 'Лояльный, поддерживающий, терпеливый',
-        low: 'Динамичный, любит изменения',
+        high: t('psychometric.disc.S.high'),
+        low: t('psychometric.disc.S.low'),
       },
     },
     {
       code: 'C',
-      name: 'Соответствие',
+      name: t('psychometric.disc.C.name'),
       color: 'bg-blue-500',
-      description: 'Точность, аналитичность, следование правилам',
+      description: t('psychometric.disc.C.description'),
       interpretation: {
-        high: 'Детально ориентированный, осторожный, точный',
-        low: 'Гибкий, склонен к риску',
+        high: t('psychometric.disc.C.high'),
+        low: t('psychometric.disc.C.low'),
       },
     },
   ]
@@ -53,14 +55,14 @@ export const DISCResults = ({ results, dominantStyle }: DISCResultsProps) => {
     <div className="space-y-8">
       {/* Доминирующий стиль */}
       <Card className="p-6 text-center">
-        <p className="text-sm text-muted-foreground mb-2">Ваш доминирующий стиль</p>
+        <p className="text-sm text-muted-foreground mb-2">{t('results.yourDominantStyle')}</p>
         <h2 className="text-3xl font-bold">{styles.find((s) => s.code === dominantStyle)?.name}</h2>
         <p className="text-muted-foreground mt-2">{styles.find((s) => s.code === dominantStyle)?.description}</p>
       </Card>
 
       {/* Столбчатая диаграмма */}
       <Card className="p-6">
-        <h3 className="text-lg font-semibold mb-6">Ваш профиль DISC</h3>
+        <h3 className="text-lg font-semibold mb-6">{t('results.yourDISCProfile')}</h3>
 
         <div className="grid grid-cols-4 gap-4">
           {styles.map((style) => {

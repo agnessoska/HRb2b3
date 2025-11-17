@@ -36,10 +36,10 @@ import { useHrProfile } from '@/shared/hooks/useHrProfile'
 import { useTranslation } from 'react-i18next'
 import { Plus, Loader2 } from 'lucide-react'
 
-const vacancySchema = z.object({
-  title: z.string().min(1, 'Title is required'),
-  description: z.string().min(1, 'Description is required'),
-  requirements: z.string().min(1, 'Requirements are required'),
+const createVacancySchema = (t: (key: string) => string) => z.object({
+  title: z.string().min(1, t('validation.titleRequired')),
+  description: z.string().min(1, t('validation.descriptionRequired')),
+  requirements: z.string().min(1, t('validation.requirementsRequired')),
   salary_min: z.number().optional(),
   salary_max: z.number().optional(),
   location: z.string().optional(),
@@ -52,6 +52,8 @@ export function CreateVacancyDialog() {
   const queryClient = useQueryClient()
   const { data: organization } = useOrganization()
   const { data: hrProfile } = useHrProfile()
+
+  const vacancySchema = createVacancySchema(t)
 
   const form = useForm<z.infer<typeof vacancySchema>>({
     resolver: zodResolver(vacancySchema),

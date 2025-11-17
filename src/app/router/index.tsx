@@ -16,6 +16,8 @@ import CandidateChatPage from '@/pages/candidate/chat'
 import BuyTokensPage from '@/pages/hr/buy-tokens'
 import PaymentSuccessPage from '@/pages/hr/payment/success'
 import PaymentCancelPage from '@/pages/hr/payment/cancel'
+import BillingPage from '@/pages/hr/billing'
+import TeamPage from '@/pages/hr/team'
 
 export const router = createBrowserRouter([
   {
@@ -76,6 +78,14 @@ export const router = createBrowserRouter([
       {
         path: 'hr/buy-tokens',
         element: <BuyTokensPage />,
+      },
+      {
+        path: 'hr/billing',
+        element: <BillingPage />,
+      },
+      {
+        path: 'hr/team',
+        element: <TeamPage />,
       },
       {
         path: 'candidate/dashboard',

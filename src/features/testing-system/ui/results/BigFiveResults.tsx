@@ -1,45 +1,47 @@
 import { Card } from '@/components/ui/card'
+import { useTranslation } from 'react-i18next'
 
 interface BigFiveResultsProps {
   results: Record<string, number>
 }
 
 export const BigFiveResults = ({ results }: BigFiveResultsProps) => {
+  const { t } = useTranslation('tests')
   const scales = [
     {
       key: 'openness',
-      name: 'Открытость опыту',
-      description: 'Интерес к новому, любознательность, креативность',
+      name: t('psychometric.bigFive.openness.name'),
+      description: t('psychometric.bigFive.openness.description'),
       value: results.openness,
       type: 'higher_is_better',
     },
     {
       key: 'conscientiousness',
-      name: 'Добросовестность',
-      description: 'Организованность, надежность, самодисциплина',
+      name: t('psychometric.bigFive.conscientiousness.name'),
+      description: t('psychometric.bigFive.conscientiousness.description'),
       value: results.conscientiousness,
       type: 'higher_is_better',
     },
     {
       key: 'extraversion',
-      name: 'Экстраверсия',
-      description: 'Общительность, энергичность, позитивные эмоции',
+      name: t('psychometric.bigFive.extraversion.name'),
+      description: t('psychometric.bigFive.extraversion.description'),
       value: results.extraversion,
       type: 'optimal',
       optimalValue: 50,
     },
     {
       key: 'agreeableness',
-      name: 'Доброжелательность',
-      description: 'Эмпатия, готовность к сотрудничеству, доверие',
+      name: t('psychometric.bigFive.agreeableness.name'),
+      description: t('psychometric.bigFive.agreeableness.description'),
       value: results.agreeableness,
       type: 'optimal',
       optimalValue: 65,
     },
     {
       key: 'neuroticism',
-      name: 'Нейротизм',
-      description: 'Эмоциональная стабильность, уровень стресса',
+      name: t('psychometric.bigFive.neuroticism.name'),
+      description: t('psychometric.bigFive.neuroticism.description'),
       value: results.neuroticism,
       type: 'lower_is_better',
     },
@@ -69,35 +71,35 @@ export const BigFiveResults = ({ results }: BigFiveResultsProps) => {
 
   const getInterpretation = (scale: (typeof scales)[0]) => {
     if (scale.key === 'openness') {
-      if (scale.value >= 67) return 'Высокая: креативный, любит новизну и перемены'
-      if (scale.value >= 34) return 'Средняя: сбалансированный, открыт новому при необходимости'
-      return 'Низкая: консервативный, предпочитает привычное'
+      if (scale.value >= 67) return t('psychometric.bigFive.openness.high')
+      if (scale.value >= 34) return t('psychometric.bigFive.openness.medium')
+      return t('psychometric.bigFive.openness.low')
     }
     if (scale.key === 'conscientiousness') {
-      if (scale.value >= 67) return 'Высокая: очень дисциплинированный, перфекционист'
-      if (scale.value >= 34) return 'Средняя: организованный, но сохраняет гибкость'
-      return 'Низкая: спонтанный, гибкий, может пренебрегать планированием'
+      if (scale.value >= 67) return t('psychometric.bigFive.conscientiousness.high')
+      if (scale.value >= 34) return t('psychometric.bigFive.conscientiousness.medium')
+      return t('psychometric.bigFive.conscientiousness.low')
     }
     if (scale.key === 'extraversion') {
-      if (scale.value >= 67) return 'Высокая: экстраверт, черпает энергию из общения'
-      if (scale.value >= 34) return 'Средняя: амбиверт, сбалансирован'
-      return 'Низкая: интроверт, предпочитает уединение'
+      if (scale.value >= 67) return t('psychometric.bigFive.extraversion.high')
+      if (scale.value >= 34) return t('psychometric.bigFive.extraversion.medium')
+      return t('psychometric.bigFive.extraversion.low')
     }
     if (scale.key === 'agreeableness') {
-      if (scale.value >= 71) return 'Высокая: очень отзывчивый, может жертвовать своими интересами'
-      if (scale.value >= 31) return 'Средняя: сбалансированный, дипломатичный'
-      return 'Низкая: скептичный, прямолинейный, может быть конфликтным'
+      if (scale.value >= 71) return t('psychometric.bigFive.agreeableness.high')
+      if (scale.value >= 31) return t('psychometric.bigFive.agreeableness.medium')
+      return t('psychometric.bigFive.agreeableness.low')
     }
     if (scale.key === 'neuroticism') {
-      if (scale.value >= 71) return 'Высокая: высокий уровень тревожности, чувствителен к стрессу'
-      if (scale.value >= 31) return 'Средняя: периодические волнения'
-      return 'Низкая: эмоционально стабилен, устойчив к стрессу'
+      if (scale.value >= 71) return t('psychometric.bigFive.neuroticism.high')
+      if (scale.value >= 31) return t('psychometric.bigFive.neuroticism.medium')
+      return t('psychometric.bigFive.neuroticism.low')
     }
   }
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-semibold">Ваши результаты</h2>
+      <h2 className="text-2xl font-semibold">{t('results.yourResults')}</h2>
 
       <div className="space-y-4">
         {scales.map((scale) => (
@@ -130,7 +132,7 @@ export const BigFiveResults = ({ results }: BigFiveResultsProps) => {
                     style={{ left: `${scale.optimalValue}%` }}
                   >
                     <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs text-muted-foreground whitespace-nowrap">
-                      Оптимум
+                      {t('results.optimal')}
                     </div>
                   </div>
                 )}

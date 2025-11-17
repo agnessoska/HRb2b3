@@ -11,5 +11,18 @@
   "error": "Қате пайда болды",
   "success": "Сәтті",
   "close": "Жабу",
-  "confirm": "Растау"
+  "confirm": "Растау",
+  "appName": "HR Platform",
+  "theme": {
+    "toggle": "Тақырыпты ауыстыру",
+    "light": "Ашық",
+    "dark": "Қараңғы",
+    "system": "Жүйелік"
+  },
+  "language": {
+    "toggle": "Тілді ауыстыру"
+  },
+  "chat": {
+    "loading": "Чат жүктелуде..."
+  }
 }

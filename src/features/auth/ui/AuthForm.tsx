@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -27,25 +28,29 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import type { ControllerRenderProps } from 'react-hook-form'
 import { Mail, Lock, User, Building2, Loader2, Briefcase, UserCircle2 } from 'lucide-react'
 
-const loginSchema = z.object({
-  email: z.string().email({ message: 'Invalid email address.' }),
-  password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
+const createLoginSchema = (t: (key: string) => string) => z.object({
+  email: z.string().email({ message: t('validation.invalidEmail') }),
+  password: z.string().min(6, { message: t('validation.passwordMin') }),
 })
 
-const registerSchema = z.object({
-  email: z.string().email({ message: 'Invalid email address.' }),
-  password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
-  fullName: z.string().min(2, { message: 'Full name is required.' }),
+const createRegisterSchema = (t: (key: string) => string) => z.object({
+  email: z.string().email({ message: t('validation.invalidEmail') }),
+  password: z.string().min(6, { message: t('validation.passwordMin') }),
+  fullName: z.string().min(2, { message: t('validation.fullNameRequired') }),
   organizationName: z.string().optional(),
 })
 
 type Role = 'hr' | 'candidate'
 
 export function AuthForm() {
+  const { t } = useTranslation('auth')
   const navigate = useNavigate()
   const [role, setRole] = useState<Role>('hr')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const loginSchema = createLoginSchema(t)
+  const registerSchema = createRegisterSchema(t)
 
   const loginForm = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -76,7 +81,7 @@ export function AuthForm() {
     if (role === 'hr' && (!values.organizationName || values.organizationName.trim().length < 2)) {
       registerForm.setError('organizationName', {
         type: 'manual',
-        message: 'Organization name is required for HR specialists.',
+        message: t('validation.organizationRequired'),
       })
       setLoading(false)
       return
@@ -105,14 +110,14 @@ export function AuthForm() {
   return (
     <Tabs defaultValue="login" className="w-full">
       <TabsList className="grid w-full grid-cols-2 mb-4">
-        <TabsTrigger value="login">Login</TabsTrigger>
-        <TabsTrigger value="register">Register</TabsTrigger>
+        <TabsTrigger value="login">{t('loginTab')}</TabsTrigger>
+        <TabsTrigger value="register">{t('registerTab')}</TabsTrigger>
       </TabsList>
       <TabsContent value="login" className="mt-0">
         <Card className="border-0 shadow-lg">
           <CardHeader className="space-y-1 pb-6">
-            <CardTitle className="text-2xl">Welcome back</CardTitle>
-            <CardDescription>Enter your credentials to access your account</CardDescription>
+            <CardTitle className="text-2xl">{t('loginTitle')}</CardTitle>
+            <CardDescription>{t('loginDescription')}</CardDescription>
           </CardHeader>
           <CardContent>
             <Form {...loginForm}>
@@ -122,11 +127,11 @@ export function AuthForm() {
                   name="email"
                   render={({ field }: { field: ControllerRenderProps<z.infer<typeof loginSchema>, "email"> }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>{t('emailLabel')}</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input placeholder="m@example.com" className="pl-10" {...field} />
+                          <Input placeholder={t('emailPlaceholder')} className="pl-10" {...field} />
                         </div>
                       </FormControl>
                       <FormMessage />
@@ -138,7 +143,7 @@ export function AuthForm() {
                   name="password"
                   render={({ field }: { field: ControllerRenderProps<z.infer<typeof loginSchema>, "password"> }) => (
                     <FormItem>
-                      <FormLabel>Password</FormLabel>
+                      <FormLabel>{t('passwordLabel')}</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -158,10 +163,10 @@ export function AuthForm() {
                   {loading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Signing in...
+                      {t('signingInButton')}
                     </>
                   ) : (
-                    'Sign In'
+                    t('signInButton')
                   )}
                 </Button>
               </form>
@@ -172,14 +177,14 @@ export function AuthForm() {
       <TabsContent value="register" className="mt-0">
         <Card className="border-0 shadow-lg">
           <CardHeader className="space-y-1 pb-6">
-            <CardTitle className="text-2xl">Create an account</CardTitle>
-            <CardDescription>Enter your details to get started</CardDescription>
+            <CardTitle className="text-2xl">{t('registerTitle')}</CardTitle>
+            <CardDescription>{t('registerDescription')}</CardDescription>
           </CardHeader>
           <CardContent>
             <Form {...registerForm}>
               <form onSubmit={registerForm.handleSubmit(onRegister)} className="space-y-4">
                 <div className="space-y-3">
-                  <Label className="text-sm font-medium">I am a</Label>
+                  <Label className="text-sm font-medium">{t('iAm')}</Label>
                   <RadioGroup defaultValue="hr" onValueChange={(value: Role) => setRole(value)} className="grid grid-cols-2 gap-3">
                     <div>
                       <RadioGroupItem value="hr" id="r1" className="peer sr-only" />
@@ -188,7 +193,7 @@ export function AuthForm() {
                         className="flex flex-col items-center justify-center rounded-md border-2 border-muted bg-transparent p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer transition-all"
                       >
                         <Briefcase className="mb-2 h-6 w-6" />
-                        <span className="text-sm font-medium">HR Specialist</span>
+                        <span className="text-sm font-medium">{t('hrSpecialist')}</span>
                       </Label>
                     </div>
                     <div>
@@ -198,7 +203,7 @@ export function AuthForm() {
                         className="flex flex-col items-center justify-center rounded-md border-2 border-muted bg-transparent p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer transition-all"
                       >
                         <UserCircle2 className="mb-2 h-6 w-6" />
-                        <span className="text-sm font-medium">Candidate</span>
+                        <span className="text-sm font-medium">{t('candidate')}</span>
                       </Label>
                     </div>
                   </RadioGroup>
@@ -208,11 +213,11 @@ export function AuthForm() {
                   name="fullName"
                   render={({ field }: { field: ControllerRenderProps<z.infer<typeof registerSchema>, "fullName"> }) => (
                     <FormItem>
-                      <FormLabel>Full Name</FormLabel>
+                      <FormLabel>{t('fullNameLabel')}</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input placeholder="John Doe" className="pl-10" {...field} />
+                          <Input placeholder={t('fullNamePlaceholder')} className="pl-10" {...field} />
                         </div>
                       </FormControl>
                       <FormMessage />
@@ -224,11 +229,11 @@ export function AuthForm() {
                   name="email"
                   render={({ field }: { field: ControllerRenderProps<z.infer<typeof registerSchema>, "email"> }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>{t('emailLabel')}</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input placeholder="m@example.com" className="pl-10" {...field} />
+                          <Input placeholder={t('emailPlaceholder')} className="pl-10" {...field} />
                         </div>
                       </FormControl>
                       <FormMessage />
@@ -240,7 +245,7 @@ export function AuthForm() {
                   name="password"
                   render={({ field }: { field: ControllerRenderProps<z.infer<typeof registerSchema>, "password"> }) => (
                     <FormItem>
-                      <FormLabel>Password</FormLabel>
+                      <FormLabel>{t('passwordLabel')}</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -257,11 +262,11 @@ export function AuthForm() {
                     name="organizationName"
                     render={({ field }: { field: ControllerRenderProps<z.infer<typeof registerSchema>, "organizationName"> }) => (
                       <FormItem>
-                        <FormLabel>Organization Name</FormLabel>
+                        <FormLabel>{t('organizationLabel')}</FormLabel>
                         <FormControl>
                           <div className="relative">
                             <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input placeholder="Your Company LLC" className="pl-10" {...field} />
+                            <Input placeholder={t('organizationPlaceholder')} className="pl-10" {...field} />
                           </div>
                         </FormControl>
                         <FormMessage />
@@ -278,10 +283,10 @@ export function AuthForm() {
                   {loading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Creating account...
+                      {t('creatingAccountButton')}
                     </>
                   ) : (
-                    'Create Account'
+                    t('createAccountButton')
                   )}
                 </Button>
               </form>

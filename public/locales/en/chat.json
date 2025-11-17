@@ -9,5 +9,6 @@
   "sendError": "Error sending message",
   "viewProfile": "Profile",
   "newMessageReceived": "New message received",
-  "typing": "is typing..."
+  "typing": "is typing...",
+  "loading": "Loading chat..."
 }

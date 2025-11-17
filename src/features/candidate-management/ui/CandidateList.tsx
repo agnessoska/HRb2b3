@@ -66,9 +66,9 @@ export function CandidateList() {
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Candidates</h2>
+          <h2 className="text-2xl font-bold tracking-tight">{t('common.candidates')}</h2>
           <p className="text-sm text-muted-foreground mt-1">
-            View and manage your candidate pool
+            {t('list.description')}
           </p>
         </div>
         <GenerateInviteLinkDialog />

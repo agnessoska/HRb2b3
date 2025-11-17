@@ -1,33 +1,35 @@
 import { Card } from '@/components/ui/card'
+import { useTranslation } from 'react-i18next'
 
 interface EQResultsProps {
   results: Record<string, number>
 }
 
 export const EQResults = ({ results }: EQResultsProps) => {
+  const { t } = useTranslation('tests')
   const competencies = [
     {
       key: 'self_awareness',
-      name: 'Самосознание',
-      description: 'Понимание своих эмоций и их влияния',
+      name: t('psychometric.eq.selfAwareness.name'),
+      description: t('psychometric.eq.selfAwareness.description'),
       icon: '🧠',
     },
     {
       key: 'self_management',
-      name: 'Самоуправление',
-      description: 'Контроль импульсов, адаптивность',
+      name: t('psychometric.eq.selfManagement.name'),
+      description: t('psychometric.eq.selfManagement.description'),
       icon: '⚖️',
     },
     {
       key: 'social_awareness',
-      name: 'Социальная осведомленность',
-      description: 'Эмпатия, понимание чувств других',
+      name: t('psychometric.eq.socialAwareness.name'),
+      description: t('psychometric.eq.socialAwareness.description'),
       icon: '👥',
     },
     {
       key: 'relationship_management',
-      name: 'Управление отношениями',
-      description: 'Влияние, разрешение конфликтов',
+      name: t('psychometric.eq.relationshipManagement.name'),
+      description: t('psychometric.eq.relationshipManagement.description'),
       icon: '🤝',
     },
   ]
@@ -39,9 +41,9 @@ export const EQResults = ({ results }: EQResultsProps) => {
   }
 
   const getLevel = (value: number) => {
-    if (value >= 75) return 'Высокий'
-    if (value >= 50) return 'Средний'
-    return 'Требует развития'
+    if (value >= 75) return t('results.levelHigh')
+    if (value >= 50) return t('results.levelMedium')
+    return t('results.levelNeedsDevelopment')
   }
 
   const averageEQ = Math.round(Object.values(results).reduce((sum, val) => sum + val, 0) / 4)
@@ -52,7 +54,7 @@ export const EQResults = ({ results }: EQResultsProps) => {
       <Card className="p-8">
         <div className="text-center space-y-4">
           <p className="text-sm text-muted-foreground uppercase tracking-wider">
-            Ваш общий уровень эмоционального интеллекта
+            {t('results.yourOverallEQLevel')}
           </p>
           <div className="relative inline-block">
             <svg className="w-40 h-40 transform -rotate-90">
@@ -89,7 +91,7 @@ export const EQResults = ({ results }: EQResultsProps) => {
 
       {/* Детализация по компетенциям */}
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold">Детализация по компетенциям</h2>
+        <h2 className="text-xl font-semibold">{t('results.competenciesBreakdown')}</h2>
 
         {competencies.map((comp) => {
           const value = results[comp.key as keyof typeof results]
@@ -123,9 +125,9 @@ export const EQResults = ({ results }: EQResultsProps) => {
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">{getLevel(value)}</span>
                   <span className="text-xs text-muted-foreground">
-                    {value >= 75 && 'Отлично развито'}
-                    {value >= 50 && value < 75 && 'Есть потенциал для роста'}
-                    {value < 50 && 'Рекомендуется развитие'}
+                    {value >= 75 && t('results.excellentlyDeveloped')}
+                    {value >= 50 && value < 75 && t('results.potentialForGrowth')}
+                    {value < 50 && t('results.recommendedDevelopment')}
                   </span>
                 </div>
               </div>

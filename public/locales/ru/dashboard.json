@@ -1,10 +1,42 @@
 {
   "title": "HR Панель",
+  "description": "Управляйте процессом найма эффективно",
+  "resume": "Резюме",
   "tabs": {
     "resume_analysis": "Анализ резюме",
     "candidates": "Кандидаты",
     "vacancies": "Вакансии"
   },
   "myTests": "Мои тесты",
-  "errorLoadingTests": "Ошибка при загрузке тестов."
+  "errorLoadingTests": "Ошибка при загрузке тестов.",
+  "welcome": "Добро пожаловать",
+  "hrSpecialist": "HR специалист",
+  "you": "Вы",
+  "testingProgress": {
+    "title": "Прогресс тестирования",
+    "completed": "Пройдено {{count}} из 6 тестов",
+    "button": "К тестам"
+  },
+  "profileVisibility": {
+    "title": "Статус профиля",
+    "label": "Показывать в рынке талантов",
+    "error": "Не удалось изменить статус",
+    "success": "Статус успешно изменен"
+  },
+  "activeApplications": {
+    "title": "Активные заявки",
+    "empty": "У вас пока нет активных заявок."
+  },
+  "recentMessages": {
+    "title": "Последние сообщения",
+    "empty": "У вас пока нет сообщений.",
+    "button": "Все сообщения"
+  },
+  "statuses": {
+    "invited": "Приглашен",
+    "testing": "Тестирование",
+    "evaluated": "Оценен",
+    "interview": "Интервью",
+    "offer": "Оффер"
+  }
 }

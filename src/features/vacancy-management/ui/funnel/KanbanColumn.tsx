@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useDroppable } from '@dnd-kit/core';
 import {
   SortableContext,
@@ -21,6 +22,7 @@ export const KanbanColumn = ({
   count,
   applications,
 }: KanbanColumnProps) => {
+  const { t } = useTranslation('vacancies');
   const { setNodeRef, isOver } = useDroppable({
     id,
   });
@@ -49,7 +51,7 @@ export const KanbanColumn = ({
         >
           {applications.length === 0 ? (
             <div className="flex items-center justify-center h-32 text-sm text-muted-foreground">
-              Нет кандидатов
+              {t('funnel.noCandidates')}
             </div>
           ) : (
             applications.map((application: Application) => (
