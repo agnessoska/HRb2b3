@@ -14,4 +14,8 @@ export type ChatRoom = Database['public']['Tables']['chat_rooms']['Row'] & {
   hr_specialist: HrSpecialist;
 };
 
-export type ChatMessage = Database['public']['Tables']['chat_messages']['Row'];
+export type ChatMessage = Database['public']['Tables']['chat_messages']['Row'] & {
+  attachment_url?: string | null;
+  attachment_type?: string | null;
+  attachment_name?: string | null;
+};

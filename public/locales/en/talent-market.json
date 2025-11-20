@@ -12,7 +12,8 @@
     "sortBy": "Sort by",
     "sortByCompatibility": "By compatibility",
     "sortByDate": "By registration date",
-    "sortByTests": "By number of tests"
+    "sortByTests": "By number of tests",
+    "reset": "Reset filters"
   },
   "noVacancyAlert": {
     "title": "Select a vacancy",

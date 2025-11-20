@@ -2,15 +2,18 @@ import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Input } from '@/components/ui/input';
 import { useDebouncedValue } from '@/shared/hooks/useDebouncedValue';
-import { Search, MessageSquare } from 'lucide-react';
-import { ChatListItem } from './';
+import { Search } from 'lucide-react';
+import { ChatListItem } from './ChatListItem';
+import { EmptyChatState } from './EmptyChatState';
+import { ChatSkeleton } from './ChatSkeleton';
 import type { ChatRoom } from '../types';
 
 interface ChatListProps {
-  chatRooms: ChatRoom[];
+  chatRooms: ChatRoom[] | undefined;
   userType: 'hr' | 'candidate';
   activeChatRoomId: string | null;
   onChatSelect: (chatRoomId: string, otherUserId: string) => void;
+  isLoading?: boolean;
 }
 
 export const ChatList = ({
@@ -18,12 +21,14 @@ export const ChatList = ({
   userType,
   activeChatRoomId,
   onChatSelect,
+  isLoading = false,
 }: ChatListProps) => {
   const { t } = useTranslation('chat');
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearch = useDebouncedValue(searchQuery, 300);
 
   const filteredChats = useMemo(() => {
+    if (!chatRooms) return [];
     if (!debouncedSearch) return chatRooms;
 
     const query = debouncedSearch.toLowerCase();
@@ -35,6 +40,20 @@ export const ChatList = ({
       return name?.toLowerCase().includes(query) || false;
     });
   }, [chatRooms, debouncedSearch, userType]);
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col h-full">
+        <div className="p-4 border-b">
+          <div className="h-6 w-24 bg-muted rounded mb-3 animate-pulse" />
+          <div className="h-10 w-full bg-muted rounded animate-pulse" />
+        </div>
+        <div className="flex-1 overflow-y-auto p-4">
+          <ChatSkeleton />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full">
@@ -52,11 +71,10 @@ export const ChatList = ({
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        {filteredChats.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-32 text-muted-foreground">
-            <MessageSquare className="h-8 w-8 mb-2" />
-            <p className="text-sm">{t('noChats')}</p>
-          </div>
+        {!chatRooms || chatRooms.length === 0 ? (
+          <EmptyChatState />
+        ) : filteredChats.length === 0 ? (
+          <EmptyChatState /> // Can customize for "No search results" if needed
         ) : (
           filteredChats.map(room => {
             const otherUser =

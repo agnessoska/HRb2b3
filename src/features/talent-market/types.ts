@@ -14,14 +14,5 @@ export type ScoredCandidate = {
   category: Json;
 };
 
-export type UnscoredCandidate = {
-  id: string;
-  full_name: string | null;
-  category: { id: string; name_ru: string } | null;
-  tests_completed: number;
-  tests_last_updated_at: string | null;
-  skills: { canonical_skill: string }[];
-  compatibility: null;
-};
-
-export type TalentMarketCandidate = ScoredCandidate | UnscoredCandidate;
+// Unscored candidates are mapped to match ScoredCandidate structure in the API hook
+export type TalentMarketCandidate = ScoredCandidate;

@@ -2,7 +2,6 @@ import { useOrganization } from '@/shared/hooks/useOrganization';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { DashboardLayout } from '@/shared/ui/layouts';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useMutation } from '@tanstack/react-query';
 import { createRobokassaInvoice } from '@/features/payments/api/createRobokassaInvoice';
@@ -50,7 +49,7 @@ const BuyTokensPage = () => {
   }
 
   return (
-    <DashboardLayout>
+    <div className="container mx-auto px-4 py-8">
       <div className="space-y-8">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold tracking-tight">{t('buyTokens.title')}</h1>
@@ -89,7 +88,7 @@ const BuyTokensPage = () => {
           ))}
         </div>
       </div>
-    </DashboardLayout>
+    </div>
   );
 };
 

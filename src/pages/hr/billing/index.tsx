@@ -1,4 +1,3 @@
-import { DashboardLayout } from '@/shared/ui/layouts/DashboardLayout'
 import { useOrganization } from '@/shared/hooks/useOrganization'
 import { useQuery } from '@tanstack/react-query'
 import { getPaymentTransactions } from '@/features/payments/api/getPaymentTransactions'
@@ -27,19 +26,16 @@ const BillingPage = () => {
 
   if (isOrgLoading) {
     return (
-      <DashboardLayout>
-        <div className="container mx-auto px-4 py-8 space-y-8">
-          <Skeleton className="h-8 w-1/4" />
-          <Skeleton className="h-96 w-full" />
-          <Skeleton className="h-96 w-full" />
-        </div>
-      </DashboardLayout>
+      <div className="container mx-auto px-4 py-8 space-y-8">
+        <Skeleton className="h-8 w-1/4" />
+        <Skeleton className="h-96 w-full" />
+        <Skeleton className="h-96 w-full" />
+      </div>
     )
   }
 
   return (
-    <DashboardLayout>
-      <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">{t('title')}</h1>
           <div className="text-right">
@@ -76,7 +72,6 @@ const BillingPage = () => {
           </Card>
         </div>
       </div>
-    </DashboardLayout>
   )
 }
 

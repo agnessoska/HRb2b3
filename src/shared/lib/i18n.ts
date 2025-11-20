@@ -32,4 +32,9 @@ i18n
     },
   })
 
+// Log loading errors
+i18n.on('failedLoading', (lng, ns, msg) => {
+  console.error(`Failed to load translation file for lng: ${lng}, ns: ${ns}. Error: ${msg}`)
+})
+
 export default i18n

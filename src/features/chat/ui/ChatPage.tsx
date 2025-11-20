@@ -32,10 +32,41 @@ export const ChatPage = ({ userType }: ChatPageProps) => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const { data: chatRooms, isLoading } = useQuery({
-    queryKey: ['chat-rooms', userType, user?.id],
+  // Fetch profile to get the correct ID for chat rooms
+  const { data: hrProfile } = useQuery({
+    queryKey: ['hrProfile', user?.id],
     queryFn: async () => {
-      if (!user) return [];
+      if (!user || userType !== 'hr') return null;
+      const { data } = await supabase
+        .from('hr_specialists')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+      return data;
+    },
+    enabled: !!user && userType === 'hr',
+  });
+
+  const { data: candidateProfile } = useQuery({
+    queryKey: ['candidateProfile', user?.id],
+    queryFn: async () => {
+      if (!user || userType !== 'candidate') return null;
+      const { data } = await supabase
+        .from('candidates')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+      return data;
+    },
+    enabled: !!user && userType === 'candidate',
+  });
+
+  const profileId = userType === 'hr' ? hrProfile?.id : candidateProfile?.id;
+
+  const { data: chatRooms, isLoading } = useQuery({
+    queryKey: ['chat-rooms', userType, profileId],
+    queryFn: async () => {
+      if (!profileId) return [];
       const query = supabase
         .from('chat_rooms')
         .select(
@@ -48,16 +79,16 @@ export const ChatPage = ({ userType }: ChatPageProps) => {
         .order('last_message_at', { ascending: false });
 
       if (userType === 'hr') {
-        query.eq('hr_specialist_id', user.id);
+        query.eq('hr_specialist_id', profileId);
       } else {
-        query.eq('candidate_id', user.id);
+        query.eq('candidate_id', profileId);
       }
 
       const { data, error } = await query;
       if (error) throw error;
       return data || [];
     },
-    enabled: !!user,
+    enabled: !!profileId,
   });
 
   useEffect(() => {
@@ -72,12 +103,12 @@ export const ChatPage = ({ userType }: ChatPageProps) => {
           table: 'chat_rooms',
           filter:
             userType === 'hr'
-              ? `hr_specialist_id=eq.${user.id}`
-              : `candidate_id=eq.${user.id}`,
+              ? `hr_specialist_id=eq.${profileId}`
+              : `candidate_id=eq.${profileId}`,
         },
         () => {
           queryClient.invalidateQueries({
-            queryKey: ['chat-rooms', userType, user.id],
+            queryKey: ['chat-rooms', userType, profileId],
           });
         }
       )
@@ -86,7 +117,7 @@ export const ChatPage = ({ userType }: ChatPageProps) => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, userType, queryClient]);
+  }, [user, userType, queryClient, profileId]);
 
   const handleChatSelect = (_chatRoomId: string, otherUserId: string) => {
     const param = userType === 'hr' ? 'candidateId' : 'hrId';

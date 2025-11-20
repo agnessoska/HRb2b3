@@ -1,38 +1,71 @@
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { VacancyList } from '@/features/vacancy-management/ui/VacancyList'
 import { CandidateList } from '@/features/candidate-management/ui/CandidateList'
 import { ResumeAnalysis } from '@/features/ai-analysis/ui/ResumeAnalysis'
 import { FileSearch, Users, Briefcase } from 'lucide-react'
+import { GlassCard } from '@/shared/ui/GlassCard'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 export default function HRDashboardPage() {
   const { t } = useTranslation('dashboard')
+  const [activeTab, setActiveTab] = useState('vacancies')
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold tracking-tight">{t('title')}</h1>
-        <p className="mt-2 text-muted-foreground">
+      <GlassCard className="mb-8 p-6 border-none shadow-md">
+        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-600">
+          {t('title')}
+        </h1>
+        <p className="mt-2 text-muted-foreground text-base sm:text-lg">
           {t('description')}
         </p>
+      </GlassCard>
+
+      {/* Mobile View: Select */}
+      <div className="sm:hidden mb-6">
+        <Select value={activeTab} onValueChange={setActiveTab}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="resume-analysis">
+              <div className="flex items-center gap-2">
+                <FileSearch className="h-4 w-4" />
+                {t('tabs.resume_analysis')}
+              </div>
+            </SelectItem>
+            <SelectItem value="candidates">
+              <div className="flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                {t('tabs.candidates')}
+              </div>
+            </SelectItem>
+            <SelectItem value="vacancies">
+              <div className="flex items-center gap-2">
+                <Briefcase className="h-4 w-4" />
+                {t('tabs.vacancies')}
+              </div>
+            </SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
-      <Tabs defaultValue="vacancies" className="w-full space-y-6">
-        <TabsList className="grid w-full grid-cols-3 h-12">
-          <TabsTrigger value="resume-analysis" className="gap-2">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-6">
+        {/* Desktop View: TabsList */}
+        <TabsList className="hidden sm:grid w-full grid-cols-3 h-12 p-1 bg-muted/50 backdrop-blur supports-[backdrop-filter]:bg-muted/50">
+          <TabsTrigger value="resume-analysis" className="gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
             <FileSearch className="h-4 w-4" />
-            <span className="hidden sm:inline">{t('tabs.resume_analysis')}</span>
-            <span className="sm:hidden">{t('resume')}</span>
+            <span>{t('tabs.resume_analysis')}</span>
           </TabsTrigger>
-          <TabsTrigger value="candidates" className="gap-2">
+          <TabsTrigger value="candidates" className="gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
             <Users className="h-4 w-4" />
-            <span className="hidden sm:inline">{t('tabs.candidates')}</span>
-            <span className="sm:hidden">{t('tabs.candidatesShort')}</span>
+            <span>{t('tabs.candidates')}</span>
           </TabsTrigger>
-          <TabsTrigger value="vacancies" className="gap-2">
+          <TabsTrigger value="vacancies" className="gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
             <Briefcase className="h-4 w-4" />
-            <span className="hidden sm:inline">{t('tabs.vacancies')}</span>
-            <span className="sm:hidden">{t('tabs.vacanciesShort')}</span>
+            <span>{t('tabs.vacancies')}</span>
           </TabsTrigger>
         </TabsList>
 

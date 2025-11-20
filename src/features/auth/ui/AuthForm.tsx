@@ -40,6 +40,10 @@ const createRegisterSchema = (t: (key: string) => string) => z.object({
   organizationName: z.string().optional(),
 })
 
+const createForgotPasswordSchema = (t: (key: string) => string) => z.object({
+  email: z.string().email({ message: t('validation.invalidEmail') }),
+})
+
 type Role = 'hr' | 'candidate'
 
 export function AuthForm() {
@@ -48,9 +52,13 @@ export function AuthForm() {
   const [role, setRole] = useState<Role>('hr')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showEmailConfirmation, setShowEmailConfirmation] = useState(false)
+  const [showForgotPassword, setShowForgotPassword] = useState(false)
+  const [resetLinkSent, setResetLinkSent] = useState(false)
 
   const loginSchema = createLoginSchema(t)
   const registerSchema = createRegisterSchema(t)
+  const forgotPasswordSchema = createForgotPasswordSchema(t)
 
   const loginForm = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -61,6 +69,25 @@ export function AuthForm() {
     resolver: zodResolver(registerSchema),
     defaultValues: { email: '', password: '', fullName: '', organizationName: '' },
   })
+
+  const forgotPasswordForm = useForm<z.infer<typeof forgotPasswordSchema>>({
+    resolver: zodResolver(forgotPasswordSchema),
+    defaultValues: { email: '' },
+  })
+
+  async function onForgotPassword(values: z.infer<typeof forgotPasswordSchema>) {
+    setLoading(true)
+    setError(null)
+    const { error } = await supabase.auth.resetPasswordForEmail(values.email, {
+      redirectTo: `${window.location.origin}/auth/reset-password`,
+    })
+    if (error) {
+      setError(error.message)
+    } else {
+      setResetLinkSent(true)
+    }
+    setLoading(false)
+  }
 
   async function onLogin(values: z.infer<typeof loginSchema>) {
     setLoading(true)
@@ -101,10 +128,100 @@ export function AuthForm() {
     if (error) {
       setError(error.message)
     } else if (data.user) {
-      // Assuming email confirmation is off based on user feedback
-      navigate('/')
+      if (data.user.identities?.length === 0) {
+        setError(t('validation.emailTaken'))
+      } else if (!data.session) {
+        setShowEmailConfirmation(true)
+      } else {
+        navigate('/')
+      }
     }
     setLoading(false)
+  }
+
+  if (showEmailConfirmation) {
+    return (
+      <Card className="border-0 shadow-lg">
+        <CardHeader className="space-y-1 pb-6 text-center">
+          <Mail className="mx-auto h-12 w-12 text-primary mb-4" />
+          <CardTitle className="text-2xl">{t('checkEmailTitle')}</CardTitle>
+          <CardDescription>{t('checkEmailDescription')}</CardDescription>
+        </CardHeader>
+        <CardContent className="text-center">
+          <p className="text-sm text-muted-foreground mb-6">
+            {t('checkEmailInstructions')}
+          </p>
+          <Button variant="outline" onClick={() => setShowEmailConfirmation(false)} className="w-full">
+            {t('backToLogin')}
+          </Button>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (showForgotPassword) {
+    return (
+      <Card className="border-0 shadow-lg">
+        <CardHeader className="space-y-1 pb-6">
+          <div className="flex justify-center mb-4">
+            <Lock className="h-12 w-12 text-primary" />
+          </div>
+          <CardTitle className="text-2xl text-center">{t('resetPasswordTitle')}</CardTitle>
+          <CardDescription className="text-center">
+            {resetLinkSent ? t('resetLinkSent') : t('resetPasswordDescription')}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {resetLinkSent ? (
+             <Button variant="outline" onClick={() => {
+               setShowForgotPassword(false)
+               setResetLinkSent(false)
+             }} className="w-full">
+              {t('backToLogin')}
+            </Button>
+          ) : (
+            <Form {...forgotPasswordForm}>
+              <form onSubmit={forgotPasswordForm.handleSubmit(onForgotPassword)} className="space-y-4">
+                <FormField
+                  control={forgotPasswordForm.control}
+                  name="email"
+                  render={({ field }: { field: ControllerRenderProps<z.infer<typeof forgotPasswordSchema>, "email"> }) => (
+                    <FormItem>
+                      <FormLabel>{t('emailLabel')}</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Input placeholder={t('emailPlaceholder')} className="pl-10" {...field} />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {error && (
+                  <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+                    {error}
+                  </div>
+                )}
+                <Button type="submit" className="w-full h-11" disabled={loading}>
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      {t('sendingResetLink')}
+                    </>
+                  ) : (
+                    t('sendResetLink')
+                  )}
+                </Button>
+                <Button type="button" variant="ghost" onClick={() => setShowForgotPassword(false)} className="w-full">
+                  {t('backToLogin')}
+                </Button>
+              </form>
+            </Form>
+          )}
+        </CardContent>
+      </Card>
+    )
   }
 
   return (
@@ -168,6 +285,14 @@ export function AuthForm() {
                   ) : (
                     t('signInButton')
                   )}
+                </Button>
+                <Button
+                  type="button"
+                  variant="link"
+                  className="w-full text-sm text-muted-foreground hover:text-primary"
+                  onClick={() => setShowForgotPassword(true)}
+                >
+                  {t('forgotPassword')}
                 </Button>
               </form>
             </Form>

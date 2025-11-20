@@ -12,7 +12,8 @@
     "sortBy": "Сортировка",
     "sortByCompatibility": "По совместимости",
     "sortByDate": "По дате регистрации",
-    "sortByTests": "По количеству тестов"
+    "sortByTests": "По количеству тестов",
+    "reset": "Сбросить фильтры"
   },
   "noVacancyAlert": {
     "title": "Выберите вакансию",

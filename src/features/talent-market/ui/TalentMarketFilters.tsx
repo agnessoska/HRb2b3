@@ -7,8 +7,9 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/shared/lib/supabase";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, X } from "lucide-react";
 import { SkillsMultiSelect } from "./SkillsMultiSelect";
+import { Button } from "@/components/ui/button";
 
 export interface MarketFilters {
   vacancyId: string | null;
@@ -40,6 +41,7 @@ export const TalentMarketFilters = ({ onFilterChange }: TalentMarketFiltersProps
         .from('vacancies')
         .select('id, title')
         .eq('status', 'active')
+        .not('ideal_profile', 'is', null)
         .order('created_at', { ascending: false });
       return data;
     }
@@ -62,8 +64,26 @@ export const TalentMarketFilters = ({ onFilterChange }: TalentMarketFiltersProps
     onFilterChange(newFilters);
   };
 
+  const handleResetFilters = () => {
+    const resetFilters: MarketFilters = {
+      vacancyId: null,
+      categoryId: null,
+      skills: [],
+      minTestsCompleted: 0,
+      sortBy: 'compatibility'
+    };
+    setFilters(resetFilters);
+    onFilterChange(resetFilters);
+  };
+
   return (
     <Card className="p-6">
+      <div className="flex justify-end mb-4">
+        <Button variant="ghost" size="sm" onClick={handleResetFilters} className="h-8">
+          <X className="mr-2 h-4 w-4" />
+          {t('filters.reset')}
+        </Button>
+      </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
         <div className="space-y-2">
           <Label>{t('filters.vacancy')}</Label>
@@ -87,14 +107,14 @@ export const TalentMarketFilters = ({ onFilterChange }: TalentMarketFiltersProps
         <div className="space-y-2">
           <Label>{t('filters.category')}</Label>
           <Select
-            value={filters.categoryId || ''}
-            onValueChange={(value) => handleFilterChange('categoryId', value || null)}
+            value={filters.categoryId || 'all'}
+            onValueChange={(value) => handleFilterChange('categoryId', value === 'all' ? null : value)}
           >
             <SelectTrigger>
               <SelectValue placeholder={t('filters.categoryPlaceholder')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">{t('filters.categoryPlaceholder')}</SelectItem>
+              <SelectItem value="all">{t('filters.categoryPlaceholder')}</SelectItem>
               {categories?.map((category) => (
                 <SelectItem key={category.id} value={category.id}>
                   {category[`name_${lang}`]}

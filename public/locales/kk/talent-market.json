@@ -12,7 +12,8 @@
     "sortBy": "Сұрыптау",
     "sortByCompatibility": "Сәйкестік бойынша",
     "sortByDate": "Тіркелген күні бойынша",
-    "sortByTests": "Тест саны бойынша"
+    "sortByTests": "Тест саны бойынша",
+    "reset": "Сүзгілерді тазалау"
   },
   "noVacancyAlert": {
     "title": "Бос жұмыс орнын таңдаңыз",

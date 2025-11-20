@@ -14,13 +14,15 @@ export const searchCandidatesNotInFunnel = async (
 
   const candidateIdsInFunnel = applications.map(app => app.candidate_id);
 
-  const { data, error } = await supabase
-    .from('candidates')
-    .select('id, full_name')
-    .ilike('full_name', `%${query}%`)
-    .eq('invited_by_organization_id', organizationId)
-    .not('id', 'in', `(${candidateIdsInFunnel.join(',')})`)
-    .limit(10);
+  let rpcQuery = supabase
+    .rpc('get_organization_candidates', { p_organization_id: organizationId })
+    .ilike('full_name', `%${query}%`);
+
+  if (candidateIdsInFunnel.length > 0) {
+    rpcQuery = rpcQuery.not('id', 'in', `(${candidateIdsInFunnel.join(',')})`);
+  }
+
+  const { data, error } = await rpcQuery.limit(10);
 
   if (error) throw error;
   return data;

@@ -10,5 +10,6 @@
   "viewProfile": "Profile",
   "newMessageReceived": "New message received",
   "typing": "is typing...",
+  "fileTooLarge": "File too large (max 10MB)",
   "loading": "Loading chat..."
 }

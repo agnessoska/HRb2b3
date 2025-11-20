@@ -110,5 +110,7 @@
   "funnel": {
     "noCandidates": "No candidates",
     "vacancyIdNotFound": "Vacancy ID not found"
-  }
+  },
+  "profileUpdatedSuccess": "Vacancy profile updated successfully",
+  "profileUpdatedError": "Error updating vacancy profile"
 }

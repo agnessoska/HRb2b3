@@ -15,7 +15,6 @@ import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Plus, Info, Sparkles, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
-import { createRoot } from 'react-dom/client';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,6 +26,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { KanbanColumn } from './KanbanColumn.tsx';
 import { CandidateCard } from './CandidateCard.tsx';
 import { AddCandidateDialog } from './AddCandidateDialog';
@@ -41,21 +41,33 @@ interface DialogState {
   additionalInfo: string;
 }
 
+interface ConfirmationDialogState {
+  type: 'reject' | 'offer' | 'interview' | null;
+  application: Application | null;
+  newStatus: string;
+}
+
 interface VacancyFunnelProps {
   vacancyId: string;
 }
 
 export const VacancyFunnel = ({ vacancyId }: VacancyFunnelProps) => {
-  const { t } = useTranslation('funnel');
+  const { t } = useTranslation(['funnel', 'common']);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState('invited');
   const [isAddCandidateOpen, setIsAddCandidateOpen] = useState(false);
   const [dialogState, setDialogState] = useState<DialogState>({
     isOpen: false,
     application: null,
     documentType: 'interview_invitation',
     additionalInfo: '',
+  });
+  const [confirmationDialog, setConfirmationDialog] = useState<ConfirmationDialogState>({
+    type: null,
+    application: null,
+    newStatus: '',
   });
 
   // Fetch vacancy details
@@ -168,7 +180,7 @@ export const VacancyFunnel = ({ vacancyId }: VacancyFunnelProps) => {
     setActiveId(event.active.id as string);
   };
 
-  const handleDragEnd = async (event: DragEndEvent) => {
+  const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveId(null);
     if (!over) return;
@@ -179,149 +191,37 @@ export const VacancyFunnel = ({ vacancyId }: VacancyFunnelProps) => {
 
     if (!application || application.status === newStatus) return;
 
-    const showRejectionDialog = (application: Application): Promise<boolean | null> => {
-      return new Promise(resolve => {
-        const container = document.createElement('div');
-        document.body.appendChild(container);
-        const root = createRoot(container);
-        const dialog = (
-          <AlertDialog open onOpenChange={() => resolve(null)}>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>{t('rejectCandidate')}</AlertDialogTitle>
-                <AlertDialogDescription>
-                  {t('rejectDescription', { name: application.candidate.full_name })}
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <div className="space-y-3 py-4">
-                <Alert>
-                  <Info className="h-4 w-4" />
-                  <AlertTitle>{t('rejectInfo')}</AlertTitle>
-                  <AlertDescription>{t('rejectInfoDescription')}</AlertDescription>
-                </Alert>
-              </div>
-              <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-                <AlertDialogCancel onClick={() => resolve(null)}>{t('common:cancel')}</AlertDialogCancel>
-                <Button variant="outline" onClick={() => resolve(false)}>
-                  {t('rejectWithoutLetter')}
-                </Button>
-                <AlertDialogAction onClick={() => resolve(true)}>{t('rejectAndSendLetter')}</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        );
-        root.render(dialog);
-      });
-    };
-
-    const showOfferDialog = (application: Application): Promise<boolean | null> => {
-      return new Promise(resolve => {
-        const container = document.createElement('div');
-        document.body.appendChild(container);
-        const root = createRoot(container);
-        const dialog = (
-          <AlertDialog open onOpenChange={() => resolve(null)}>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>{t('sendOffer')}</AlertDialogTitle>
-                <AlertDialogDescription>
-                  {t('offerDescription', { name: application.candidate.full_name })}
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <div className="space-y-3 py-4">
-                <Alert>
-                  <Sparkles className="h-4 w-4" />
-                  <AlertTitle>{t('offerInfo')}</AlertTitle>
-                  <AlertDescription>{t('offerInfoDescription')}</AlertDescription>
-                </Alert>
-              </div>
-              <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-                <AlertDialogCancel onClick={() => resolve(null)}>{t('common:cancel')}</AlertDialogCancel>
-                <Button variant="outline" onClick={() => resolve(false)}>
-                  {t('updateStatusOnly')}
-                </Button>
-                <AlertDialogAction onClick={() => resolve(true)}>{t('generateAndSendOffer')}</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        );
-        root.render(dialog);
-      });
-    };
-
-    const showInterviewDialog = (application: Application): Promise<boolean | null> => {
-      return new Promise(resolve => {
-        const container = document.createElement('div');
-        document.body.appendChild(container);
-        const root = createRoot(container);
-        const dialog = (
-          <AlertDialog open onOpenChange={() => resolve(null)}>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>{t('inviteToInterview')}</AlertDialogTitle>
-                <AlertDialogDescription>
-                  {t('interviewDescription', { name: application.candidate.full_name })}
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <div className="space-y-3 py-4">
-                <Alert>
-                  <Calendar className="h-4 w-4" />
-                  <AlertTitle>{t('interviewInfo')}</AlertTitle>
-                  <AlertDescription>{t('interviewInfoDescription')}</AlertDescription>
-                </Alert>
-              </div>
-              <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-                <AlertDialogCancel onClick={() => resolve(null)}>{t('common:cancel')}</AlertDialogCancel>
-                <Button variant="outline" onClick={() => resolve(false)}>
-                  {t('updateStatusOnly')}
-                </Button>
-                <AlertDialogAction onClick={() => resolve(true)}>{t('generateInvitation')}</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        );
-        root.render(dialog);
-      });
-    };
-
     if (newStatus === 'rejected') {
-      const shouldSendRejection = await showRejectionDialog(application);
-      if (shouldSendRejection === null) return;
-      await updateStatusMutation.mutateAsync({ applicationId, newStatus });
-      if (shouldSendRejection) {
-        setDialogState({
-          isOpen: true,
-          application,
-          documentType: 'rejection_letter',
-          additionalInfo: '',
-        });
-      }
+      setConfirmationDialog({ type: 'reject', application, newStatus });
     } else if (newStatus === 'offer') {
-      const shouldGenerateOffer = await showOfferDialog(application);
-      if (shouldGenerateOffer === null) return;
-      await updateStatusMutation.mutateAsync({ applicationId, newStatus });
-      if (shouldGenerateOffer) {
-        setDialogState({
-          isOpen: true,
-          application,
-          documentType: 'job_offer',
-          additionalInfo: '',
-        });
-      }
+      setConfirmationDialog({ type: 'offer', application, newStatus });
     } else if (newStatus === 'interview') {
-      const shouldSendInvite = await showInterviewDialog(application);
-      if (shouldSendInvite === null) return;
-      await updateStatusMutation.mutateAsync({ applicationId, newStatus });
-      if (shouldSendInvite) {
-        setDialogState({
-          isOpen: true,
-          application,
-          documentType: 'interview_invitation',
-          additionalInfo: '',
-        });
-      }
+      setConfirmationDialog({ type: 'interview', application, newStatus });
     } else {
-      await updateStatusMutation.mutateAsync({ applicationId, newStatus });
+      updateStatusMutation.mutate({ applicationId, newStatus });
+      toast.success(t('statusUpdated'));
+    }
+  };
+
+  const handleConfirmationAction = async (generateDocument: boolean) => {
+    const { application, newStatus, type } = confirmationDialog;
+    if (!application) return;
+
+    await updateStatusMutation.mutateAsync({ applicationId: application.id, newStatus });
+    setConfirmationDialog({ type: null, application: null, newStatus: '' });
+
+    if (generateDocument) {
+      let documentType: DocumentType = 'interview_invitation';
+      if (type === 'reject') documentType = 'rejection_letter';
+      if (type === 'offer') documentType = 'job_offer';
+
+      setDialogState({
+        isOpen: true,
+        application,
+        documentType,
+        additionalInfo: '',
+      });
+    } else {
       toast.success(t('statusUpdated'));
     }
   };
@@ -385,14 +285,15 @@ export const VacancyFunnel = ({ vacancyId }: VacancyFunnelProps) => {
         </div>
       )}
 
-      <div className="flex-1 overflow-x-auto overflow-y-hidden p-4">
+      <div className="flex-1 overflow-hidden p-4">
         <DndContext
           sensors={sensors}
           collisionDetection={closestCorners}
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
         >
-          <div className="inline-flex gap-4 min-h-full">
+          {/* Desktop View */}
+          <div className="hidden md:inline-flex gap-4 min-h-full h-full overflow-x-auto pb-4">
             {statuses.map(status => (
               <KanbanColumn
                 key={status.id}
@@ -403,6 +304,33 @@ export const VacancyFunnel = ({ vacancyId }: VacancyFunnelProps) => {
               />
             ))}
           </div>
+
+          {/* Mobile View */}
+          <div className="md:hidden h-full">
+             <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
+              <TabsList className="w-full overflow-x-auto justify-start mb-4">
+                {statuses.map(status => (
+                  <TabsTrigger key={status.id} value={status.id} className="flex-shrink-0">
+                    {status.label}
+                    <span className="ml-2 text-xs bg-muted-foreground/20 px-1.5 py-0.5 rounded-full">
+                      {groupedByStatus[status.id]?.length || 0}
+                    </span>
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+              {statuses.map(status => (
+                <TabsContent key={status.id} value={status.id} className="flex-1 mt-0 h-full overflow-y-auto">
+                  <KanbanColumn
+                    id={status.id}
+                    title={status.label}
+                    count={groupedByStatus[status.id]?.length || 0}
+                    applications={groupedByStatus[status.id] || []}
+                  />
+                </TabsContent>
+              ))}
+            </Tabs>
+          </div>
+
           <DragOverlay>
             {activeId && activeApplication ? (
               <div className="rotate-3 opacity-80">
@@ -430,6 +358,53 @@ export const VacancyFunnel = ({ vacancyId }: VacancyFunnelProps) => {
         onOpenChange={setIsAddCandidateOpen}
         vacancyId={vacancyId}
       />
+      
+      <AlertDialog open={!!confirmationDialog.type} onOpenChange={(open) => !open && setConfirmationDialog({ type: null, application: null, newStatus: '' })}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {confirmationDialog.type === 'reject' && t('rejectCandidate')}
+              {confirmationDialog.type === 'offer' && t('sendOffer')}
+              {confirmationDialog.type === 'interview' && t('inviteToInterview')}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {confirmationDialog.type === 'reject' && t('rejectDescription', { name: confirmationDialog.application?.candidate.full_name })}
+              {confirmationDialog.type === 'offer' && t('offerDescription', { name: confirmationDialog.application?.candidate.full_name })}
+              {confirmationDialog.type === 'interview' && t('interviewDescription', { name: confirmationDialog.application?.candidate.full_name })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-3 py-4">
+            <Alert>
+              {confirmationDialog.type === 'reject' && <Info className="h-4 w-4" />}
+              {confirmationDialog.type === 'offer' && <Sparkles className="h-4 w-4" />}
+              {confirmationDialog.type === 'interview' && <Calendar className="h-4 w-4" />}
+              <AlertTitle>
+                {confirmationDialog.type === 'reject' && t('rejectInfo')}
+                {confirmationDialog.type === 'offer' && t('offerInfo')}
+                {confirmationDialog.type === 'interview' && t('interviewInfo')}
+              </AlertTitle>
+              <AlertDescription>
+                {confirmationDialog.type === 'reject' && t('rejectInfoDescription')}
+                {confirmationDialog.type === 'offer' && t('offerInfoDescription')}
+                {confirmationDialog.type === 'interview' && t('interviewInfoDescription')}
+              </AlertDescription>
+            </Alert>
+          </div>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+            <AlertDialogCancel onClick={() => setConfirmationDialog({ type: null, application: null, newStatus: '' })}>{t('common:cancel')}</AlertDialogCancel>
+            <Button variant="outline" onClick={() => handleConfirmationAction(false)}>
+              {confirmationDialog.type === 'reject' && t('rejectWithoutLetter')}
+              {confirmationDialog.type === 'offer' && t('updateStatusOnly')}
+              {confirmationDialog.type === 'interview' && t('updateStatusOnly')}
+            </Button>
+            <AlertDialogAction onClick={() => handleConfirmationAction(true)}>
+              {confirmationDialog.type === 'reject' && t('rejectAndSendLetter')}
+              {confirmationDialog.type === 'offer' && t('generateAndSendOffer')}
+              {confirmationDialog.type === 'interview' && t('generateInvitation')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };

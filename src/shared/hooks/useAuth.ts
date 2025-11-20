@@ -1,12 +1,10 @@
 import { useAuthStore } from '@/app/store/auth';
 
 export const useAuth = () => {
-  const { user, session, loading, role } = useAuthStore(state => ({
-    user: state.user,
-    session: state.session,
-    loading: state.loading,
-    role: state.role,
-  }));
+  const user = useAuthStore((state) => state.user);
+  const session = useAuthStore((state) => state.session);
+  const loading = useAuthStore((state) => state.loading);
+  const role = useAuthStore((state) => state.role);
 
   return { user, session, loading, role, isAuthenticated: !!user };
 };

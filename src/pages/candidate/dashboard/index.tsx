@@ -1,4 +1,3 @@
-import { DashboardLayout } from '@/shared/ui/layouts/DashboardLayout'
 import { useQuery } from '@tanstack/react-query'
 import { getTests } from '@/features/testing-system/api/getTests'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -65,34 +64,32 @@ const CandidateDashboardPage = () => {
     isProfileLoading || isTestsLoading || isAppsLoading || isMessagesLoading
 
   return (
-    <DashboardLayout>
-      <div className="container mx-auto py-10">
-        <h1 className="text-3xl font-bold mb-8">
-          {t('welcome')}, {profile?.full_name || '...'}
-        </h1>
+    <div className="container mx-auto py-10">
+      <h1 className="text-3xl font-bold mb-8">
+        {t('welcome')}, {profile?.full_name || '...'}
+      </h1>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-8">
-            <ActiveApplicationsWidget
-              applications={applications}
-              isLoading={isLoading}
-            />
-            <RecentMessagesWidget messages={messages} isLoading={isLoading} />
-          </div>
-          <div className="space-y-8">
-            <TestingProgressWidget
-              profile={profile}
-              isLoading={isLoading}
-            />
-            <ProfileStatusWidget
-              profile={profile}
-              onVisibilityChange={handleProfileVisibilityChange}
-              isLoading={isLoading}
-            />
-          </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 space-y-8">
+          <ActiveApplicationsWidget
+            applications={applications}
+            isLoading={isLoading}
+          />
+          <RecentMessagesWidget messages={messages} isLoading={isLoading} />
+        </div>
+        <div className="space-y-8">
+          <TestingProgressWidget
+            profile={profile}
+            isLoading={isLoading}
+          />
+          <ProfileStatusWidget
+            profile={profile}
+            onVisibilityChange={handleProfileVisibilityChange}
+            isLoading={isLoading}
+          />
         </div>
       </div>
-    </DashboardLayout>
+    </div>
   )
 }
 

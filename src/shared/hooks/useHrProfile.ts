@@ -22,7 +22,7 @@ async function getHrProfile(userId: string): Promise<HrProfile | null> {
 }
 
 export function useHrProfile() {
-  const { user } = useAuthStore()
+  const user = useAuthStore((state) => state.user)
 
   return useQuery({
     queryKey: ['hrProfile', user?.id],

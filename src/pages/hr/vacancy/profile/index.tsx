@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { IdealProfileGenerator } from '@/features/vacancy-management/ui/IdealProfileGenerator'
 import { IdealProfileEditor } from '@/features/vacancy-management/ui/IdealProfileEditor'
 import { updateVacancyProfile } from '@/features/vacancy-management/api/updateVacancyProfile'
+import { toast } from 'sonner'
 
 const VacancyProfilePage = () => {
   const { id } = useParams<{ id: string }>()
@@ -33,10 +34,10 @@ const VacancyProfilePage = () => {
     mutationFn: updateVacancyProfile,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vacancy', id] })
-      // TODO: Add toast notification for success
+      toast.success(t('profileUpdatedSuccess'))
     },
     onError: () => {
-      // TODO: Add toast notification for error
+      toast.error(t('profileUpdatedError'))
     },
   })
 

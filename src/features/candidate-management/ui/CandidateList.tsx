@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { GenerateInviteLinkDialog } from './GenerateInviteLinkDialog'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Users } from 'lucide-react'
+import { ListContainer, ListItem } from '@/shared/ui/ListTransition'
 
 export function CandidateList() {
   const { t } = useTranslation('candidates')
@@ -74,17 +75,13 @@ export function CandidateList() {
         <GenerateInviteLinkDialog />
       </div>
       {candidates && candidates.length > 0 ? (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          {candidates.map((candidate, index) => (
-            <div
-              key={candidate.id}
-              className="animate-in fade-in slide-in-from-bottom-2"
-              style={{ animationDelay: `${index * 50}ms`, animationFillMode: 'backwards' }}
-            >
+        <ListContainer className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {candidates.map((candidate) => (
+            <ListItem key={candidate.id}>
               <CandidateCard candidate={candidate} />
-            </div>
+            </ListItem>
           ))}
-        </div>
+        </ListContainer>
       ) : (
         <Card className="border-dashed">
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">

@@ -10,5 +10,6 @@
   "viewProfile": "Профиль",
   "newMessageReceived": "Жаңа хабарлама",
   "typing": "жазып жатыр...",
+  "fileTooLarge": "Файл тым үлкен (макс. 10 МБ)",
   "loading": "Чат жүктелуде..."
 }

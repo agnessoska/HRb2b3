@@ -24,5 +24,12 @@
   },
   "chat": {
     "loading": "Loading chat..."
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "talentMarket": "Talent Market",
+    "chat": "Chat",
+    "billing": "Billing",
+    "team": "Team"
   }
 }

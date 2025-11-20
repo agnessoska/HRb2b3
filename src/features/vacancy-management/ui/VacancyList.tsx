@@ -1,5 +1,7 @@
-import { useQuery } from '@tanstack/react-query'
+import { useState } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getVacancies } from '../api/getVacancies'
+import { updateVacancy } from '../api/updateVacancy'
 import { useOrganization } from '@/shared/hooks/useOrganization'
 import { CreateVacancyDialog } from './CreateVacancyDialog'
 import type { Database } from '@/shared/types/database'
@@ -14,6 +16,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Briefcase, MapPin, DollarSign, Users, MoreVertical, Eye, Edit, Archive } from 'lucide-react'
+import { toast } from 'sonner'
+import { ListContainer, ListItem } from '@/shared/ui/ListTransition'
 
 type Vacancy = Database['public']['Tables']['vacancies']['Row']
 
@@ -30,7 +34,13 @@ function getStatusColor(status: string) {
   }
 }
 
-function VacancyCard({ vacancy }: { vacancy: Vacancy }) {
+interface VacancyCardProps {
+  vacancy: Vacancy
+  onEdit: (vacancy: Vacancy) => void
+  onArchive: (vacancy: Vacancy) => void
+}
+
+function VacancyCard({ vacancy, onEdit, onArchive }: VacancyCardProps) {
   const { t } = useTranslation('vacancies')
   const navigate = useNavigate()
   const statusColor = getStatusColor(vacancy.status || 'active')
@@ -61,12 +71,12 @@ function VacancyCard({ vacancy }: { vacancy: Vacancy }) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => console.log('Edit clicked')}>
+              <DropdownMenuItem onClick={() => onEdit(vacancy)}>
                 <Edit className="mr-2 h-4 w-4" />
                 <span>{t('actions.edit')}</span>
               </DropdownMenuItem>
               <DropdownMenuItem
-                onClick={() => console.log('Archive clicked')}
+                onClick={() => onArchive(vacancy)}
                 className="text-destructive"
               >
                 <Archive className="mr-2 h-4 w-4" />
@@ -132,6 +142,9 @@ export function VacancyList() {
   const { t } = useTranslation('vacancies')
   const { data: organization, isLoading: isLoadingOrg } = useOrganization()
   const organizationId = organization?.id
+  const queryClient = useQueryClient()
+  const [vacancyToEdit, setVacancyToEdit] = useState<Vacancy | null>(null)
+  const [isEditOpen, setIsEditOpen] = useState(false)
 
   const {
     data: vacancies,
@@ -142,6 +155,28 @@ export function VacancyList() {
     queryFn: () => getVacancies(organizationId!),
     enabled: !!organizationId,
   })
+
+  const { mutate: archiveVacancy } = useMutation({
+    mutationFn: updateVacancy,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['vacancies', organizationId] })
+      toast.success(t('archivedSuccess'))
+    },
+    onError: () => {
+      toast.error(t('archivedError'))
+    },
+  })
+
+  const handleEdit = (vacancy: Vacancy) => {
+    setVacancyToEdit(vacancy)
+    setIsEditOpen(true)
+  }
+
+  const handleArchive = (vacancy: Vacancy) => {
+    if (confirm(t('confirmArchive'))) {
+      archiveVacancy({ id: vacancy.id, status: 'archived' })
+    }
+  }
 
   if (isLoadingOrg || isLoadingVacancies) {
     return (
@@ -191,17 +226,17 @@ export function VacancyList() {
         <CreateVacancyDialog />
       </div>
       {vacancies && vacancies.length > 0 ? (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          {vacancies.map((vacancy, index) => (
-            <div
-              key={vacancy.id}
-              className="animate-in fade-in slide-in-from-bottom-2"
-              style={{ animationDelay: `${index * 50}ms`, animationFillMode: 'backwards' }}
-            >
-              <VacancyCard vacancy={vacancy} />
-            </div>
+        <ListContainer className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {vacancies.map((vacancy) => (
+            <ListItem key={vacancy.id}>
+              <VacancyCard
+                vacancy={vacancy}
+                onEdit={handleEdit}
+                onArchive={handleArchive}
+              />
+            </ListItem>
           ))}
-        </div>
+        </ListContainer>
       ) : (
         <Card className="border-dashed">
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
@@ -218,6 +253,15 @@ export function VacancyList() {
           </CardContent>
         </Card>
       )}
+
+      <CreateVacancyDialog
+        isOpen={isEditOpen}
+        onOpenChange={(open) => {
+          setIsEditOpen(open)
+          if (!open) setVacancyToEdit(null)
+        }}
+        vacancyToEdit={vacancyToEdit}
+      />
     </div>
   )
 }

@@ -7,10 +7,15 @@ async function getOrganization(userId: string) {
     .from('hr_specialists')
     .select('organization_id')
     .eq('user_id', userId)
-    .single()
+    .maybeSingle()
 
-  if (hrError || !hrSpecialist) {
-    throw new Error('Could not find HR specialist profile.')
+  if (hrError) {
+    console.error('Error fetching HR specialist:', hrError)
+    throw hrError
+  }
+
+  if (!hrSpecialist) {
+    return null
   }
 
   const { data: organization, error: orgError } = await supabase
@@ -20,6 +25,7 @@ async function getOrganization(userId: string) {
     .single()
 
   if (orgError) {
+    console.error('Error fetching organization:', orgError)
     throw orgError
   }
 
@@ -27,11 +33,12 @@ async function getOrganization(userId: string) {
 }
 
 export function useOrganization() {
-  const { user } = useAuthStore()
+  const user = useAuthStore((state) => state.user)
+  const role = useAuthStore((state) => state.role)
 
   return useQuery({
     queryKey: ['organization', user?.id],
     queryFn: () => getOrganization(user!.id),
-    enabled: !!user,
+    enabled: !!user && role === 'hr',
   })
 }

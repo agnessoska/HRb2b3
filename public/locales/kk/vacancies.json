@@ -110,5 +110,7 @@
   "funnel": {
     "noCandidates": "Үміткерлер жоқ",
     "vacancyIdNotFound": "Бос орын ID табылмады"
-  }
+  },
+  "profileUpdatedSuccess": "Бос жұмыс орнының профилі сәтті жаңартылды",
+  "profileUpdatedError": "Бос жұмыс орнының профилін жаңарту кезінде қате пайда болды"
 }

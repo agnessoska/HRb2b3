@@ -2,6 +2,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { supabase } from "@/shared/lib/supabase";
 import type { MarketFilters } from "../ui/TalentMarketFilters";
 import { useAuthStore } from "@/app/store/auth";
+import type { TalentMarketCandidate } from "../types";
 
 const PAGE_LIMIT = 20;
 
@@ -22,8 +23,15 @@ export const useTalentMarket = (filters: MarketFilters) => {
             p_offset: offset
           }
         );
-        if (scoreError) throw scoreError;
-        return scoredCandidates;
+        
+        if (scoreError) {
+          console.error('Error fetching candidate scores:', scoreError);
+          // Return empty array instead of throwing to avoid infinite retry loops causing UI crashes
+          return [];
+        }
+        
+        // Ensure the returned data matches TalentMarketCandidate structure
+        return (scoredCandidates as unknown) as TalentMarketCandidate[];
       }
 
       let query = supabase
@@ -46,6 +54,16 @@ export const useTalentMarket = (filters: MarketFilters) => {
         query = query.gte('tests_completed', filters.minTestsCompleted);
       }
       
+      // Apply sorting
+      if (filters.sortBy === 'date') {
+        query = query.order('created_at', { ascending: false });
+      } else if (filters.sortBy === 'tests') {
+        query = query.order('tests_completed', { ascending: false });
+      } else {
+        // Default sort (compatibility without vacancy -> date, or just date fallback)
+        query = query.order('created_at', { ascending: false });
+      }
+
       const { data: candidates, error } = await query;
       if (error) throw error;
 
@@ -61,7 +79,7 @@ export const useTalentMarket = (filters: MarketFilters) => {
         compatibility_details: null,
         skills: c.skills,
         category: c.category,
-      }));
+      })) as TalentMarketCandidate[];
     },
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => {

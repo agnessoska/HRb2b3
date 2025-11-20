@@ -1,7 +1,6 @@
 import { Link, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { getTestById } from '@/features/testing-system/api/getTestById'
-import { DashboardLayout } from '@/shared/ui/layouts/DashboardLayout'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getTestResultsByCandidate } from '@/features/testing-system/api/getTestResultsByCandidate'
@@ -13,12 +12,14 @@ import { EQResults } from '@/features/testing-system/ui/results/EQResults'
 import { SoftSkillsResults } from '@/features/testing-system/ui/results/SoftSkillsResults'
 import { MotivationResults } from '@/features/testing-system/ui/results/MotivationResults'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Download } from 'lucide-react'
+import { ArrowLeft, Download, RefreshCw } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
-import { format } from 'date-fns'
+import { format, addMonths, isAfter } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { useTranslation } from 'react-i18next'
-
+import html2canvas from 'html2canvas'
+import jsPDF from 'jspdf'
+import { toast } from 'sonner'
 const TestResultsPage = () => {
   const { t } = useTranslation('tests')
   const { testId } = useParams<{ testId: string }>()
@@ -46,29 +47,53 @@ const TestResultsPage = () => {
 
   const currentResult = results?.find((r) => r.test_id === testId)
 
+  const handleDownloadPDF = async () => {
+    const element = document.getElementById('test-results')
+    if (!element) return
+
+    try {
+      toast.info(t('results.generatingPDF'))
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        logging: false
+      })
+      const imgData = canvas.toDataURL('image/png')
+      const pdf = new jsPDF('p', 'mm', 'a4')
+      const pdfWidth = pdf.internal.pageSize.getWidth()
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight)
+      pdf.save(`${test?.name_ru || 'test_result'}.pdf`)
+      toast.success(t('results.pdfDownloaded'))
+    } catch (error) {
+      console.error('PDF generation error:', error)
+      toast.error(t('results.pdfError'))
+    }
+  }
+
+  const canRetake = currentResult?.completed_at &&
+    isAfter(new Date(), addMonths(new Date(currentResult.completed_at), 1))
+
   if (isLoadingTest || isLoadingResults) {
     return (
-      <DashboardLayout>
-        <div className="container mx-auto py-10">
-          <Skeleton className="h-8 w-1/3 mb-4" />
-          <Skeleton className="h-6 w-2/3 mb-8" />
-          <Card>
-            <CardContent className="p-6">
-              <Skeleton className="h-64 w-full" />
-            </CardContent>
-          </Card>
-        </div>
-      </DashboardLayout>
+      <div className="container mx-auto py-10">
+        <Skeleton className="h-8 w-1/3 mb-4" />
+        <Skeleton className="h-6 w-2/3 mb-8" />
+        <Card>
+          <CardContent className="p-6">
+            <Skeleton className="h-64 w-full" />
+          </CardContent>
+        </Card>
+      </div>
     )
   }
 
   if (isErrorTest || isErrorResults || !test) {
     return (
-      <DashboardLayout>
-        <div className="container mx-auto py-10 text-center">
-          <p className="text-destructive">{t('results.failedToLoad')}</p>
-        </div>
-      </DashboardLayout>
+      <div className="container mx-auto py-10 text-center">
+        <p className="text-destructive">{t('results.failedToLoad')}</p>
+      </div>
     )
   }
 
@@ -100,9 +125,8 @@ const TestResultsPage = () => {
   }
 
   return (
-    <DashboardLayout>
-      <div className="container mx-auto py-10 space-y-8">
-        <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div className="container mx-auto py-10 space-y-8">
+      <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <Button asChild variant="outline" className="self-start">
             <Link to="/candidate/dashboard">
               <ArrowLeft className="mr-2 h-4 w-4" />
@@ -110,15 +134,22 @@ const TestResultsPage = () => {
             </Link>
           </Button>
           <div className="flex items-center gap-2 self-start md:self-center">
-            <Button variant="outline">
+            <Button variant="outline" onClick={handleDownloadPDF}>
               <Download className="mr-2 h-4 w-4" />
               {t('results.downloadPDF')}
             </Button>
-            <Button variant="secondary">{t('results.retakeTest')}</Button>
+            {canRetake && (
+              <Button variant="secondary" asChild>
+                 <Link to={`/candidate/test/${testId}`}>
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                    {t('results.retakeTest')}
+                 </Link>
+              </Button>
+            )}
           </div>
         </header>
 
-        <main id="test-results" className="space-y-6">
+        <main id="test-results" className="space-y-6 bg-background p-4 rounded-lg">
           <Card>
             <CardHeader>
               <CardTitle className="text-3xl font-bold">{test.name_ru}</CardTitle>
@@ -137,8 +168,7 @@ const TestResultsPage = () => {
 
           {renderTestResult()}
         </main>
-      </div>
-    </DashboardLayout>
+    </div>
   )
 }
 

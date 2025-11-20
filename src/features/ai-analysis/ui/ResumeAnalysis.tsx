@@ -17,6 +17,8 @@ import { useOrganization } from '@/shared/hooks/useOrganization'
 import { useAnalyzeResumes } from '../api/analyzeResumes'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
+import { AIBorder } from '@/shared/ui/AIBorder'
+import { AIStreamingText } from '@/shared/ui/AIStreamingText'
 
 interface AnalysisResult {
   id: string;
@@ -110,27 +112,31 @@ export const ResumeAnalysis = () => {
   if (analysisResult) {
     return (
       <div className="space-y-6">
-        <Card>
-          <CardHeader>
-            <div className="flex justify-between items-center">
-              <div>
-                <CardTitle>{t('resumeAnalysis.result.title')}</CardTitle>
-                <CardDescription>
-                  {t('resumeAnalysis.result.description', { date: new Date(analysisResult.created_at).toLocaleString() })}
-                </CardDescription>
+        <AIBorder>
+          <Card className="border-none shadow-none">
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <div>
+                  <CardTitle>
+                    <AIStreamingText text={t('resumeAnalysis.result.title')} isStreaming={false} />
+                  </CardTitle>
+                  <CardDescription>
+                    {t('resumeAnalysis.result.description', { date: new Date(analysisResult.created_at).toLocaleString() })}
+                  </CardDescription>
+                </div>
+                <Button onClick={resetForm}>
+                  {t('resumeAnalysis.result.newAnalysisButton')}
+                </Button>
               </div>
-              <Button onClick={resetForm}>
-                {t('resumeAnalysis.result.newAnalysisButton')}
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div
-              className="prose dark:prose-invert max-w-none"
-              dangerouslySetInnerHTML={{ __html: analysisResult.content_html }}
-            />
-          </CardContent>
-        </Card>
+            </CardHeader>
+            <CardContent>
+              <div
+                className="prose dark:prose-invert max-w-none"
+                dangerouslySetInnerHTML={{ __html: analysisResult.content_html }}
+              />
+            </CardContent>
+          </Card>
+        </AIBorder>
       </div>
     )
   }

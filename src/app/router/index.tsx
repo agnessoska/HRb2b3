@@ -18,6 +18,7 @@ import PaymentSuccessPage from '@/pages/hr/payment/success'
 import PaymentCancelPage from '@/pages/hr/payment/cancel'
 import BillingPage from '@/pages/hr/billing'
 import TeamPage from '@/pages/hr/team'
+import { PageTransition } from '@/shared/ui/PageTransition'
 
 export const router = createBrowserRouter([
   {
@@ -29,17 +30,29 @@ export const router = createBrowserRouter([
         children: [
           {
             path: 'login',
-            element: <LoginPage />,
+            element: (
+              <PageTransition>
+                <LoginPage />
+              </PageTransition>
+            ),
           },
         ],
       },
       {
         path: 'payment/success',
-        element: <PaymentSuccessPage />,
+        element: (
+          <PageTransition>
+            <PaymentSuccessPage />
+          </PageTransition>
+        ),
       },
       {
         path: 'payment/cancel',
-        element: <PaymentCancelPage />,
+        element: (
+          <PageTransition>
+            <PaymentCancelPage />
+          </PageTransition>
+        ),
       },
     ],
   },
@@ -53,55 +66,107 @@ export const router = createBrowserRouter([
       },
       {
         path: 'hr/dashboard',
-        element: <HRDashboardPage />,
+        element: (
+          <PageTransition>
+            <HRDashboardPage />
+          </PageTransition>
+        ),
       },
       {
         path: 'hr/vacancy/:id/profile',
-        element: <VacancyProfilePage />,
+        element: (
+          <PageTransition>
+            <VacancyProfilePage />
+          </PageTransition>
+        ),
       },
       {
         path: 'hr/vacancy/:id/funnel',
-        element: <VacancyFunnelPage />,
+        element: (
+          <PageTransition>
+            <VacancyFunnelPage />
+          </PageTransition>
+        ),
       },
       {
         path: 'hr/candidate/:id',
-        element: <CandidateProfilePage />,
+        element: (
+          <PageTransition>
+            <CandidateProfilePage />
+          </PageTransition>
+        ),
       },
       {
         path: 'hr/talent-market',
-        element: <TalentMarketPage />,
+        element: (
+          <PageTransition>
+            <TalentMarketPage />
+          </PageTransition>
+        ),
       },
       {
         path: 'hr/chat',
-        element: <HRChatPage />,
+        element: (
+          <PageTransition>
+            <HRChatPage />
+          </PageTransition>
+        ),
       },
       {
         path: 'hr/buy-tokens',
-        element: <BuyTokensPage />,
+        element: (
+          <PageTransition>
+            <BuyTokensPage />
+          </PageTransition>
+        ),
       },
       {
         path: 'hr/billing',
-        element: <BillingPage />,
+        element: (
+          <PageTransition>
+            <BillingPage />
+          </PageTransition>
+        ),
       },
       {
         path: 'hr/team',
-        element: <TeamPage />,
+        element: (
+          <PageTransition>
+            <TeamPage />
+          </PageTransition>
+        ),
       },
       {
         path: 'candidate/dashboard',
-        element: <CandidateDashboardPage />,
+        element: (
+          <PageTransition>
+            <CandidateDashboardPage />
+          </PageTransition>
+        ),
       },
       {
         path: 'candidate/test/:testId',
-        element: <TestPassingPage />,
+        element: (
+          <PageTransition>
+            <TestPassingPage />
+          </PageTransition>
+        ),
       },
       {
         path: 'candidate/test/:testId/results',
-        element: <TestResultsPage />,
+        element: (
+          <PageTransition>
+            <TestResultsPage />
+          </PageTransition>
+        ),
       },
       {
         path: 'candidate/chat',
-        element: <CandidateChatPage />,
+        element: (
+          <PageTransition>
+            <CandidateChatPage />
+          </PageTransition>
+        ),
       },
     ],
   },
