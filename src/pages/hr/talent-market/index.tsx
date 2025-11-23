@@ -88,7 +88,7 @@ const TalentMarketPage = () => {
                 <TalentCard
                   key={candidate.candidate_id}
                   candidate={candidate}
-                  isAcquired={acquiredCandidates?.includes(candidate.candidate_id) || false}
+                  isAcquired={acquiredCandidates?.includes(candidate.candidate_id || '') || false}
                   onAcquire={() => setCandidateToAcquire(candidate)}
                 />
               ))}
@@ -120,7 +120,7 @@ const TalentMarketPage = () => {
       {candidateToAcquire && (
         <AcquireCandidateDialog
           candidate={candidateToAcquire}
-          vacancyId={filters.vacancyId}
+          vacancyId={filters.vacancyId || ''}
           isOpen={!!candidateToAcquire}
           onClose={() => setCandidateToAcquire(null)}
           onSuccess={() => {

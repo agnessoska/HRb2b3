@@ -25,7 +25,6 @@ export const useGetOrganizationInvitations = () => {
     queryFn: async () => {
       if (!organization?.id) return []
 
-      // @ts-expect-error: New RPC function not yet in generated types
       const { data, error } = await supabase.rpc('get_organization_invitations', {
         p_organization_id: organization.id,
       })

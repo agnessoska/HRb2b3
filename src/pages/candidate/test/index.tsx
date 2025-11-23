@@ -217,7 +217,7 @@ const TestPassingPage = () => {
 
       <div className="flex-1 overflow-auto">
         <div className="max-w-4xl mx-auto p-6 space-y-6">
-          {test.test_questions.sort((a, b) => a.question_number - b.question_number).map((question) => (
+          {test.test_questions.sort((a: TestQuestion, b: TestQuestion) => a.question_number - b.question_number).map((question: TestQuestion) => (
             <div key={question.id} ref={(el) => { questionRefs.current[question.question_number] = el; }}>
               {test.test_type === 'scale' && <QuestionCard question={question as TestQuestion & { options: { ru: string[], kk: string[], en: string[], values: number[] } }} questionNumber={question.question_number} totalQuestions={totalQuestions} selectedValue={answers[question.question_number]} onAnswer={(value) => handleAnswer(question.question_number, value)} />}
               {test.test_type === 'dichotomy' && <MBTIQuestionCard question={question as TestQuestion & { options: { ru: string[], kk: string[], en: string[], values: number[] } }} questionNumber={question.question_number} totalQuestions={totalQuestions} selectedValue={answers[question.question_number]} onAnswer={(value) => handleAnswer(question.question_number, value)} />}

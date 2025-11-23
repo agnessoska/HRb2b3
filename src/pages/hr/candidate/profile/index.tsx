@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useGetCandidateById } from '@/features/candidate-management/api/getCandidateById'
 import { Button } from '@/components/ui/button'
@@ -12,6 +12,7 @@ import { useOrganization } from '@/shared/hooks/useOrganization'
 import { useGetFullAnalysisByCandidate } from '@/features/ai-analysis/api/getFullAnalysisByCandidate'
 import { useGetGeneratedDocumentsByCandidate } from '@/features/ai-analysis/api/getGeneratedDocuments'
 import { GenerateDocumentDialog } from '@/features/ai-analysis/ui/GenerateDocumentDialog'
+import type { DocumentType } from '@/features/ai-analysis/api/generateDocument'
 import { marked } from 'marked'
 import { useTranslation } from 'react-i18next'
 
@@ -38,6 +39,10 @@ export default function CandidateProfilePage() {
     data: documents,
     isLoading: isLoadingDocuments,
   } = useGetGeneratedDocumentsByCandidate(id!, organization?.id)
+
+  const [isDocumentDialogOpen, setIsDocumentDialogOpen] = useState(false)
+  const [documentType, setDocumentType] = useState<DocumentType>('interview_invitation')
+  const [additionalInfo, setAdditionalInfo] = useState('')
 
   const analysisHtml = useMemo(() => {
     if (analysis?.content_markdown) {
@@ -162,12 +167,20 @@ export default function CandidateProfilePage() {
                   {t('profile.actionsCard.analysisDisabledTooltip')}
                 </p>
               )}
-              <GenerateDocumentDialog>
-                <Button className="w-full gap-2">
-                  <PlusCircle className="h-4 w-4" />
-                  {t('profile.actionsCard.generateDocument')}
-                </Button>
-              </GenerateDocumentDialog>
+              <Button className="w-full gap-2" onClick={() => setIsDocumentDialogOpen(true)}>
+                <PlusCircle className="h-4 w-4" />
+                {t('profile.actionsCard.generateDocument')}
+              </Button>
+              <GenerateDocumentDialog
+                isOpen={isDocumentDialogOpen}
+                onOpenChange={setIsDocumentDialogOpen}
+                candidateId={id!}
+                vacancyId={documents?.[0]?.vacancy_id || undefined}
+                documentType={documentType}
+                onDocumentTypeChange={setDocumentType}
+                additionalInfo={additionalInfo}
+                onAdditionalInfoChange={setAdditionalInfo}
+              />
               <GenerateStructuredInterviewDialog
                 candidateId={id!}
                 // TODO: Pass a relevant vacancy ID. Using a placeholder for now.

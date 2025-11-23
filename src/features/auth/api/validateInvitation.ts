@@ -28,7 +28,6 @@ export const useValidateInvitation = (token: string | null) => {
       }
 
       // 2. If not HR, try validate as Candidate invitation
-      // @ts-expect-error: New RPC function not yet in generated types
       const { data: candidateData, error: candidateError } = await supabase.rpc('validate_candidate_invitation_token', {
         p_token: token,
       })

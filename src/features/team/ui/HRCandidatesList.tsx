@@ -39,7 +39,6 @@ export const HRCandidatesList = ({ hrId }: HRCandidatesListProps) => {
   const { data: candidates, isLoading } = useQuery({
     queryKey: ['hr-candidates', hrId],
     queryFn: async () => {
-      // @ts-expect-error: RPC function not yet in generated types
       const { data, error } = await supabase.rpc('get_candidates_by_hr', {
         p_hr_id: hrId,
       })

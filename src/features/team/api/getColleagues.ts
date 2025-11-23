@@ -19,7 +19,6 @@ export const useGetColleagues = () => {
     queryFn: async () => {
       if (!organization?.id) return []
 
-      // @ts-expect-error: RPC function not yet in generated types
       const { data, error } = await supabase.rpc('get_colleagues_with_stats', {
         p_organization_id: organization.id,
       })

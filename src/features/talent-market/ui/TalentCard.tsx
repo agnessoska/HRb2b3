@@ -102,7 +102,7 @@ export const TalentCard = ({ candidate, isAcquired, onAcquire }: TalentCardProps
                 <p className="text-sm text-muted-foreground mb-1">{t('card.overallCompatibility')}</p>
                 <p className={cn(
                   "text-4xl font-bold",
-                  getCompatibilityColor(candidate.overall_compatibility)
+                  getCompatibilityColor(candidate.overall_compatibility || 0)
                 )}>
                   {candidate.overall_compatibility}%
                 </p>
