@@ -46,6 +46,11 @@
       "title": "Analysis Result",
       "description": "Analyzed on {{date}}",
       "newAnalysisButton": "Start New Analysis"
+    },
+    "history": {
+      "title": "Analysis History",
+      "candidatesCount": "Candidates: {{count}}",
+      "empty": "Analysis history is empty"
     }
   },
   "fullAnalysis": {

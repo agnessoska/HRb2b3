@@ -13,6 +13,7 @@ import {
 import { useGenerateStructuredInterview } from '../api/generateStructuredInterview'
 import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { AIGenerationModal } from '@/shared/ui/AIGenerationModal'
 
 interface GenerateStructuredInterviewDialogProps {
   candidateId: string
@@ -54,8 +55,16 @@ export function GenerateStructuredInterviewDialog({
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
+    <>
+      <AIGenerationModal
+        isOpen={isPending}
+        onOpenChange={() => {}}
+        isPending={isPending}
+        title={t('generateInterview.processingTitle', 'Генерация интервью')}
+        description={t('generateInterview.processingDescription', 'ИИ составляет вопросы для интервью...')}
+      />
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogTrigger asChild>
         <Button disabled={disabled || isPending}>
           {isPending ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -79,7 +88,8 @@ export function GenerateStructuredInterviewDialog({
             {t('generateInterview.confirm')}
           </Button>
         </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }

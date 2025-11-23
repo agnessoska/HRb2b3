@@ -13,18 +13,18 @@ export default function HRDashboardPage() {
   const [activeTab, setActiveTab] = useState('vacancies')
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <GlassCard className="mb-8 p-6 border-none shadow-md">
-        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-600">
+    <div className="space-y-6 sm:space-y-8">
+      <GlassCard className="p-6 border-none shadow-md">
+        <h1 className="text-2xl sm:text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-600">
           {t('title')}
         </h1>
-        <p className="mt-2 text-muted-foreground text-base sm:text-lg">
+        <p className="mt-2 text-muted-foreground text-sm sm:text-lg">
           {t('description')}
         </p>
       </GlassCard>
 
       {/* Mobile View: Select */}
-      <div className="sm:hidden mb-6">
+      <div className="sm:hidden">
         <Select value={activeTab} onValueChange={setActiveTab}>
           <SelectTrigger>
             <SelectValue />

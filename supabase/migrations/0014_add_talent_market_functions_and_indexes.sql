@@ -301,7 +301,7 @@ BEGIN
   -- Get the HR's organization
   SELECT organization_id INTO v_organization_id
   FROM hr_specialists
-  WHERE user_id = p_hr_specialist_id;
+  WHERE id = p_hr_specialist_id;
   
   IF v_organization_id IS NULL THEN
     RETURN jsonb_build_object('success', false, 'error', 'HR specialist not found');

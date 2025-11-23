@@ -240,7 +240,7 @@ serve(async (req: Request) => {
     console.log(`[${OPERATION_TYPE}] Step 4: Fetching vacancy details.`);
     const { data: vacancies, error: vacanciesError } = await supabaseAdmin
       .from('vacancies')
-      .select('title, description, requirements')
+      .select('title, description, requirements, salary_min, salary_max, currency')
       .in('id', payload.vacancy_ids)
 
     if (vacanciesError) throw new Error(`Failed to fetch vacancies: ${vacanciesError.message}`)
@@ -248,9 +248,13 @@ serve(async (req: Request) => {
     console.log(`[${OPERATION_TYPE}] Step 4 successful. Fetched details for ${vacancies.length} vacancies.`);
 
     const vacanciesDescription = vacancies
-      .map((v: { title: string; description: string | null; requirements: string | null }) => 
-        `--- VACANCY: ${v.title} ---\nDescription: ${v.description || 'Нет описания.'}\nRequirements: ${v.requirements || 'Нет требований.'}\n---`
-      )
+      .map((v: { title: string; description: string | null; requirements: string | null; salary_min: number | null; salary_max: number | null; currency: string }) => {
+        let salaryInfo = 'Salary: Not specified';
+        if (v.salary_min || v.salary_max) {
+            salaryInfo = `Salary: ${v.salary_min || 0} - ${v.salary_max || 'unlimited'} ${v.currency}`;
+        }
+        return `--- VACANCY: ${v.title} ---\n${salaryInfo}\nDescription: ${v.description || 'Нет описания.'}\nRequirements: ${v.requirements || 'Нет требований.'}\n---`;
+      })
       .join('\n\n')
 
     console.log(`[${OPERATION_TYPE}] Step 5: Parsing resumes from base64.`);
@@ -279,8 +283,25 @@ serve(async (req: Request) => {
     const { response: aiResponse, inputTokens, outputTokens } = await callAI(aiConfig, finalPrompt)
     console.log(`[${OPERATION_TYPE}] Step 8 successful. Received response from AI.`);
 
-    console.log(`[${OPERATION_TYPE}] Step 9: Converting markdown to HTML.`);
-    const htmlContent = await marked.parse(aiResponse);
+    console.log(`[${OPERATION_TYPE}] Step 9: Parsing JSON response.`);
+    let analysisData: any = null;
+    let htmlContent = '';
+    
+    try {
+      // Пытаемся найти JSON блок, если он обернут в markdown
+      const jsonMatch = aiResponse.match(/```json\n([\s\S]*?)\n```/) || aiResponse.match(/```\n([\s\S]*?)\n```/);
+      const jsonString = jsonMatch ? jsonMatch[1] : aiResponse;
+      
+      analysisData = JSON.parse(jsonString);
+      
+      // Генерируем простой HTML для обратной совместимости (если нужно)
+      // Но основным источником истины теперь будет analysisData
+      htmlContent = await marked.parse(aiResponse); // Сохраняем оригинальный ответ как есть для истории
+    } catch (e) {
+      console.warn(`[${OPERATION_TYPE}] Failed to parse JSON from AI response. Fallback to raw text.`, e);
+      // Если не удалось распарсить JSON, сохраняем как есть, analysisData останется null
+      htmlContent = await marked.parse(aiResponse);
+    }
     console.log(`[${OPERATION_TYPE}] Step 9 successful.`);
 
     console.log(`[${OPERATION_TYPE}] Step 10: Saving result to database.`);
@@ -292,7 +313,8 @@ serve(async (req: Request) => {
         vacancy_ids: payload.vacancy_ids,
         resume_count: payload.resumes.length,
         content_markdown: aiResponse,
-        content_html: htmlContent, 
+        content_html: htmlContent,
+        analysis_data: analysisData
       })
       .select()
       .single()

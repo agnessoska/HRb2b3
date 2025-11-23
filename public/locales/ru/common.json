@@ -7,12 +7,18 @@
   "edit": "Редактировать",
   "create": "Создать",
   "submit": "Отправить",
+  "add": "Добавить",
   "loading": "Загрузка...",
   "error": "Произошла ошибка",
   "success": "Успешно",
+  "done": "Готово",
   "close": "Закрыть",
   "confirm": "Подтвердить",
+  "actions": "Действия",
+  "soon": "Скоро будет",
   "appName": "HR Platform",
+  "buyTokens": "Купить токены",
+  "balance": "Баланс",
   "theme": {
     "toggle": "Переключить тему",
     "light": "Светлая",
@@ -25,11 +31,57 @@
   "chat": {
     "loading": "Загрузка чата..."
   },
+  "ai": {
+    "resumeAnalysis": {
+      "processingTitle": "Анализ резюме",
+      "processingDescription": "ИИ анализирует резюме и сопоставляет их с вакансиями..."
+    },
+    "generateFullAnalysis": {
+      "processingTitle": "Генерация полного анализа",
+      "processingDescription": "ИИ анализирует профиль кандидата и результаты тестов..."
+    },
+    "generateDocument": {
+      "processingTitle": "Генерация документа",
+      "processingDescription": "ИИ составляет документ на основе профиля кандидата и вакансии..."
+    },
+    "generateInterview": {
+      "processingTitle": "Генерация интервью",
+      "processingDescription": "ИИ составляет вопросы для интервью..."
+    },
+    "compareCandidates": {
+      "processingTitle": "Сравнение кандидатов",
+      "processingDescription": "ИИ сравнивает выбранных кандидатов..."
+    },
+    "idealProfile": {
+      "processingTitle": "Генерация идеального профиля",
+      "processingDescription": "ИИ анализирует описание вакансии и создает профиль..."
+    }
+  },
+  "aiModal": {
+    "doNotClose": "Пожалуйста, не закрывайте окно",
+    "steps": {
+      "initializing": "Инициализация...",
+      "analyzing": "Анализ данных...",
+      "processing": "Обработка...",
+      "generating": "Генерация ответа...",
+      "finalizing": "Завершение..."
+    }
+  },
   "nav": {
     "dashboard": "Дашборд",
     "talentMarket": "Рынок талантов",
     "chat": "Чат",
     "billing": "Биллинг",
     "team": "Команда"
-  }
+  },
+  "settings": "Настройки",
+  "profile": "Профиль",
+  "signOut": "Выйти",
+  "hrPlatform": "HR Платформа",
+  "organizationSettings": "Настройки организации",
+  "organizationSettingsDesc": "Управление профилем организации и брендингом",
+  "logo": "Логотип",
+  "logoHelp": "Рекомендуемый размер: 512x512px. Макс. размер: 2MB.",
+  "organizationName": "Название организации",
+  "saveChanges": "Сохранить изменения"
 }

@@ -1,73 +1,70 @@
-# React + TypeScript + Vite
+# HR Platform v2.0
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Это комплексная платформа для автоматизации процессов подбора персонала с интеграцией психометрического тестирования и AI-анализа.
 
-Currently, two official plugins are available:
+## Технологический стек
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Frontend**: React 19, TypeScript 5, Vite, Tailwind CSS 3.4.17
+- **UI**: shadcn/ui
+- **State Management**: Zustand, TanStack Query
+- **Routing**: React Router
+- **Backend**: Supabase (Auth, Database, Storage, Edge Functions)
 
-## React Compiler
+## Запуск проекта на новом компьютере
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Шаг 1: Предварительные требования
 
-## Expanding the ESLint configuration
+Перед началом убедитесь, что на вашем компьютере установлены:
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+-   **Node.js**: Рекомендуется версия v18.x или выше. Вы можете скачать его с [официального сайта Node.js](https://nodejs.org/).
+-   **Git**: Для клонирования репозитория.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Шаг 2: Клонирование репозитория
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+Сначала необходимо клонировать репозиторий с GitHub на ваш локальный компьютер.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+git clone https://github.com/agnessoska/HRb2b-2.git
+cd HRb2b-2
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Шаг 3: Установка зависимостей
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Проект использует `npm` в качестве менеджера пакетов, который устанавливается вместе с Node.js. Выполните следующую команду для установки всех необходимых зависимостей:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
 ```
+
+> **Примечание:** Если вы получаете ошибку, что команда `npm` не распознана (`npm is not recognized...`), это означает, что Node.js не установлен или не был добавлен в системный `PATH`. Стандартный установщик Node.js для Windows автоматически добавляет его в `PATH`, поэтому такая проблема возникает редко. В этом случае, самый простой способ — переустановить Node.js, убедившись, что при установке выбрана опция "Add to PATH".
+
+### Шаг 3: Настройка переменных окружения
+
+Для работы с Supabase необходимо настроить переменные окружения.
+
+1.  Создайте копию файла `.env.example` и назовите ее `.env.local`:
+    ```bash
+    cp .env.example .env.local
+    ```
+2.  Откройте файл `.env.local` и вставьте ваши ключи из проекта Supabase:
+    ```
+    VITE_SUPABASE_URL=YOUR_SUPABASE_URL
+    VITE_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
+    ```
+
+### Шаг 4: Запуск dev-сервера
+
+После установки зависимостей и настройки переменных окружения, вы можете запустить проект в режиме разработки:
+
+```bash
+npm run dev
+```
+
+Проект будет доступен по адресу `http://localhost:5173` (или на другом порту, если 5173 занят).
+
+## Доступные скрипты
+
+- `npm run dev`: Запуск сервера для разработки.
+- `npm run build`: Сборка проекта для production.
+- `npm run lint`: Запуск ESLint для проверки кода.
+- `npm run preview`: Локальный предпросмотр production-сборки.

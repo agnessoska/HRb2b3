@@ -18,6 +18,7 @@ import PaymentSuccessPage from '@/pages/hr/payment/success'
 import PaymentCancelPage from '@/pages/hr/payment/cancel'
 import BillingPage from '@/pages/hr/billing'
 import TeamPage from '@/pages/hr/team'
+import HRProfilePage from '@/pages/hr/profile'
 import { PageTransition } from '@/shared/ui/PageTransition'
 
 export const router = createBrowserRouter([
@@ -133,6 +134,14 @@ export const router = createBrowserRouter([
         element: (
           <PageTransition>
             <TeamPage />
+          </PageTransition>
+        ),
+      },
+      {
+        path: 'hr/profile',
+        element: (
+          <PageTransition>
+            <HRProfilePage />
           </PageTransition>
         ),
       },

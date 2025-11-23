@@ -46,6 +46,11 @@
       "title": "Результат анализа",
       "description": "Проанализировано {{date}}",
       "newAnalysisButton": "Начать новый анализ"
+    },
+    "history": {
+      "title": "История анализов",
+      "candidatesCount": "Кандидатов: {{count}}",
+      "empty": "История анализов пуста"
     }
   },
   "fullAnalysis": {

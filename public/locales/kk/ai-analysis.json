@@ -46,6 +46,11 @@
       "title": "Талдау нәтижесі",
       "description": "{{date}} күні талданды",
       "newAnalysisButton": "Жаңа талдауды бастау"
+    },
+    "history": {
+      "title": "Талдау тарихы",
+      "candidatesCount": "Кандидаттар: {{count}}",
+      "empty": "Талдау тарихы бос"
     }
   },
   "fullAnalysis": {

@@ -225,7 +225,7 @@ serve(async (req: Request) => {
     // 3. Fetch Vacancy Data
     const { data: vacancies, error: vacanciesError } = await supabaseAdmin
       .from('vacancies')
-      .select('title, description')
+      .select('title, description, salary_min, salary_max, currency')
       .in('id', payload.vacancy_ids)
     if (vacanciesError) throw new Error(`Failed to fetch vacancies: ${vacanciesError.message}`)
 
@@ -234,10 +234,16 @@ serve(async (req: Request) => {
 
     // 5. Build Prompt
     type TestResult = { test_id: string; normalized_scores: unknown; detailed_result: string | null }
-    type Vacancy = { title: string; description: string | null }
+    type Vacancy = { title: string; description: string | null; salary_min: number | null; salary_max: number | null; currency: string }
 
     const testResultsText = testResults.map((r: TestResult) => `${r.test_id}: ${JSON.stringify(r.normalized_scores || r.detailed_result)}`).join('\n')
-    const vacanciesText = vacancies.map((v: Vacancy) => `Title: ${v.title}\nDescription: ${v.description}`).join('\n\n')
+    const vacanciesText = vacancies.map((v: Vacancy) => {
+        let salaryInfo = '';
+        if (v.salary_min || v.salary_max) {
+            salaryInfo = `\nSalary: ${v.salary_min || 0} - ${v.salary_max || 'unlimited'} ${v.currency}`;
+        }
+        return `Title: ${v.title}${salaryInfo}\nDescription: ${v.description}`;
+    }).join('\n\n')
 
     const finalPrompt = aiConfig.prompt_text
       .replace('{full_name}', candidate.full_name || 'N/A')

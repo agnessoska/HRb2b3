@@ -3,7 +3,9 @@ import { supabase } from '@/shared/lib/supabase';
 export const searchCandidatesNotInFunnel = async (
   vacancyId: string,
   organizationId: string,
-  query: string
+  query: string = '',
+  pageParam: number = 0,
+  pageSize: number = 20
 ) => {
   const { data: applications, error: applicationsError } = await supabase
     .from('applications')
@@ -14,15 +16,20 @@ export const searchCandidatesNotInFunnel = async (
 
   const candidateIdsInFunnel = applications.map(app => app.candidate_id);
 
-  let rpcQuery = supabase
-    .rpc('get_organization_candidates', { p_organization_id: organizationId })
-    .ilike('full_name', `%${query}%`);
+  let rpcQuery = supabase.rpc('get_organization_candidates', {
+    p_organization_id: organizationId,
+  });
+
+  if (query) {
+    rpcQuery = rpcQuery.ilike('full_name', `%${query}%`);
+  }
 
   if (candidateIdsInFunnel.length > 0) {
     rpcQuery = rpcQuery.not('id', 'in', `(${candidateIdsInFunnel.join(',')})`);
   }
 
-  const { data, error } = await rpcQuery.limit(10);
+  const { data, error } = await rpcQuery
+    .range(pageParam * pageSize, (pageParam + 1) * pageSize - 1);
 
   if (error) throw error;
   return data;

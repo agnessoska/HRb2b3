@@ -1,14 +1,12 @@
 {
+  "generate_invite_link": "Generate Link",
+  "empty": {
+    "title": "No candidates yet",
+    "description": "Invite candidates using a link or add them manually."
+  },
   "list": {
     "title": "Candidates",
-    "generateInvite": "Generate Invite Link",
-    "inviteDialog": {
-      "title": "Invite Candidate",
-      "description": "The link is valid for 24 hours. Cost: 500 tokens.",
-      "copy": "Copy",
-      "copied": "Copied!",
-      "close": "Close"
-    }
+    "description": "Manage your candidate database and invite new ones."
   },
   "card": {
     "testsCompleted": "{{count}} of 6 tests completed",
@@ -17,7 +15,10 @@
       "expiring": "Expiring soon",
       "expired": "Outdated"
     },
-    "viewProfile": "Profile"
+    "viewProfile": "Profile",
+    "testing_progress": "Testing Progress",
+    "profile_button": "Profile",
+    "assign_button": "Assign"
   },
   "profile": {
     "title": "Candidate Profile",
@@ -55,13 +56,25 @@
     "notAvailable": "N/A",
     "candidates": "Candidates"
   },
-  "invite": {
+  "invite_dialog": {
+    "title": "Invite Candidate",
+    "description": "Create a unique link to invite a candidate. The candidate will be able to register and automatically link to your organization.",
+    "initial_prompt": "Click the button below to generate a link",
+    "generate_button": "Generate Link",
+    "generating_button": "Generating...",
+    "success_prompt": "Link successfully generated!",
     "shareLink": "Share this link with candidates to invite them.",
-    "cost": "Cost:",
-    "balance": "Balance:",
+    "cost": "Cost",
+    "balance": "Balance",
     "tokens": "tokens",
     "costPerLink": "Cost: 500 tokens per link",
     "done": "Done",
-    "description": "View and manage your candidate pool"
+    "copy_button": "Copy",
+    "close_button": "Close",
+    "success_toast": "Link created. {{tokens}} tokens deducted.",
+    "errors": {
+      "insufficient_tokens_title": "Insufficient tokens",
+      "insufficient_tokens_desc": "Your organization does not have enough tokens to generate a link."
+    }
   }
 }

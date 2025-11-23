@@ -240,7 +240,7 @@ serve(async (req: Request) => {
     if(analysesError) throw new Error(`Failed to fetch candidate analyses: ${analysesError.message}`);
     if(!analyses || analyses.length !== payload.candidate_ids.length) throw new Error('Could not find full analysis for all specified candidates.');
     
-    const candidateAnalysesText = analyses.map((a: { candidate_id: string; content_markdown: string | null }, index: number) => 
+    const candidateAnalysesText = analyses.map((a: { candidate_id: string; content_markdown: string | null }, index: number) =>
         `--- CANDIDATE ${index + 1} ---\n${a.content_markdown || 'No analysis content.'}\n---`
     ).join('\n\n');
     console.log(`[${OPERATION_TYPE}] Step 5 successful. Fetched ${analyses.length} analyses.`);

@@ -2,14 +2,14 @@ import { useState, useMemo } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { FileSearch, UploadCloud, FileText, X, ChevronsUpDown, Check, Loader2 } from 'lucide-react'
+import { FileSearch, UploadCloud, FileText, X, ChevronsUpDown, Check, Loader2, Briefcase, Sparkles, Languages, FileType2 } from 'lucide-react'
 import { useGetVacancies } from '@/features/vacancy-management/api/getVacancies'
 import { useSettingsStore } from '@/app/store/settings'
 import { useHrProfile } from '@/shared/hooks/useHrProfile'
@@ -17,14 +17,18 @@ import { useOrganization } from '@/shared/hooks/useOrganization'
 import { useAnalyzeResumes } from '../api/analyzeResumes'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
-import { AIBorder } from '@/shared/ui/AIBorder'
-import { AIStreamingText } from '@/shared/ui/AIStreamingText'
+import { AIGenerationModal } from '@/shared/ui/AIGenerationModal'
+import { GlassCard } from '@/shared/ui/GlassCard'
+import { ResumeAnalysisHistory } from './ResumeAnalysisHistory'
+import { ResumeAnalysisResult } from './ResumeAnalysisResult'
 
 interface AnalysisResult {
   id: string;
-  content_html: string;
-  content_markdown: string;
+  content_html: string | null;
+  content_markdown: string | null;
   created_at: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  analysis_data: any;
 }
 
 export const ResumeAnalysis = () => {
@@ -69,13 +73,6 @@ export const ResumeAnalysis = () => {
     maxSize: 5 * 1024 * 1024, // 5MB
   })
 
-  const resetForm = () => {
-    setFiles([])
-    setSelectedVacancies([])
-    setAdditionalNotes('')
-    setAnalysisResult(null)
-  }
-
   const removeFile = (fileName: string) => {
     setFiles(files.filter(file => file.name !== fileName))
   }
@@ -111,58 +108,67 @@ export const ResumeAnalysis = () => {
 
   if (analysisResult) {
     return (
-      <div className="space-y-6">
-        <AIBorder>
-          <Card className="border-none shadow-none">
-            <CardHeader>
-              <div className="flex justify-between items-center">
-                <div>
-                  <CardTitle>
-                    <AIStreamingText text={t('resumeAnalysis.result.title')} isStreaming={false} />
-                  </CardTitle>
-                  <CardDescription>
-                    {t('resumeAnalysis.result.description', { date: new Date(analysisResult.created_at).toLocaleString() })}
-                  </CardDescription>
-                </div>
-                <Button onClick={resetForm}>
-                  {t('resumeAnalysis.result.newAnalysisButton')}
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div
-                className="prose dark:prose-invert max-w-none"
-                dangerouslySetInnerHTML={{ __html: analysisResult.content_html }}
-              />
-            </CardContent>
-          </Card>
-        </AIBorder>
-      </div>
+      <ResumeAnalysisResult
+        result={analysisResult}
+        onBack={() => setAnalysisResult(null)}
+      />
     )
   }
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-      <div className="lg:col-span-2 space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('resumeAnalysis.title')}</CardTitle>
-            <CardDescription>{t('resumeAnalysis.description')}</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div>
-              <h3 className="font-semibold mb-2">{t('resumeAnalysis.selectVacancies.label')} (max. 7)</h3>
+      <AIGenerationModal
+        isOpen={analyzeResumesMutation.isPending}
+        onOpenChange={() => {}} // Locked
+        isPending={analyzeResumesMutation.isPending}
+        title={t('resumeAnalysis.processingTitle', 'Анализ резюме')}
+        description={t('resumeAnalysis.processingDescription', 'ИИ анализирует резюме и сопоставляет их с вакансиями...')}
+      />
+      <div className="lg:col-span-2 space-y-8">
+        <GlassCard className="overflow-hidden border-none shadow-lg bg-gradient-to-br from-card to-card/50">
+          <div className="p-4 sm:p-8 bg-gradient-to-r from-primary/10 via-purple-500/5 to-background border-b">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="p-2 sm:p-3 bg-background/50 backdrop-blur-sm rounded-lg sm:rounded-xl border shadow-sm text-primary shrink-0">
+                <FileSearch className="w-5 h-5 sm:w-8 sm:h-8" />
+              </div>
+              <div>
+                <h2 className="text-lg sm:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-600">
+                  {t('resumeAnalysis.title')}
+                </h2>
+                <p className="text-xs sm:text-base text-muted-foreground mt-0.5 sm:mt-1 line-clamp-2 sm:line-clamp-none">
+                  {t('resumeAnalysis.description')}
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <CardContent className="space-y-6 sm:space-y-8 p-4 sm:p-8">
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-2">
+                <Briefcase className="w-4 h-4" />
+                <h3>{t('resumeAnalysis.selectVacancies.label')}</h3>
+                <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">max 7</span>
+              </div>
+              
               <Popover open={openPopover} onOpenChange={setOpenPopover}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
                     role="combobox"
                     aria-expanded={openPopover}
-                    className="w-full justify-between h-auto min-h-[40px]"
+                    className="w-full justify-between h-auto min-h-[48px] px-4 rounded-xl hover:bg-accent/50 hover:border-primary/50 transition-all"
                   >
-                    <div className="flex flex-wrap gap-1">
+                    <div className="flex flex-wrap gap-2">
                       {selectedVacanciesDetails.length > 0 ? (
-                        selectedVacanciesDetails.map(v => <Badge key={v.id} variant="secondary">{v.title}</Badge>)
+                        selectedVacanciesDetails.map(v => (
+                          <Badge
+                            key={v.id}
+                            variant="secondary"
+                            className="bg-primary/10 text-primary hover:bg-primary/20 border-none px-3 py-1"
+                          >
+                            {v.title}
+                          </Badge>
+                        ))
                       ) : (
                         <span className="text-muted-foreground font-normal">{t('resumeAnalysis.selectVacancies.placeholder')}</span>
                       )}
@@ -170,11 +176,11 @@ export const ResumeAnalysis = () => {
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                <PopoverContent className="w-[--radix-popover-trigger-width] p-0 rounded-xl shadow-xl border-primary/10" align="start">
                   <Command>
-                    <CommandInput placeholder={t('resumeAnalysis.selectVacancies.searchPlaceholder')} />
+                    <CommandInput placeholder={t('resumeAnalysis.selectVacancies.searchPlaceholder')} className="h-12" />
                     <CommandEmpty>{isLoadingVacancies ? t('common:loading') : t('common:noResults')}</CommandEmpty>
-                    <CommandGroup>
+                    <CommandGroup className="max-h-[300px] overflow-y-auto">
                       {vacanciesData?.map((vacancy) => (
                         <CommandItem
                           key={vacancy.id}
@@ -187,10 +193,11 @@ export const ResumeAnalysis = () => {
                               setSelectedVacancies([...selectedVacancies, vacancy.id])
                             }
                           }}
+                          className="py-3 cursor-pointer"
                         >
                           <Check
                             className={cn(
-                              "mr-2 h-4 w-4",
+                              "mr-2 h-4 w-4 text-primary transition-opacity",
                               selectedVacancies.includes(vacancy.id) ? "opacity-100" : "opacity-0"
                             )}
                           />
@@ -203,90 +210,162 @@ export const ResumeAnalysis = () => {
               </Popover>
             </div>
 
-            <div>
-              <h3 className="font-semibold mb-2">{t('resumeAnalysis.uploadResumes.label')} (max. 20)</h3>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                  <UploadCloud className="w-4 h-4" />
+                  <h3>{t('resumeAnalysis.uploadResumes.label')}</h3>
+                </div>
+                <span className={cn(
+                  "text-xs font-medium px-2 py-0.5 rounded-full transition-colors",
+                  files.length >= 20 ? "bg-destructive/10 text-destructive" : "bg-muted text-muted-foreground"
+                )}>
+                  {files.length} / 20
+                </span>
+              </div>
+              
               <div
                 {...getRootProps()}
-                className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
-                  isDragActive ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50'
-                }`}
+                className={cn(
+                  "relative border-2 border-dashed rounded-2xl transition-all duration-300 ease-in-out min-h-[200px]",
+                  isDragActive
+                    ? "border-primary bg-primary/5 scale-[1.01] shadow-lg ring-2 ring-primary/20"
+                    : "border-border/60 hover:border-primary/50 hover:bg-muted/30",
+                  files.length > 0 ? "p-4" : "p-10 flex flex-col items-center justify-center text-center"
+                )}
               >
                 <input {...getInputProps()} />
-                <div className="flex flex-col items-center">
-                  <UploadCloud className="h-12 w-12 text-muted-foreground mb-4" />
-                  {isDragActive ? (
-                    <p className="font-semibold">{t('resumeAnalysis.uploadResumes.dropFiles')}</p>
-                  ) : (
-                    <p>{t('resumeAnalysis.uploadResumes.dragAndDrop')}</p>
-                  )}
-                  <p className="text-xs text-muted-foreground mt-2">{t('resumeAnalysis.uploadResumes.fileRequirements')}</p>
-                </div>
+                
+                {files.length > 0 ? (
+                  <div className="space-y-4 w-full">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {files.map((file) => (
+                        <div
+                          key={file.name}
+                          className="group relative flex items-center gap-3 p-3 bg-background/80 backdrop-blur-sm border rounded-xl shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-200"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <div className="h-10 w-10 rounded-lg bg-red-500/10 flex items-center justify-center flex-shrink-0 text-red-500">
+                            <FileType2 className="h-5 w-5" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate" title={file.name}>
+                              {file.name}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {(file.size / 1024 / 1024).toFixed(2)} MB
+                            </p>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-all scale-90 group-hover:scale-100 shadow-sm bg-background border"
+                            onClick={() => removeFile(file.name)}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    {files.length < 20 && (
+                      <div className="flex items-center justify-center py-6 border-2 border-dashed border-muted-foreground/10 rounded-xl hover:bg-muted/30 hover:border-primary/30 transition-all cursor-pointer group">
+                        <div className="flex flex-col items-center gap-2 text-muted-foreground group-hover:text-primary transition-colors">
+                          <UploadCloud className="h-6 w-6 mb-1 animate-bounce duration-1000" />
+                          <span className="text-sm font-medium">{t('resumeAnalysis.uploadResumes.dropFiles')}</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center">
+                    <div className={cn(
+                      "h-20 w-20 rounded-full bg-gradient-to-br from-primary/20 to-purple-500/20 flex items-center justify-center mb-6 transition-transform duration-500",
+                      isDragActive ? "scale-110" : "group-hover:scale-105"
+                    )}>
+                      <UploadCloud className={cn(
+                        "h-10 w-10 text-primary transition-all duration-500",
+                        isDragActive ? "scale-110" : ""
+                      )} />
+                    </div>
+                    {isDragActive ? (
+                      <p className="font-semibold text-lg text-primary animate-pulse">{t('resumeAnalysis.uploadResumes.dropFiles')}</p>
+                    ) : (
+                      <>
+                        <p className="font-medium text-lg mb-2">{t('resumeAnalysis.uploadResumes.dragAndDrop')}</p>
+                        <p className="text-sm text-muted-foreground max-w-xs">{t('resumeAnalysis.uploadResumes.fileRequirements')}</p>
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
-            <div>
-              <h3 className="font-semibold mb-2">{t('resumeAnalysis.additionalNotes.label')}</h3>
-              <Textarea
-                value={additionalNotes}
-                onChange={(e) => setAdditionalNotes(e.target.value)}
-                placeholder={t('resumeAnalysis.additionalNotes.placeholder')}
-                rows={4}
-              />
-            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                  <FileText className="w-4 h-4" />
+                  <h3>{t('resumeAnalysis.additionalNotes.label')}</h3>
+                </div>
+                <Textarea
+                  value={additionalNotes}
+                  onChange={(e) => setAdditionalNotes(e.target.value)}
+                  placeholder={t('resumeAnalysis.additionalNotes.placeholder')}
+                  rows={4}
+                  className="resize-none rounded-xl focus-visible:ring-primary/50"
+                />
+              </div>
 
-            <div>
-              <h3 className="font-semibold mb-2">{t('resumeAnalysis.resultLanguage.label')}</h3>
-              <Select value={resultLanguage} onValueChange={(value) => setResultLanguage(value as 'ru' | 'kk' | 'en')}>
-                <SelectTrigger>
-                  <SelectValue placeholder={t('resumeAnalysis.resultLanguage.placeholder')} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ru">{t('languages.ru')}</SelectItem>
-                  <SelectItem value="en">{t('languages.en')}</SelectItem>
-                  <SelectItem value="kk">{t('languages.kk')}</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                  <Languages className="w-4 h-4" />
+                  <h3>{t('resumeAnalysis.resultLanguage.label')}</h3>
+                </div>
+                <Select value={resultLanguage} onValueChange={(value) => setResultLanguage(value as 'ru' | 'kk' | 'en')}>
+                  <SelectTrigger className="h-12 rounded-xl">
+                    <SelectValue placeholder={t('resumeAnalysis.resultLanguage.placeholder')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ru">🇷🇺 {t('languages.ru')}</SelectItem>
+                    <SelectItem value="en">🇺🇸 {t('languages.en')}</SelectItem>
+                    <SelectItem value="kk">🇰🇿 {t('languages.kk')}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </CardContent>
-        </Card>
+        </GlassCard>
+
+        <ResumeAnalysisHistory onViewAnalysis={setAnalysisResult} />
       </div>
 
-      <div className="space-y-6">
-        <Card>
+      <div className="space-y-6 lg:sticky lg:top-4">
+        <Card className="border-none shadow-lg bg-card/50 backdrop-blur-sm overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
           <CardHeader>
-            <CardTitle>{t('resumeAnalysis.summary.title')}</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-primary" />
+              {t('resumeAnalysis.summary.title')}
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            {files.length > 0 && (
-              <div className="space-y-2">
-                <h4 className="font-semibold">{t('resumeAnalysis.summary.uploadedFiles')} ({files.length}/20)</h4>
-                <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
-                  {files.map(file => (
-                    <div key={file.name} className="flex items-center justify-between bg-secondary p-2 rounded-md">
-                      <div className="flex items-center gap-2 truncate">
-                        <FileText className="h-5 w-5 flex-shrink-0" />
-                        <span className="text-sm truncate">{file.name}</span>
-                      </div>
-                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeFile(file.name)}>
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
+          <CardContent className="space-y-6 relative">
+            <Alert className="bg-primary/5 border-primary/10 text-primary-foreground">
+              <div className="flex gap-3">
+                <div className="p-2 bg-background/50 rounded-lg h-fit text-primary">
+                  <FileSearch className="h-4 w-4" />
+                </div>
+                <div>
+                  <AlertTitle className="text-foreground font-medium mb-1">{t('resumeAnalysis.summary.cost.title')}</AlertTitle>
+                  <AlertDescription className="text-muted-foreground text-xs leading-relaxed">
+                    {t('resumeAnalysis.summary.cost.description')}
+                  </AlertDescription>
                 </div>
               </div>
-            )}
-
-            <Alert>
-              <FileSearch className="h-4 w-4" />
-              <AlertTitle>{t('resumeAnalysis.summary.cost.title')}</AlertTitle>
-              <AlertDescription>
-                {t('resumeAnalysis.summary.cost.description')}
-              </AlertDescription>
             </Alert>
 
             <Button
               onClick={handleAnalyze}
-              className="w-full"
+              className="w-full h-12 text-base font-medium bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 shadow-lg shadow-primary/25 transition-all duration-300 hover:scale-[1.02]"
               size="lg"
               disabled={
                 files.length === 0 ||
@@ -294,8 +373,10 @@ export const ResumeAnalysis = () => {
                 analyzeResumesMutation.isPending
               }
             >
-              {analyzeResumesMutation.isPending && (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              {analyzeResumesMutation.isPending ? (
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              ) : (
+                <Sparkles className="mr-2 h-5 w-5" />
               )}
               {t('resumeAnalysis.analyzeButton')}
             </Button>

@@ -82,7 +82,7 @@
     }
   },
   "skillsSelect": {
-    "placeholder": "Выберите навыки...",
+    "placeholder": "Добавить навык",
     "selected": "выбрано",
     "searchPlaceholder": "Поиск навыков...",
     "searching": "Поиск...",

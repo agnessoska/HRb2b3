@@ -18,6 +18,7 @@ import {
 import { Menu, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/shared/lib/supabase';
+import { TokenBalance } from '../TokenBalance';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -100,6 +101,13 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                 </nav>
 
                 <div className="border-t pt-6 space-y-4">
+                  {role === 'hr' && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">{t('balance', 'Баланс')}</span>
+                      <TokenBalance />
+                    </div>
+                  )}
+                  
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">{t('settings')}</span>
                     <div className="flex items-center gap-2">
@@ -161,6 +169,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
           </nav>
 
           <div className="flex items-center justify-end space-x-4 ml-auto">
+            {role === 'hr' && <TokenBalance className="hidden sm:flex mr-2" />}
             <nav className="flex items-center space-x-1">
               <LanguageSwitcher />
               <ModeToggle />
@@ -171,7 +180,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
           </div>
         </div>
       </header>
-      <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">{children}</main>
+      <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">{children}</main>
     </div>
   );
 };

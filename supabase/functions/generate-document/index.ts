@@ -177,11 +177,16 @@ serve(async (req: Request) => {
     if (payload.vacancy_id) {
       const { data: vacancyData, error: vacancyError } = await supabaseAdmin
         .from('vacancies')
-        .select('title')
+        .select('title, salary_min, salary_max, currency')
         .eq('id', payload.vacancy_id)
         .single()
       if (vacancyError) console.warn(`Vacancy not found: ${vacancyError.message}`)
-      else vacancyTitle = vacancyData.title
+      else {
+        vacancyTitle = vacancyData.title
+        if (vacancyData.salary_min || vacancyData.salary_max) {
+            vacancyTitle += ` (Salary: ${vacancyData.salary_min || 0} - ${vacancyData.salary_max || 'unlimited'} ${vacancyData.currency})`
+        }
+      }
     }
     
     const { data: orgData, error: orgError } = await supabaseAdmin

@@ -1,0 +1,70 @@
+{
+  "title": "Team Management",
+  "subtitle": "Manage your organization's employees and invite new colleagues",
+  "noMembers": "No members in your team yet",
+  "member": "Member",
+  "role": "Role",
+  "status": "Status",
+  "joinedAt": "Joined",
+  "roles": {
+    "owner": "Owner",
+    "member": "Member"
+  },
+  "statuses": {
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "invite": {
+    "button": "Invite Member",
+    "title": "Invite to Team",
+    "description": "Send an invitation to a colleague to add them to your organization. The link will be valid for 7 days.",
+    "emailLabel": "Colleague's Email",
+    "generateLink": "Generate Link",
+    "readyText": "Link is ready! Copy and send it to your colleague:",
+    "success": "Invitation created",
+    "error": "Error creating invitation",
+    "copied": "Link copied"
+  },
+  "tabs": {
+    "members": "Members",
+    "analytics": "Analytics"
+  },
+  "analytics": {
+    "invitationsHistory": "Invitations History"
+  },
+  "invitations": {
+    "type": "Type",
+    "link": "Link",
+    "created": "Created",
+    "statusLabel": "Status",
+    "usedBy": "Used By",
+    "empty": "Invitations history is empty",
+    "copied": "Link copied",
+    "filter": {
+      "all": "All"
+    },
+    "emptyFilter": "No invitations found",
+    "types": {
+      "hr": "Colleague",
+      "candidate": "Candidate"
+    },
+    "status": {
+      "used": "Used",
+      "expired": "Expired",
+      "active": "Active"
+    }
+  },
+  "invitedCandidates": "candidates",
+  "noCandidatesInvited": "This member hasn't invited anyone yet",
+  "candidateName": "Candidate Name",
+  "category": "Category",
+  "tests": "Tests",
+  "invitedAt": "Invited At",
+  "spentTokens": "Spent (T)",
+  "spendingStats": {
+    "aiOperations": "AI Operations",
+    "invitations": "Invitations",
+    "talentMarket": "Talent Market"
+  },
+  "invitedCandidatesTitle": "Invited Candidates"
+}

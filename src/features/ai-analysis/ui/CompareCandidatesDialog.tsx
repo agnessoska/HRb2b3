@@ -15,6 +15,7 @@ import { useCompareCandidates } from '../api/compareCandidates'
 import { useHrProfile } from '@/shared/hooks/useHrProfile'
 import { useOrganization } from '@/shared/hooks/useOrganization'
 import { toast } from 'sonner'
+import { AIGenerationModal } from '@/shared/ui/AIGenerationModal'
 
 // Assuming a basic candidate type for now
 interface Candidate {
@@ -75,8 +76,16 @@ export const CompareCandidatesDialog = ({
   const isValidSelection = selectedCandidates.length >= 2 && selectedCandidates.length <= 5
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+    <>
+      <AIGenerationModal
+        isOpen={isPending}
+        onOpenChange={() => {}}
+        isPending={isPending}
+        title={t('compareCandidates.processingTitle', 'Сравнение кандидатов')}
+        description={t('compareCandidates.processingDescription', 'ИИ сравнивает выбранных кандидатов...')}
+      />
+      <Dialog open={isOpen} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>{t('compareCandidates.title')}</DialogTitle>
           <DialogDescription>{t('compareCandidates.description')}</DialogDescription>
@@ -109,7 +118,8 @@ export const CompareCandidatesDialog = ({
             {isPending ? t('compareCandidates.loading') : t('compareCandidates.submit')}
           </Button>
         </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }

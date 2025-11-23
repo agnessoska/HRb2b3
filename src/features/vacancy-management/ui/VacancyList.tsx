@@ -15,22 +15,30 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Briefcase, MapPin, DollarSign, Users, MoreVertical, Eye, Edit, Archive } from 'lucide-react'
+import { Briefcase, MapPin, Users, MoreVertical, Eye, Edit, Archive } from 'lucide-react'
 import { toast } from 'sonner'
 import { ListContainer, ListItem } from '@/shared/ui/ListTransition'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 type Vacancy = Database['public']['Tables']['vacancies']['Row']
 
-function getStatusColor(status: string) {
+const currencyMap: Record<string, string> = {
+  USD: '$',
+  KZT: '₸',
+  RUB: '₽',
+  EUR: '€',
+}
+
+function getStatusStyles(status: string) {
   switch (status) {
     case 'active':
-      return 'bg-gradient-to-r from-emerald-500 to-green-600'
+      return 'bg-success/10 text-success hover:bg-success/20 border-success/20'
     case 'closed':
-      return 'bg-gradient-to-r from-gray-500 to-slate-600'
+      return 'bg-muted text-muted-foreground hover:bg-muted/80 border-border'
     case 'archived':
-      return 'bg-gradient-to-r from-red-500 to-rose-600'
+      return 'bg-destructive/10 text-destructive hover:bg-destructive/20 border-destructive/20'
     default:
-      return 'bg-gradient-to-r from-blue-500 to-blue-600'
+      return 'bg-primary/10 text-primary hover:bg-primary/20 border-primary/20'
   }
 }
 
@@ -43,92 +51,100 @@ interface VacancyCardProps {
 function VacancyCard({ vacancy, onEdit, onArchive }: VacancyCardProps) {
   const { t } = useTranslation('vacancies')
   const navigate = useNavigate()
-  const statusColor = getStatusColor(vacancy.status || 'active')
+  const statusStyles = getStatusStyles(vacancy.status || 'active')
+  const currencySymbol = currencyMap[vacancy.currency || 'USD'] || '$'
 
   return (
-    <Card className="group overflow-hidden">
-      <CardHeader className="pb-3">
+    <Card className="group relative overflow-hidden border-transparent shadow-lg shadow-primary/5 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 bg-card rounded-2xl">
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+      
+      <CardHeader className="pb-4 pt-6">
         <div className="flex items-start justify-between">
-          <div className="flex items-center gap-3 flex-1">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-              <Briefcase className="h-5 w-5" />
+          <div className="flex gap-4 flex-1 min-w-0">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary group-hover:scale-110 transition-transform duration-300">
+              <Briefcase className="h-6 w-6" />
             </div>
             <div className="flex-1 min-w-0">
-              <CardTitle className="text-lg truncate">{vacancy.title}</CardTitle>
-              <div className="flex items-center gap-2 mt-1">
+              <div className="flex items-center justify-between mb-2">
                 <div
-                  className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium text-white ${statusColor}`}
+                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border transition-colors ${statusStyles}`}
                 >
                   {t(`statuses.${vacancy.status}` as keyof typeof t)}
                 </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 -mr-2 text-muted-foreground hover:text-foreground">
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="rounded-xl">
+                    <DropdownMenuItem onClick={() => onEdit(vacancy)} className="rounded-lg cursor-pointer">
+                      <Edit className="mr-2 h-4 w-4" />
+                      <span>{t('actions.edit')}</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => onArchive(vacancy)}
+                      className="text-destructive focus:text-destructive rounded-lg cursor-pointer"
+                    >
+                      <Archive className="mr-2 h-4 w-4" />
+                      <span>{t('actions.archive')}</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
+              <CardTitle className="text-xl font-bold truncate leading-tight">{vacancy.title}</CardTitle>
             </div>
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => onEdit(vacancy)}>
-                <Edit className="mr-2 h-4 w-4" />
-                <span>{t('actions.edit')}</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => onArchive(vacancy)}
-                className="text-destructive"
-              >
-                <Archive className="mr-2 h-4 w-4" />
-                <span>{t('actions.archive')}</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
         </div>
       </CardHeader>
-      <CardContent className="pb-3">
-        <div className="space-y-2 text-sm text-muted-foreground">
+      
+      <CardContent className="pb-6">
+        <div className="flex flex-wrap gap-y-2 gap-x-4 text-sm text-muted-foreground">
           {vacancy.location && (
-            <div className="flex items-center gap-2">
-              <MapPin className="h-4 w-4" />
-              <span>{vacancy.location}</span>
+            <div className="flex items-center gap-1.5 bg-secondary/50 px-2 py-1 rounded-md">
+              <MapPin className="h-3.5 w-3.5 text-primary" />
+              <span className="font-medium">{vacancy.location}</span>
             </div>
           )}
           {(vacancy.salary_min || vacancy.salary_max) && (
-            <div className="flex items-center gap-2">
-              <DollarSign className="h-4 w-4" />
-              <span>
+            <div className="flex items-center gap-1.5 bg-secondary/50 px-2 py-1 rounded-md">
+              <div className="flex h-3.5 w-3.5 items-center justify-center text-primary font-bold text-xs">
+                {currencySymbol}
+              </div>
+              <span className="font-medium">
                 {vacancy.salary_min && vacancy.salary_max
-                  ? `$${vacancy.salary_min} - $${vacancy.salary_max}`
+                  ? `${vacancy.salary_min} - ${vacancy.salary_max}`
                   : vacancy.salary_min
-                  ? `${t('salary.from')} $${vacancy.salary_min}`
-                  : `${t('salary.upTo')} $${vacancy.salary_max}`}
+                  ? `${t('salary.from')} ${vacancy.salary_min}`
+                  : `${t('salary.upTo')} ${vacancy.salary_max}`}
               </span>
             </div>
           )}
+        </div>
+        
+        <div className="mt-6 flex items-center justify-between p-3 rounded-xl bg-secondary/30 border border-secondary/50">
           <div className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            <span className="text-xs">
-              {vacancy.funnel_counts ?
-                Object.values(vacancy.funnel_counts as Record<string, number>).reduce((a, b) => a + b, 0) : 0
-              } {t('common.candidates')}
-            </span>
+            <div className="bg-background p-1.5 rounded-lg shadow-sm">
+              <Users className="h-4 w-4 text-primary" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">{t('card.candidates')}</span>
+              <span className="text-sm font-bold">
+                {vacancy.funnel_counts ?
+                  Object.values(vacancy.funnel_counts as Record<string, number>).reduce((a, b) => a + b, 0) : 0
+                }
+              </span>
+            </div>
           </div>
+          <Button variant="ghost" size="sm" className="text-xs h-8 gap-1 hover:bg-background hover:text-primary" onClick={() => navigate(`/hr/vacancy/${vacancy.id}/funnel`)}>
+            {t('card.view_funnel')} <Eye className="h-3 w-3" />
+          </Button>
         </div>
       </CardContent>
-      <CardFooter className="flex gap-2 border-t bg-muted/30 pt-4">
+      
+      <CardFooter className="flex gap-3 px-6 pb-6 pt-0">
         <Button
-          variant="outline"
-          size="sm"
-          className="flex-1 gap-1"
-          onClick={() => navigate(`/hr/vacancy/${vacancy.id}/funnel`)}
-        >
-          <Eye className="h-3 w-3" />
-          {t('actions.view')}
-        </Button>
-        <Button
-          size="sm"
-          className="flex-1"
+          className="flex-1 rounded-xl font-semibold shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all"
           onClick={() => navigate(`/hr/vacancy/${vacancy.id}/profile`)}
         >
           {t('actions.manage')}
@@ -145,6 +161,7 @@ export function VacancyList() {
   const queryClient = useQueryClient()
   const [vacancyToEdit, setVacancyToEdit] = useState<Vacancy | null>(null)
   const [isEditOpen, setIsEditOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState('active')
 
   const {
     data: vacancies,
@@ -154,6 +171,11 @@ export function VacancyList() {
     queryKey: ['vacancies', organizationId],
     queryFn: () => getVacancies(organizationId!),
     enabled: !!organizationId,
+  })
+
+  const filteredVacancies = vacancies?.filter((vacancy) => {
+    if (activeTab === 'all') return true
+    return (vacancy.status || 'active') === activeTab
   })
 
   const { mutate: archiveVacancy } = useMutation({
@@ -225,34 +247,67 @@ export function VacancyList() {
         </div>
         <CreateVacancyDialog />
       </div>
-      {vacancies && vacancies.length > 0 ? (
-        <ListContainer className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {vacancies.map((vacancy) => (
-            <ListItem key={vacancy.id}>
-              <VacancyCard
-                vacancy={vacancy}
-                onEdit={handleEdit}
-                onArchive={handleArchive}
-              />
-            </ListItem>
-          ))}
-        </ListContainer>
-      ) : (
-        <Card className="border-dashed">
-          <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-              <Briefcase className="h-6 w-6 text-primary" />
-            </div>
-            <h3 className="mt-4 text-lg font-semibold">{t('list.empty_title')}</h3>
-            <p className="mt-2 text-sm text-muted-foreground max-w-sm">
-              {t('list.empty_description')}
-            </p>
-            <div className="mt-6">
-              <CreateVacancyDialog />
-            </div>
-          </CardContent>
-        </Card>
-      )}
+
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="mb-4">
+          <TabsTrigger value="active">
+            {t('statuses.active')}
+            <span className="ml-2 text-xs bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">
+              {vacancies?.filter((v) => (v.status || 'active') === 'active').length || 0}
+            </span>
+          </TabsTrigger>
+          <TabsTrigger value="closed">
+            {t('statuses.closed')}
+            <span className="ml-2 text-xs bg-muted text-muted-foreground px-1.5 py-0.5 rounded-full">
+              {vacancies?.filter((v) => v.status === 'closed').length || 0}
+            </span>
+          </TabsTrigger>
+          <TabsTrigger value="archived">
+            {t('statuses.archived')}
+            <span className="ml-2 text-xs bg-destructive/10 text-destructive px-1.5 py-0.5 rounded-full">
+              {vacancies?.filter((v) => v.status === 'archived').length || 0}
+            </span>
+          </TabsTrigger>
+          <TabsTrigger value="all">{t('statuses.all')}</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value={activeTab} className="mt-0">
+          {filteredVacancies && filteredVacancies.length > 0 ? (
+            <ListContainer className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 auto-rows-fr">
+              {filteredVacancies.map((vacancy) => (
+                <ListItem key={vacancy.id} className="h-full">
+                  <VacancyCard
+                    vacancy={vacancy}
+                    onEdit={handleEdit}
+                    onArchive={handleArchive}
+                  />
+                </ListItem>
+              ))}
+            </ListContainer>
+          ) : (
+            <Card className="border-2 border-dashed border-muted/60 bg-muted/10 hover:bg-muted/20 transition-colors rounded-2xl">
+              <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 animate-pulse">
+                  <Briefcase className="h-8 w-8 text-primary" />
+                </div>
+                <h3 className="mt-6 text-xl font-bold tracking-tight">
+                  {activeTab === 'all' ? t('list.empty_title') : t(`list.empty_${activeTab}`)}
+                </h3>
+                <p className="mt-2 text-base text-muted-foreground max-w-md">
+                  {activeTab === 'all'
+                    ? t('list.empty_description')
+                    : t(`list.empty_${activeTab}_description`)}
+                </p>
+                {activeTab === 'active' && (
+                  <div className="mt-8">
+                    <CreateVacancyDialog />
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+      </Tabs>
 
       <CreateVacancyDialog
         isOpen={isEditOpen}

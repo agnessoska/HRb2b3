@@ -7,12 +7,17 @@
   "edit": "Edit",
   "create": "Create",
   "submit": "Submit",
+  "add": "Add",
   "loading": "Loading...",
   "error": "An error occurred",
   "success": "Success",
   "close": "Close",
   "confirm": "Confirm",
+  "actions": "Actions",
+  "soon": "Coming soon",
   "appName": "HR Platform",
+  "buyTokens": "Buy tokens",
+  "balance": "Balance",
   "theme": {
     "toggle": "Toggle theme",
     "light": "Light",
@@ -25,11 +30,57 @@
   "chat": {
     "loading": "Loading chat..."
   },
+  "ai": {
+    "resumeAnalysis": {
+      "processingTitle": "Resume Analysis",
+      "processingDescription": "AI is analyzing resumes and matching them with vacancies..."
+    },
+    "generateFullAnalysis": {
+      "processingTitle": "Generating Full Analysis",
+      "processingDescription": "AI is analyzing candidate profile and test results..."
+    },
+    "generateDocument": {
+      "processingTitle": "Generating Document",
+      "processingDescription": "AI is composing the document based on candidate profile and vacancy..."
+    },
+    "generateInterview": {
+      "processingTitle": "Generating Interview",
+      "processingDescription": "AI is composing interview questions..."
+    },
+    "compareCandidates": {
+      "processingTitle": "Comparing Candidates",
+      "processingDescription": "AI is comparing selected candidates..."
+    },
+    "idealProfile": {
+      "processingTitle": "Generating Ideal Profile",
+      "processingDescription": "AI is analyzing vacancy description and creating a profile..."
+    }
+  },
+  "aiModal": {
+    "doNotClose": "Please do not close this window",
+    "steps": {
+      "initializing": "Initializing...",
+      "analyzing": "Analyzing data...",
+      "processing": "Processing...",
+      "generating": "Generating response...",
+      "finalizing": "Finalizing..."
+    }
+  },
   "nav": {
     "dashboard": "Dashboard",
     "talentMarket": "Talent Market",
     "chat": "Chat",
     "billing": "Billing",
     "team": "Team"
-  }
+  },
+  "settings": "Settings",
+  "profile": "Profile",
+  "signOut": "Sign out",
+  "hrPlatform": "HR Platform",
+  "organizationSettings": "Organization Settings",
+  "organizationSettingsDesc": "Manage your organization profile and branding",
+  "logo": "Logo",
+  "logoHelp": "Recommended size: 512x512px. Max file size: 2MB.",
+  "organizationName": "Organization Name",
+  "saveChanges": "Save Changes"
 }

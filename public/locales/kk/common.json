@@ -7,12 +7,17 @@
   "edit": "Өңдеу",
   "create": "Құру",
   "submit": "Жіберу",
+  "add": "Қосу",
   "loading": "Жүктелуде...",
   "error": "Қате пайда болды",
   "success": "Сәтті",
   "close": "Жабу",
   "confirm": "Растау",
+  "actions": "Әрекеттер",
+  "soon": "Жақында",
   "appName": "HR Platform",
+  "buyTokens": "Токендерді сатып алу",
+  "balance": "Баланс",
   "theme": {
     "toggle": "Тақырыпты ауыстыру",
     "light": "Ашық",
@@ -25,11 +30,57 @@
   "chat": {
     "loading": "Чат жүктелуде..."
   },
+  "ai": {
+    "resumeAnalysis": {
+      "processingTitle": "Түйіндемені талдау",
+      "processingDescription": "AI түйіндемелерді талдап, бос орындармен сәйкестендіруде..."
+    },
+    "generateFullAnalysis": {
+      "processingTitle": "Толық талдауды құру",
+      "processingDescription": "AI кандидаттың профилін және тест нәтижелерін талдауда..."
+    },
+    "generateDocument": {
+      "processingTitle": "Құжатты құру",
+      "processingDescription": "AI кандидат профилі мен бос орын негізінде құжат құрастыруда..."
+    },
+    "generateInterview": {
+      "processingTitle": "Сұхбат құру",
+      "processingDescription": "AI сұхбатқа сұрақтар құрастыруда..."
+    },
+    "compareCandidates": {
+      "processingTitle": "Кандидаттарды салыстыру",
+      "processingDescription": "AI таңдалған кандидаттарды салыстыруда..."
+    },
+    "idealProfile": {
+      "processingTitle": "Идеалды профильді құру",
+      "processingDescription": "AI бос орын сипаттамасын талдап, профиль құруда..."
+    }
+  },
+  "aiModal": {
+    "doNotClose": "Терезені жаппаңыз",
+    "steps": {
+      "initializing": "Іске қосылуда...",
+      "analyzing": "Деректерді талдау...",
+      "processing": "Өңдеу...",
+      "generating": "Жауапты құру...",
+      "finalizing": "Аяқталуда..."
+    }
+  },
   "nav": {
     "dashboard": "Бақылау тақтасы",
     "talentMarket": "Таланттар нарығы",
     "chat": "Чат",
     "billing": "Биллинг",
     "team": "Команда"
-  }
+  },
+  "settings": "Параметрлер",
+  "profile": "Профиль",
+  "signOut": "Шығу",
+  "hrPlatform": "HR Платформасы",
+  "organizationSettings": "Ұйым параметрлері",
+  "organizationSettingsDesc": "Ұйым профилін және брендін басқару",
+  "logo": "Логотип",
+  "logoHelp": "Ұсынылатын өлшем: 512x512px. Макс. өлшем: 2MB.",
+  "organizationName": "Ұйым атауы",
+  "saveChanges": "Өзгерістерді сақтау"
 }

@@ -11,6 +11,7 @@
       "description_placeholder": "Describe the tasks and the project...",
       "requirements": "Requirements",
       "requirements_placeholder": "Describe the requirements for the candidate...",
+      "skills": "Skills",
       "salary_min": "Salary from",
       "salary_max": "Salary to",
       "location": "Location",
@@ -26,16 +27,33 @@
       "creating": "Creating...",
       "cancel": "Cancel"
     },
-    "description": "Fill in the details below to post a new job opening."
+    "description": "Fill in the details below to post a new job opening.",
+    "steps": {
+      "basic_info": "Basic Info",
+      "requirements": "Requirements",
+      "details": "Details"
+    }
   },
   "loading": "Loading vacancies...",
   "error": "Error fetching vacancies",
   "list": {
     "header": "Your Vacancies",
+    "description": "Manage your job listings and view candidates.",
     "empty_title": "No vacancies yet",
-    "empty_description": "Get started by creating your first vacancy."
+    "empty_description": "Get started by creating your first vacancy.",
+    "empty_active": "No active vacancies",
+    "empty_active_description": "Create a new vacancy to start hiring.",
+    "empty_closed": "No closed vacancies",
+    "empty_closed_description": "Vacancies with completed hiring will appear here.",
+    "empty_archived": "Archive is empty",
+    "empty_archived_description": "Archived vacancies will be stored here."
+  },
+  "card": {
+    "candidates": "Candidates",
+    "view_funnel": "View Funnel"
   },
   "statuses": {
+    "all": "All",
     "active": "Active",
     "closed": "Closed",
     "archived": "Archived"
@@ -43,6 +61,14 @@
   "idealProfile": {
     "subtitle": "Manage the ideal AI profile for this vacancy.",
     "generateButton": "Generate Ideal Profile",
+    "generator": {
+      "title": "AI Generator",
+      "description": "Generate an ideal profile based on the vacancy description.",
+      "generating": "Generating...",
+      "cta": "Generate",
+      "processingTitle": "Generating Ideal Profile",
+      "processingDescription": "AI is analyzing vacancy description and creating profile..."
+    },
     "generating": "Generating...",
     "noProfileData": "No ideal profile data available.",
     "saveChanges": "Save Changes",
@@ -96,9 +122,12 @@
     "archive": "Archive",
     "view": "View",
     "manage": "Manage",
-    "manageCandidate": "Candidates"
+    "manageCandidate": "Candidates",
+    "next": "Next",
+    "back": "Back"
   },
   "salary": {
+    "label": "Salary Range",
     "from": "From",
     "upTo": "Up to"
   },

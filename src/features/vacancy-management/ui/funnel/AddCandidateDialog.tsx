@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
+import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useInView } from 'react-intersection-observer';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -39,23 +40,39 @@ export const AddCandidateDialog = ({
   const { data: organization } = useOrganization();
   const { data: hrProfile } = useHrProfile();
 
-  const { data: candidates, isLoading } = useQuery({
-    queryKey: [
-      'search-candidates',
-      vacancyId,
-      organization?.id,
-      debouncedSearch,
-    ],
-    queryFn: () => {
-      if (!debouncedSearch || !organization?.id) return [];
+  const { ref, inView } = useInView();
+
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+  } = useInfiniteQuery({
+    queryKey: ['search-candidates', vacancyId, organization?.id, debouncedSearch],
+    queryFn: ({ pageParam = 0 }) => {
+      if (!organization?.id) return Promise.resolve([]);
       return searchCandidatesNotInFunnel(
         vacancyId,
         organization.id,
-        debouncedSearch
+        debouncedSearch,
+        pageParam
       );
     },
-    enabled: debouncedSearch.length > 2 && !!organization?.id,
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      return lastPage.length === 20 ? allPages.length : undefined;
+    },
+    enabled: !!organization?.id,
   });
+
+  useEffect(() => {
+    if (inView && hasNextPage) {
+      fetchNextPage();
+    }
+  }, [inView, hasNextPage, fetchNextPage]);
+
+  const candidates = data?.pages.flat() || [];
 
   const addMutation = useMutation({
     mutationFn: (candidateId: string) => {
@@ -90,12 +107,11 @@ export const AddCandidateDialog = ({
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
           />
-          <div className="space-y-2 max-h-64 overflow-y-auto">
-            {isLoading && <p>{t('common:loading')}...</p>}
-            {candidates?.map(candidate => (
+          <div className="space-y-2 max-h-64 overflow-y-auto pr-2">
+            {candidates.map(candidate => (
               <div
                 key={candidate.id}
-                className="flex items-center justify-between p-2 rounded-md hover:bg-muted"
+                className="flex items-center justify-between p-2 rounded-md hover:bg-muted transition-colors"
               >
                 <span>{candidate.full_name}</span>
                 <Button
@@ -107,10 +123,23 @@ export const AddCandidateDialog = ({
                 </Button>
               </div>
             ))}
-            {debouncedSearch.length > 2 && !isLoading && candidates?.length === 0 && (
+            
+            {isLoading && (
+              <div className="py-2 text-center text-sm text-muted-foreground">
+                {t('common:loading')}...
+              </div>
+            )}
+
+            {!isLoading && candidates.length === 0 && (
               <p className="text-sm text-muted-foreground text-center py-4">
                 {t('noCandidatesFound')}
               </p>
+            )}
+
+            {hasNextPage && (
+              <div ref={ref} className="py-2 text-center text-sm text-muted-foreground">
+                {isFetchingNextPage ? t('common:loading') + '...' : ''}
+              </div>
             )}
           </div>
         </div>

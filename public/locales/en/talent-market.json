@@ -77,7 +77,7 @@
     "candidateType": "Candidate type"
   },
   "skillsSelect": {
-    "placeholder": "Select skills...",
+    "placeholder": "Add Skill",
     "selected": "selected",
     "searchPlaceholder": "Search skills...",
     "searching": "Searching...",

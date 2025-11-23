@@ -19,6 +19,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useGetVacancies } from '@/features/vacancy-management/api/getVacancies'
+import { AIGenerationModal } from '@/shared/ui/AIGenerationModal'
 
 interface GenerateFullAnalysisDialogProps {
   candidateId: string
@@ -60,19 +61,27 @@ export function GenerateFullAnalysisDialog({ candidateId, testsCompleted }: Gene
   const vacancies = vacanciesData ?? []
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button disabled={testsCompleted < 6}>
-          {t('generateFullAnalysis.trigger')}
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{t('generateFullAnalysis.title')}</DialogTitle>
-          <DialogDescription>{t('generateFullAnalysis.description')}</DialogDescription>
-        </DialogHeader>
-        
-        <div className="space-y-2">
+    <>
+      <AIGenerationModal
+        isOpen={isPending}
+        onOpenChange={() => {}}
+        isPending={isPending}
+        title={t('generateFullAnalysis.processingTitle', 'Генерация полного анализа')}
+        description={t('generateFullAnalysis.processingDescription', 'ИИ анализирует профиль кандидата и результаты тестов...')}
+      />
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          <Button disabled={testsCompleted < 6}>
+            {t('generateFullAnalysis.trigger')}
+          </Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('generateFullAnalysis.title')}</DialogTitle>
+            <DialogDescription>{t('generateFullAnalysis.description')}</DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-2">
             <p className="text-sm font-medium">{t('generateFullAnalysis.selectVacancies')}</p>
             <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
                 <PopoverTrigger asChild>
@@ -120,16 +129,17 @@ export function GenerateFullAnalysisDialog({ candidateId, testsCompleted }: Gene
             </Popover>
         </div>
 
-        <DialogFooter>
-          <Button variant="ghost" onClick={() => setOpen(false)}>
-            {t('common:cancel')}
-          </Button>
-          <Button onClick={handleGenerate} disabled={isPending || selectedVacancies.length === 0}>
-            {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {t('generateFullAnalysis.confirm')}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setOpen(false)}>
+              {t('common:cancel')}
+            </Button>
+            <Button onClick={handleGenerate} disabled={isPending || selectedVacancies.length === 0}>
+              {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {t('generateFullAnalysis.confirm')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }

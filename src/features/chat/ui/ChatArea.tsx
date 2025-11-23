@@ -169,6 +169,26 @@ export const ChatArea = ({ chatRoomId, userType, onBack }: ChatAreaProps) => {
           );
         }
       )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'chat_messages',
+          filter: `chat_room_id=eq.${chatRoomId}`,
+        },
+        payload => {
+          queryClient.setQueryData(
+            ['chat-messages', chatRoomId],
+            (old: ChatMessageType[] | undefined) =>
+              old?.map(msg =>
+                msg.id === (payload.new as ChatMessageType).id
+                  ? (payload.new as ChatMessageType)
+                  : msg
+              ) || []
+          );
+        }
+      )
       .on('broadcast', { event: 'typing' }, (payload) => {
         if (payload.payload.is_typing) {
           setIsOtherUserTyping(true);

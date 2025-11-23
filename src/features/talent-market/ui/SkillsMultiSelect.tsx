@@ -1,11 +1,18 @@
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { supabase } from "@/shared/lib/supabase";
 import { Badge } from "@/components/ui/badge";
-import { X, Check } from "lucide-react";
+import { X, Check, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTranslation } from 'react-i18next';
 
@@ -52,6 +59,7 @@ export const SkillsMultiSelect = ({ selectedSkills, onChange }: SkillsMultiSelec
       onChange([...selectedSkills, canonicalName]);
     }
     setSearchQuery('');
+    setIsOpen(false);
   };
 
   const handleRemoveSkill = (canonicalName: string) => {
@@ -59,82 +67,81 @@ export const SkillsMultiSelect = ({ selectedSkills, onChange }: SkillsMultiSelec
   };
 
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <PopoverTrigger asChild>
-        <Button variant="outline" className="w-full justify-start">
-          {selectedSkills.length === 0 ? (
-            <span className="text-muted-foreground">{t('skillsSelect.placeholder')}</span>
-          ) : (
-            <span>{selectedSkills.length} {t('skillsSelect.selected')}</span>
-          )}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-80 p-0" align="start">
-        <div className="p-2 border-b">
-          <Input
-            placeholder={t('skillsSelect.searchPlaceholder')}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            autoFocus
-          />
-        </div>
-
-        {selectedSkills.length > 0 && (
-          <div className="p-2 border-b">
-            <div className="flex flex-wrap gap-1">
-              {selectedSkills.map((skill) => (
-                <Badge key={skill} variant="secondary" className="gap-1">
-                  {skill}
-                  <button
-                    onClick={() => handleRemoveSkill(skill)}
-                    className="ml-1 hover:text-destructive"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </Badge>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <div className="max-h-60 overflow-auto p-2">
-          {isLoading && (
-            <div className="text-center py-4 text-sm text-muted-foreground">
-              {t('skillsSelect.searching')}
-            </div>
-          )}
-
-          {!isLoading && debouncedSearch.length < 2 && (
-            <div className="text-center py-4 text-sm text-muted-foreground">
-              {t('skillsSelect.minCharacters')}
-            </div>
-          )}
-
-          {!isLoading && debouncedSearch.length >= 2 && skillSuggestions?.length === 0 && (
-            <div className="text-center py-4 text-sm text-muted-foreground">
-              {t('skillsSelect.noSkillsFound')}
-            </div>
-          )}
-
-          {skillSuggestions?.map((skill) => (
+    <div className="space-y-3">
+      <div className="flex flex-wrap gap-2 min-h-[2.5rem]">
+        {selectedSkills.map((skill) => (
+          <Badge
+            key={skill}
+            variant="secondary"
+            className="pl-3 pr-1.5 py-1 text-sm rounded-full bg-secondary/50 text-secondary-foreground border border-secondary hover:bg-secondary transition-colors flex items-center gap-1"
+          >
+            {skill}
             <button
-              key={skill.canonical_name}
-              onClick={() => handleAddSkill(skill.canonical_name)}
-              disabled={selectedSkills.includes(skill.canonical_name)}
-              className={cn(
-                "w-full text-left px-3 py-2 rounded-md hover:bg-accent",
-                selectedSkills.includes(skill.canonical_name) && "opacity-50 cursor-not-allowed"
-              )}
+              onClick={() => handleRemoveSkill(skill)}
+              className="ml-1 p-0.5 hover:bg-background/50 rounded-full text-muted-foreground hover:text-destructive transition-colors"
             >
-              {skill.display_name}
-              {selectedSkills.includes(skill.canonical_name) && (
-                <Check className="h-4 w-4 inline ml-2" />
-              )}
+              <X className="h-3 w-3" />
             </button>
-          ))}
-        </div>
-      </PopoverContent>
-    </Popover>
+          </Badge>
+        ))}
+        
+        <Popover open={isOpen} onOpenChange={setIsOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 rounded-full border-dashed border-primary/30 bg-primary/5 text-primary hover:bg-primary/10 hover:border-primary/50"
+            >
+              <Plus className="h-3 w-3 mr-1" />
+              {t('skillsSelect.placeholder')}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="p-0 w-72" align="start">
+            <Command shouldFilter={false}>
+              <CommandInput
+                placeholder={t('skillsSelect.searchPlaceholder')}
+                value={searchQuery}
+                onValueChange={setSearchQuery}
+              />
+              <CommandList>
+                {isLoading && <div className="py-6 text-center text-xs text-muted-foreground">{t('skillsSelect.searching')}</div>}
+                
+                {!isLoading && debouncedSearch.length < 2 && (
+                  <div className="py-6 text-center text-xs text-muted-foreground">{t('skillsSelect.minCharacters')}</div>
+                )}
+
+                {!isLoading && debouncedSearch.length >= 2 && skillSuggestions?.length === 0 && (
+                  <CommandEmpty>{t('skillsSelect.noSkillsFound')}</CommandEmpty>
+                )}
+
+                <CommandGroup>
+                  {skillSuggestions?.map((skill) => (
+                    <CommandItem
+                      key={skill.canonical_name}
+                      value={skill.canonical_name}
+                      onSelect={() => handleAddSkill(skill.canonical_name)}
+                      disabled={selectedSkills.includes(skill.canonical_name)}
+                      className={cn(
+                        "cursor-pointer",
+                        selectedSkills.includes(skill.canonical_name) && "opacity-50"
+                      )}
+                    >
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          selectedSkills.includes(skill.canonical_name) ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                      {skill.display_name}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
+      </div>
+    </div>
   );
 };
 

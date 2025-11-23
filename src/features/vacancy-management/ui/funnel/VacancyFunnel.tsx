@@ -1,13 +1,4 @@
 import { useState, useMemo } from 'react';
-import {
-  DndContext,
-  DragOverlay,
-  closestCorners,
-  PointerSensor,
-  useSensor,
-  useSensors,
-} from '@dnd-kit/core';
-import type { DragStartEvent, DragEndEvent } from '@dnd-kit/core';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/shared/lib/supabase';
 import { useTranslation } from 'react-i18next';
@@ -28,7 +19,6 @@ import {
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { KanbanColumn } from './KanbanColumn.tsx';
-import { CandidateCard } from './CandidateCard.tsx';
 import { AddCandidateDialog } from './AddCandidateDialog';
 import { GenerateDocumentDialog } from '@/features/ai-analysis/ui/GenerateDocumentDialog';
 import type { DocumentType } from '@/features/ai-analysis/api/generateDocument';
@@ -55,7 +45,6 @@ export const VacancyFunnel = ({ vacancyId }: VacancyFunnelProps) => {
   const { t } = useTranslation(['funnel', 'common']);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const [activeId, setActiveId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('invited');
   const [isAddCandidateOpen, setIsAddCandidateOpen] = useState(false);
   const [dialogState, setDialogState] = useState<DialogState>({
@@ -68,6 +57,10 @@ export const VacancyFunnel = ({ vacancyId }: VacancyFunnelProps) => {
     type: null,
     application: null,
     newStatus: '',
+  });
+  const [moveDialog, setMoveDialog] = useState<{ isOpen: boolean; applicationId: string | null }>({
+    isOpen: false,
+    applicationId: null,
   });
 
   // Fetch vacancy details
@@ -144,14 +137,6 @@ export const VacancyFunnel = ({ vacancyId }: VacancyFunnelProps) => {
     { id: 'rejected', label: t('status.rejected') },
   ];
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    })
-  );
-
   const updateStatusMutation = useMutation({
     mutationFn: async ({
       applicationId,
@@ -176,19 +161,8 @@ export const VacancyFunnel = ({ vacancyId }: VacancyFunnelProps) => {
     },
   });
 
-  const handleDragStart = (event: DragStartEvent) => {
-    setActiveId(event.active.id as string);
-  };
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    setActiveId(null);
-    if (!over) return;
-
-    const applicationId = active.id as string;
-    const newStatus = over.id as string;
+  const handleStatusChange = (applicationId: string, newStatus: string) => {
     const application = applications?.find(app => app.id === applicationId);
-
     if (!application || application.status === newStatus) return;
 
     if (newStatus === 'rejected') {
@@ -201,6 +175,7 @@ export const VacancyFunnel = ({ vacancyId }: VacancyFunnelProps) => {
       updateStatusMutation.mutate({ applicationId, newStatus });
       toast.success(t('statusUpdated'));
     }
+    setMoveDialog({ isOpen: false, applicationId: null });
   };
 
   const handleConfirmationAction = async (generateDocument: boolean) => {
@@ -226,74 +201,41 @@ export const VacancyFunnel = ({ vacancyId }: VacancyFunnelProps) => {
     }
   };
 
-  const activeApplication = applications?.find(
-    app => app.id === activeId
-  );
-
   if (isLoading) {
     return <FunnelSkeleton />;
   }
 
   return (
     <>
-      <div className="h-full flex flex-col">
-        <div className="border-b bg-background p-4">
-          <div className="flex items-center justify-between max-w-7xl mx-auto">
-          <div className="flex items-center gap-4">
+      <div className="h-full flex flex-col bg-background md:bg-muted/5">
+        {/* Compact Header */}
+        <div className="border-b bg-background z-10 px-4 py-3 flex items-center justify-between gap-4 sticky top-0">
+          <div className="flex items-center gap-3 min-w-0">
             <Button
               variant="ghost"
-              size="sm"
+              size="icon"
+              className="shrink-0 h-8 w-8 -ml-1"
               onClick={() => navigate('/hr/dashboard?tab=vacancies')}
             >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              {t('common:back')}
+              <ArrowLeft className="h-4 w-4 text-muted-foreground" />
             </Button>
-            <div>
-              <h1 className="text-2xl font-bold">{vacancy?.title}</h1>
-              <p className="text-sm text-muted-foreground">
-                {t('recruitmentFunnel')}
+            <div className="min-w-0 flex flex-col">
+              <h1 className="text-lg font-semibold truncate leading-tight">{vacancy?.title}</h1>
+              <p className="text-xs text-muted-foreground truncate">
+                {applications?.length || 0} {t('funnel:candidates')}
               </p>
             </div>
           </div>
-          <Button onClick={() => setIsAddCandidateOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            {t('addCandidate')}
+          
+          <Button size="sm" onClick={() => setIsAddCandidateOpen(true)} className="shrink-0 gap-2">
+            <Plus className="h-4 w-4" />
+            <span className="hidden sm:inline">{t('addCandidate')}</span>
           </Button>
         </div>
-      </div>
 
-      {vacancy?.funnel_counts && (
-        <div className="border-b bg-muted/50 px-4 py-3">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex gap-6 text-sm">
-              <div>
-                <span className="text-muted-foreground">{t('total')}:</span>
-                <span className="ml-2 font-semibold">
-                  {applications?.length || 0}
-                </span>
-              </div>
-              {Object.entries(vacancy.funnel_counts).map(([status, count]) => (
-                <div key={status}>
-                  <span className="text-muted-foreground">
-                    {t(`status.${status}`)}:
-                  </span>
-                  <span className="ml-2 font-semibold">{count}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className="flex-1 overflow-hidden p-4">
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCorners}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-        >
+        <div className="flex-1 overflow-hidden relative">
           {/* Desktop View */}
-          <div className="hidden md:inline-flex gap-4 min-h-full h-full overflow-x-auto pb-4">
+          <div className="hidden md:flex h-full overflow-x-auto px-6 py-6 gap-6 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
             {statuses.map(status => (
               <KanbanColumn
                 key={status.id}
@@ -301,46 +243,54 @@ export const VacancyFunnel = ({ vacancyId }: VacancyFunnelProps) => {
                 title={status.label}
                 count={groupedByStatus[status.id]?.length || 0}
                 applications={groupedByStatus[status.id] || []}
+                onStatusChange={(appId, req) => {
+                  if (req === 'move_request') {
+                    setMoveDialog({ isOpen: true, applicationId: appId });
+                  }
+                }}
               />
             ))}
           </div>
 
           {/* Mobile View */}
-          <div className="md:hidden h-full">
+          <div className="md:hidden h-full flex flex-col">
              <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
-              <TabsList className="w-full overflow-x-auto justify-start mb-4">
-                {statuses.map(status => (
-                  <TabsTrigger key={status.id} value={status.id} className="flex-shrink-0">
-                    {status.label}
-                    <span className="ml-2 text-xs bg-muted-foreground/20 px-1.5 py-0.5 rounded-full">
-                      {groupedByStatus[status.id]?.length || 0}
-                    </span>
-                  </TabsTrigger>
-                ))}
-              </TabsList>
+              <div className="px-4 py-2 border-b bg-background/50 backdrop-blur-sm">
+                <TabsList className="w-full overflow-x-auto justify-start bg-transparent p-0 h-auto gap-2 no-scrollbar">
+                  {statuses.map(status => (
+                    <TabsTrigger 
+                      key={status.id} 
+                      value={status.id} 
+                      className="flex-shrink-0 rounded-full border bg-background px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground shadow-sm"
+                    >
+                      {status.label}
+                      <span className="ml-2 text-xs opacity-70 bg-black/10 dark:bg-white/20 px-1.5 py-0.5 rounded-full">
+                        {groupedByStatus[status.id]?.length || 0}
+                      </span>
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </div>
               {statuses.map(status => (
-                <TabsContent key={status.id} value={status.id} className="flex-1 mt-0 h-full overflow-y-auto">
+                <TabsContent key={status.id} value={status.id} className="flex-1 mt-0 overflow-y-auto px-4 py-4">
                   <KanbanColumn
                     id={status.id}
                     title={status.label}
                     count={groupedByStatus[status.id]?.length || 0}
                     applications={groupedByStatus[status.id] || []}
+                    onStatusChange={(appId, req) => {
+                      if (req === 'move_request') {
+                        setMoveDialog({ isOpen: true, applicationId: appId });
+                      }
+                    }}
                   />
                 </TabsContent>
               ))}
             </Tabs>
           </div>
+        </div>
+      </div>
 
-          <DragOverlay>
-            {activeId && activeApplication ? (
-              <div className="rotate-3 opacity-80">
-                <CandidateCard application={activeApplication} isDragging />
-              </div>
-            ) : null}
-          </DragOverlay>
-        </DndContext>
-      </div>
-      </div>
       {dialogState.isOpen && dialogState.application && (
         <GenerateDocumentDialog
           isOpen={dialogState.isOpen}
@@ -402,6 +352,32 @@ export const VacancyFunnel = ({ vacancyId }: VacancyFunnelProps) => {
               {confirmationDialog.type === 'offer' && t('generateAndSendOffer')}
               {confirmationDialog.type === 'interview' && t('generateInvitation')}
             </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={moveDialog.isOpen} onOpenChange={(isOpen) => setMoveDialog({ isOpen, applicationId: null })}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('funnel:moveCandidate')}</AlertDialogTitle>
+            <AlertDialogDescription>{t('funnel:selectStatus')}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="grid grid-cols-2 gap-2 py-4">
+            {statuses.map((status) => (
+              <Button
+                key={status.id}
+                variant="outline"
+                className="justify-start h-auto py-3 px-4 text-left"
+                onClick={() => moveDialog.applicationId && handleStatusChange(moveDialog.applicationId, status.id)}
+              >
+                <div className="flex flex-col items-start">
+                  <span className="font-medium">{status.label}</span>
+                </div>
+              </Button>
+            ))}
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('common:cancel')}</AlertDialogCancel>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

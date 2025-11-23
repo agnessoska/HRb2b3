@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import {
   Dialog,
   DialogContent,
@@ -13,7 +14,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useTranslation } from 'react-i18next'
 import { generateInviteToken } from '../api/generateInviteToken'
-import { Copy, Link2, Loader2, CheckCircle2, UserPlus } from 'lucide-react'
+import { Copy, Link2, Loader2, CheckCircle2, UserPlus, AlertCircle } from 'lucide-react'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 
 interface GenerateTokenResponse {
   success: boolean
@@ -22,23 +24,58 @@ interface GenerateTokenResponse {
   invite_url: string
   tokens_spent: number
   new_balance: number
+  error?: string
+  required?: number
+  available?: number
 }
 
 export function GenerateInviteLinkDialog() {
   const { t } = useTranslation('candidates')
+  const queryClient = useQueryClient()
   const [open, setOpen] = useState(false)
   const [generatedLink, setGeneratedLink] = useState('')
   const [copied, setCopied] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const mutation = useMutation<GenerateTokenResponse, Error, void>({
     mutationFn: generateInviteToken,
     onSuccess: (data) => {
-      if (data?.invite_url) {
-        setGeneratedLink(data.invite_url)
+      console.log('Token generated successfully:', data)
+      
+      if (!data.success) {
+        if (data.error === 'Insufficient tokens') {
+          setError('insufficient_tokens')
+        } else {
+          setError(data.error || 'unknown_error')
+        }
+        return
       }
-      // TODO: Show toast with token cost and new balance
-      // TODO: Invalidate queries to refetch token balance in header
+
+      if (data?.token) {
+        const origin = window.location.origin
+        const fullUrl = `${origin}/auth/login?token=${data.token}`
+        setGeneratedLink(fullUrl)
+        setError(null)
+        
+        // Invalidate queries to update token balance and invitations history
+        queryClient.invalidateQueries({ queryKey: ['organization'] })
+        queryClient.invalidateQueries({ queryKey: ['organization-invitations'] })
+        
+        toast.success(t('invite_dialog.success_toast', {
+          tokens: data.tokens_spent
+        }))
+      } else if (data?.invite_url) {
+        setGeneratedLink(data.invite_url)
+        setError(null)
+      } else {
+        console.error('No token or invite_url in response:', data)
+        setError('unknown_error')
+      }
     },
+    onError: (err) => {
+      console.error('Error generating token:', err)
+      setError(err.message || 'unknown_error')
+    }
   })
 
   const handleGenerate = () => {
@@ -84,6 +121,16 @@ export function GenerateInviteLinkDialog() {
             {t('invite_dialog.description')}
           </DialogDescription>
         </DialogHeader>
+
+        {error === 'insufficient_tokens' && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>{t('invite_dialog.errors.insufficient_tokens_title')}</AlertTitle>
+            <AlertDescription>
+              {t('invite_dialog.errors.insufficient_tokens_desc')}
+            </AlertDescription>
+          </Alert>
+        )}
 
         {generatedLink ? (
           <div className="space-y-4">

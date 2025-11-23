@@ -19,6 +19,7 @@ import {
   type DocumentType,
   useGenerateDocument,
 } from '@/features/ai-analysis/api/generateDocument'
+import { AIGenerationModal } from '@/shared/ui/AIGenerationModal'
 
 interface GenerateDocumentDialogProps {
   isOpen: boolean
@@ -71,8 +72,16 @@ export const GenerateDocumentDialog = ({
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+    <>
+      <AIGenerationModal
+        isOpen={isPending}
+        onOpenChange={() => {}}
+        isPending={isPending}
+        title={t('generateDocument.processingTitle', 'Генерация документа')}
+        description={t('generateDocument.processingDescription', 'ИИ составляет документ на основе профиля кандидата и вакансии...')}
+      />
+      <Dialog open={isOpen} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>{t('generateDocument.title')}</DialogTitle>
           <DialogDescription>{t('generateDocument.description')}</DialogDescription>
@@ -119,7 +128,8 @@ export const GenerateDocumentDialog = ({
             {isPending ? t('common:generating') : t('common:generate')}
           </Button>
         </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }

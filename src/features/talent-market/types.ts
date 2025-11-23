@@ -1,9 +1,10 @@
 import type { Json } from "@/shared/types/database";
 
 export type ScoredCandidate = {
-  candidate_id: string;
+  candidate_id: string; // From RPC
+  id?: string; // From table direct select
   full_name: string | null;
-  category_id?: string | null; // Made optional
+  category_id?: string | null;
   tests_completed: number;
   tests_last_updated_at: string | null;
   professional_compatibility: number;
@@ -14,5 +15,10 @@ export type ScoredCandidate = {
   category: Json;
 };
 
-// Unscored candidates are mapped to match ScoredCandidate structure in the API hook
-export type TalentMarketCandidate = ScoredCandidate;
+// A candidate in the talent market can be from the scoring RPC (with candidate_id)
+// or a direct query (with id). We'll unify them here.
+export type TalentMarketCandidate = Partial<ScoredCandidate> & {
+  id?: string;
+  candidate_id?: string;
+  full_name: string | null;
+};

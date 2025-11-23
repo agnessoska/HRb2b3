@@ -47,7 +47,12 @@ export const ListItem: React.FC<{ children: ReactNode; className?: string }> = (
   className,
 }) => {
   return (
-    <motion.div variants={itemVariants} className={className}>
+    <motion.div
+      variants={itemVariants}
+      initial="hidden"
+      animate="show"
+      className={className}
+    >
       {children}
     </motion.div>
   );

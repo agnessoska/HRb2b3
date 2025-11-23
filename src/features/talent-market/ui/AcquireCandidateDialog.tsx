@@ -14,6 +14,7 @@ import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { useOrganization } from "@/shared/hooks/useOrganization";
+import { useHrProfile } from "@/shared/hooks/useHrProfile";
 import type { TalentMarketCandidate } from "../types";
 
 interface AcquireCandidateDialogProps {
@@ -37,6 +38,7 @@ export const AcquireCandidateDialog = ({
   const { user } = useAuthStore();
   const { data: organization } = useOrganization();
   const tokenBalance = organization?.token_balance || 0;
+  const { data: hrProfile, isLoading: isHrProfileLoading } = useHrProfile();
 
   const { data: vacancies } = useQuery({
     queryKey: ['active-vacancies'],
@@ -62,14 +64,18 @@ export const AcquireCandidateDialog = ({
       toast.error(t('acquireDialog.noTokensTitle'));
       return;
     }
-    if (!user) return;
+    if (!user || !hrProfile) {
+      // This case is handled by the disabled button, but as a safeguard:
+      toast.error('User profile not loaded. Please try again.');
+      return;
+    }
 
     setIsLoading(true);
     try {
       const { data, error } = await supabase.rpc('acquire_candidate_from_market', {
-        p_candidate_id: 'candidate_id' in candidate ? candidate.candidate_id : candidate.id,
+        p_candidate_id: candidate.candidate_id || candidate.id || '',
         p_vacancy_id: selectedVacancyId,
-        p_hr_specialist_id: user.id
+        p_hr_specialist_id: hrProfile.id
       });
 
       if (error) throw error;
@@ -192,7 +198,7 @@ export const AcquireCandidateDialog = ({
           </Button>
           <Button
             onClick={handleAcquire}
-            disabled={!selectedVacancyId || !hasEnoughTokens || isLoading}
+            disabled={!selectedVacancyId || !hasEnoughTokens || isLoading || isHrProfileLoading}
           >
             {isLoading ? (
               <>
