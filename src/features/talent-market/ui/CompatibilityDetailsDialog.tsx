@@ -10,6 +10,7 @@ import { Check, X } from "lucide-react";
 import type { TalentMarketCandidate, ScoredCandidate } from "../types";
 import { Badge } from "@/components/ui/badge";
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 
 // #region Comparison Components
 interface ScaleComparison {
@@ -24,7 +25,7 @@ const getMatchColor = (match: number) => {
   return 'text-blue-500';
 };
 
-const ComparisonCard = ({ name, description, match, ideal, candidate, t }: { name: string, description: string, match: number, ideal: number, candidate: number, t: (key: string, options?: object) => string }) => (
+const ComparisonCard = ({ name, description, match, ideal, candidate, t }: { name: string, description: string, match: number, ideal: number, candidate: number, t: TFunction<"talent-market"> }) => (
   <Card className="p-4">
     <div className="space-y-3">
       <div className="flex items-start justify-between">
@@ -59,7 +60,7 @@ const ComparisonCard = ({ name, description, match, ideal, candidate, t }: { nam
   </Card>
 );
 
-const BigFiveComparison = ({ details, t, tTests }: { details: Record<string, ScaleComparison>, t: (key: string, options?: object) => string, tTests: (key: string) => string }) => {
+const BigFiveComparison = ({ details, t, tTests }: { details: Record<string, ScaleComparison>, t: TFunction<"talent-market">, tTests: TFunction<"tests"> }) => {
   const scales = [
     { key: 'openness', name: tTests('psychometric.bigFive.openness.name'), description: tTests('psychometric.bigFive.openness.description') },
     { key: 'conscientiousness', name: tTests('psychometric.bigFive.conscientiousness.name'), description: tTests('psychometric.bigFive.conscientiousness.description') },
@@ -70,7 +71,7 @@ const BigFiveComparison = ({ details, t, tTests }: { details: Record<string, Sca
   return <div className="space-y-4">{scales.map(s => details[s.key] ? <ComparisonCard key={s.key} name={s.name} description={s.description} {...details[s.key]} t={t} /> : null)}</div>;
 };
 
-const MBTIComparison = ({ details, t, tTests }: { details: { ideal: string; candidate: string; match: number }, t: (key: string, options?: object) => string, tTests: (key: string) => string }) => {
+const MBTIComparison = ({ details, t, tTests }: { details: { ideal: string; candidate: string; match: number }, t: TFunction<"talent-market">, tTests: TFunction<"tests"> }) => {
   const idealLetters = details.ideal.split('');
   const candidateLetters = details.candidate.split('');
   const dichotomies = [
@@ -99,7 +100,7 @@ const MBTIComparison = ({ details, t, tTests }: { details: { ideal: string; cand
   );
 };
 
-const DISCComparison = ({ details, t, tTests }: { details: Record<string, ScaleComparison>, t: (key: string, options?: object) => string, tTests: (key: string) => string }) => {
+const DISCComparison = ({ details, t, tTests }: { details: Record<string, ScaleComparison>, t: TFunction<"talent-market">, tTests: TFunction<"tests"> }) => {
   const scales = [
     { key: 'D', name: tTests('psychometric.disc.D.name'), description: tTests('psychometric.disc.D.description') },
     { key: 'I', name: tTests('psychometric.disc.I.name'), description: tTests('psychometric.disc.I.description') },
@@ -108,7 +109,7 @@ const DISCComparison = ({ details, t, tTests }: { details: Record<string, ScaleC
   ];
   return <div className="space-y-4">{scales.map(s => details[s.key] ? <ComparisonCard key={s.key} name={s.name} description={s.description} {...details[s.key]} t={t} /> : null)}</div>;
 };
-const EQComparison = ({ details, t, tTests }: { details: Record<string, ScaleComparison>, t: (key: string, options?: object) => string, tTests: (key: string) => string }) => {
+const EQComparison = ({ details, t, tTests }: { details: Record<string, ScaleComparison>, t: TFunction<"talent-market">, tTests: TFunction<"tests"> }) => {
   const scales = [
     { key: 'self_awareness', name: tTests('psychometric.eq.selfAwareness.name'), description: tTests('psychometric.eq.selfAwareness.description') },
     { key: 'self_management', name: tTests('psychometric.eq.selfManagement.name'), description: tTests('psychometric.eq.selfManagement.description') },
@@ -117,7 +118,7 @@ const EQComparison = ({ details, t, tTests }: { details: Record<string, ScaleCom
   ];
   return <div className="space-y-4">{scales.map(s => details[s.key] ? <ComparisonCard key={s.key} name={s.name} description={s.description} {...details[s.key]} t={t} /> : null)}</div>;
 };
-const SoftSkillsComparison = ({ details, t, tTests }: { details: Record<string, ScaleComparison>, t: (key: string, options?: object) => string, tTests: (key: string) => string }) => {
+const SoftSkillsComparison = ({ details, t, tTests }: { details: Record<string, ScaleComparison>, t: TFunction<"talent-market">, tTests: TFunction<"tests"> }) => {
   const scales = [
     { key: 'communication', name: tTests('psychometric.softSkills.communication.name'), description: tTests('psychometric.softSkills.communication.description') },
     { key: 'teamwork', name: tTests('psychometric.softSkills.teamwork.name'), description: tTests('psychometric.softSkills.teamwork.description') },
@@ -127,7 +128,7 @@ const SoftSkillsComparison = ({ details, t, tTests }: { details: Record<string, 
   ];
   return <div className="space-y-4">{scales.map(s => details[s.key] ? <ComparisonCard key={s.key} name={s.name} description={s.description} {...details[s.key]} t={t} /> : null)}</div>;
 };
-const MotivationComparison = ({ details, t, tTests }: { details: Record<string, ScaleComparison>, t: (key: string, options?: object) => string, tTests: (key: string) => string }) => {
+const MotivationComparison = ({ details, t, tTests }: { details: Record<string, ScaleComparison>, t: TFunction<"talent-market">, tTests: TFunction<"tests"> }) => {
   const scales = [
     { key: 'achievement', name: tTests('psychometric.motivation.achievement.name'), description: tTests('psychometric.motivation.achievement.description') },
     { key: 'power', name: tTests('psychometric.motivation.power.name'), description: tTests('psychometric.motivation.power.description') },

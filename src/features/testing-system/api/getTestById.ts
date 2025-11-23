@@ -1,5 +1,5 @@
 import { supabase } from '@/shared/lib/supabase';
-import type { TestWithQuestions } from '@/shared/types/database';
+import type { TestWithQuestions } from '@/shared/types/extended';
 
 export const getTestById = async (testId: string): Promise<TestWithQuestions | null> => {
   const { data, error } = await supabase

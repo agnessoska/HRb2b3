@@ -16,7 +16,7 @@ import { DISCQuestionCard } from '@/features/testing-system/ui/DISCQuestionCard'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { addMonths } from 'date-fns';
 import { getCandidateProfileByUserId } from '@/features/candidate-management/api/getCandidateProfileByUserId';
-import type { TestWithQuestions, TestQuestion } from '@/shared/types/database';
+import type { TestWithQuestions, TestQuestion } from '@/shared/types/extended';
 import type { Json } from '@/shared/types/database';
 
 type TestState = 'loading' | 'instructions' | 'inProgress' | 'submitting';
