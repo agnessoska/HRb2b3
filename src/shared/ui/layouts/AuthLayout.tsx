@@ -33,7 +33,7 @@ export function AuthLayout() {
       </div>
 
       {/* Content Wrapper */}
-      <div className="relative z-10 w-full flex-1 flex items-center justify-center p-4 md:p-8">
+      <div className="relative z-10 w-full flex-1 flex items-center justify-center p-4 md:p-8 mt-20">
         <Outlet />
       </div>
     </div>

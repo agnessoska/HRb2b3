@@ -69,9 +69,14 @@ export const TestCard = ({ test, onRetake }: TestCardProps) => {
   return (
     <Card className="h-full flex flex-col">
       <CardHeader>
-        <div className="flex items-start justify-between">
+        <div className="flex items-start justify-between gap-4">
           <CardTitle className="text-xl">{test[`name_${lang}`]}</CardTitle>
-          <Badge variant={status.badge as "default" | "destructive" | "outline" | "secondary" | "success" | "warning"}>{status.label}</Badge>
+          <Badge
+            variant={status.badge as "default" | "destructive" | "outline" | "secondary" | "success" | "warning"}
+            className="whitespace-nowrap shrink-0"
+          >
+            {status.label}
+          </Badge>
         </div>
         <CardDescription className="line-clamp-2 h-10">
           {test[`description_${lang}`]}

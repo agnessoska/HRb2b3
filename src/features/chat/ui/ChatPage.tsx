@@ -67,26 +67,30 @@ export const ChatPage = ({ userType }: ChatPageProps) => {
     queryKey: ['chat-rooms', userType, profileId],
     queryFn: async () => {
       if (!profileId) return [];
-      const query = supabase
-        .from('chat_rooms')
-        .select(
-          `
-          *,
-          hr_specialist:hr_specialists(*),
-          candidate:candidates(*, category:professional_categories(*))
-        `
-        )
-        .order('last_message_at', { ascending: false });
-
-      if (userType === 'hr') {
-        query.eq('hr_specialist_id', profileId);
-      } else {
-        query.eq('candidate_id', profileId);
-      }
-
-      const { data, error } = await query;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data, error } = await supabase.rpc('get_my_chat_rooms' as any);
+      
       if (error) throw error;
-      return data || [];
+      
+      // Adapt RPC result to match ChatRoom type for compatibility
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return ((data as any[]) || []).map((room: any) => ({
+        id: room.id,
+        created_at: room.created_at,
+        last_message_at: room.last_message_at,
+        organization_id: '',
+        hr_specialist_id: '',
+        candidate_id: '',
+        unread_count_hr: userType === 'hr' ? room.unread_count : 0,
+        unread_count_candidate: userType === 'candidate' ? room.unread_count : 0,
+        hr_specialist: userType === 'candidate' ? { full_name: room.other_user_name, id: room.other_user_id } : {},
+        candidate: userType === 'hr' ? {
+          full_name: room.other_user_name,
+          id: room.other_user_id,
+          category: room.other_user_category ? { name_ru: room.other_user_category, name_en: room.other_user_category, name_kk: room.other_user_category } : null
+        } : {}
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      })) as any;
     },
     enabled: !!profileId,
   });
@@ -130,7 +134,8 @@ export const ChatPage = ({ userType }: ChatPageProps) => {
 
   const activeChatRoom = useMemo(() => {
     if (!selectedChatId || !chatRooms) return null;
-    return chatRooms.find(room =>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (chatRooms as any[]).find((room: any) =>
       userType === 'hr'
         ? room.candidate.id === selectedChatId
         : room.hr_specialist.id === selectedChatId
@@ -146,7 +151,7 @@ export const ChatPage = ({ userType }: ChatPageProps) => {
 
   if (isMobileView) {
     return (
-      <div className="h-full flex flex-col">
+      <div className="h-[calc(100vh-6rem)] flex flex-col border rounded-xl overflow-hidden bg-background shadow-sm">
         {!showChatArea ? (
           <ChatList
             chatRooms={chatRooms || []}
@@ -160,6 +165,7 @@ export const ChatPage = ({ userType }: ChatPageProps) => {
             chatRoomId={activeChatRoomId!}
             userType={userType}
             onBack={handleBackToList}
+            initialChatRoom={activeChatRoom}
           />
         )}
       </div>
@@ -167,8 +173,8 @@ export const ChatPage = ({ userType }: ChatPageProps) => {
   }
 
   return (
-    <div className="h-full flex">
-      <div className="w-[30%] border-r flex flex-col">
+    <div className="h-[calc(100vh-8.5rem)] flex border rounded-xl overflow-hidden bg-background shadow-sm ring-1 ring-border/50 isolate">
+      <div className="w-80 border-r flex flex-col bg-muted/10">
         <ChatList
           chatRooms={chatRooms || []}
           userType={userType}
@@ -177,9 +183,14 @@ export const ChatPage = ({ userType }: ChatPageProps) => {
         />
       </div>
 
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col bg-background/50 backdrop-blur-sm">
         {activeChatRoomId ? (
-          <ChatArea key={activeChatRoomId} chatRoomId={activeChatRoomId} userType={userType} />
+          <ChatArea
+            key={activeChatRoomId}
+            chatRoomId={activeChatRoomId}
+            userType={userType}
+            initialChatRoom={activeChatRoom}
+          />
         ) : (
           <EmptyChatState />
         )}

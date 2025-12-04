@@ -65,6 +65,19 @@ export function AuthForm() {
   // Initialize activeTab based on token presence
   const [activeTab, setActiveTab] = useState(invitationToken ? 'register' : 'login')
 
+  // Update activeTab when invitationToken changes or is absent (fix for "stuck" tabs)
+  // Using setTimeout to avoid "setState during render" warning in strict mode,
+  // though typically direct set in effect is OK if it doesn't cause loop.
+  // Ideally, this logic should be part of state initialization or useLayoutEffect,
+  // but here we react to prop/url change.
+  useEffect(() => {
+    if (invitationToken) {
+      // Defer state update to next tick to avoid synchronous update warning
+      const timer = setTimeout(() => setActiveTab('register'), 0)
+      return () => clearTimeout(timer)
+    }
+  }, [invitationToken])
+
   const { data: invitationData, isLoading: isInvitationLoading } = useValidateInvitation(invitationToken)
 
   const loginSchema = createLoginSchema(t)
@@ -272,11 +285,11 @@ export function AuthForm() {
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <TabsList className="grid w-full grid-cols-2 mb-4">
+      <TabsList className="grid w-full grid-cols-2 mb-4 relative z-20">
         <TabsTrigger value="login">{t('loginTab')}</TabsTrigger>
         <TabsTrigger value="register">{t('registerTab')}</TabsTrigger>
       </TabsList>
-      <TabsContent value="login" className="mt-0">
+      <TabsContent value="login" className="mt-0 relative z-10">
         <Card className="border-0 shadow-lg">
           <CardHeader className="space-y-1 pb-6">
             <CardTitle className="text-2xl">{t('loginTitle')}</CardTitle>
@@ -345,7 +358,7 @@ export function AuthForm() {
           </CardContent>
         </Card>
       </TabsContent>
-      <TabsContent value="register" className="mt-0">
+      <TabsContent value="register" className="mt-0 relative z-10">
         <Card className="border-0 shadow-lg">
           <CardHeader className="space-y-1 pb-6 flex flex-col items-center">
             {isJoinMode && invitationData.brand_logo_url && (

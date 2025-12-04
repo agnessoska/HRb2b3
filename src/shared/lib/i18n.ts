@@ -28,7 +28,8 @@ i18n
     defaultNS: 'common',
     backend: {
       // Path where translation files are located
-      loadPath: '/locales/{{lng}}/{{ns}}.json',
+      // Added version query param to bust cache
+      loadPath: '/locales/{{lng}}/{{ns}}.json?v=20251203-2',
     },
   })
 

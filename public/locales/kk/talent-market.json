@@ -79,10 +79,35 @@
   "skillsSelect": {
     "placeholder": "Дағдыны қосу",
     "selected": "таңдалды",
-    "searchPlaceholder": "Дағдыларды іздеу...",
+    "searchPlaceholder": "Аты бойынша іздеу...",
     "searching": "Іздеу...",
     "minCharacters": "Кемінде 2 таңба енгізіңіз",
-    "noSkillsFound": "Дағдылар табылмады"
+    "noSkillsFound": "Дағдылар табылмады",
+    "categories": "Санаттар",
+    "allSkills": "Барлық дағдылар"
+  },
+  "skillCategories": {
+    "it_frontend": "Frontend",
+    "it_backend": "Backend",
+    "it_database": "Деректер базасы",
+    "it_devops": "DevOps & Cloud",
+    "it_mobile": "Mobile",
+    "it_testing": "Тестілеу & QA",
+    "it_datascience": "Data Science & ML",
+    "it_management": "IT Менеджмент",
+    "it_general": "IT Жалпы",
+    "it_architecture": "Архитектура",
+    "it_api": "API",
+    "design": "Дизайн",
+    "finance": "Қаржы және Бухгалтерия",
+    "hr": "HR",
+    "marketing": "Маркетинг",
+    "language": "Тілдер",
+    "soft_skill": "Soft Skills",
+    "management": "Менеджмент",
+    "office_tools": "Кеңсе құралдары",
+    "sales": "Сатылымдар",
+    "other": "Басқа"
   },
   "noCandidatesFound": "Сіздің сүзгілеріңізге сәйкес үміткерлер табылмады.",
   "noMoreCandidates": "Сіз барлық үміткерлерді қарап шықтыңыз."

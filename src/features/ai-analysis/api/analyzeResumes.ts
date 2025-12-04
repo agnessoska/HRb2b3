@@ -5,15 +5,31 @@ interface AnalyzeResumesPayload {
   organization_id: string
   hr_specialist_id: string
   vacancy_ids: string[]
-  resumes: {
-    filename: string
-    content_base64: string
-  }[]
+  file_paths: string[] // Changed from resumes object to file paths
   additional_notes?: string
   language: 'ru' | 'kk' | 'en'
+  save_to_db?: boolean
 }
 
-const analyzeResumes = async (payload: AnalyzeResumesPayload) => {
+export interface AnalyzeResumesResponse {
+  success: boolean
+  result: {
+    id: string
+    content_html: string | null
+    content_markdown: string | null
+    created_at: string
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    analysis_data: any
+  }
+  data?: {
+    content_html: string | null
+    content_markdown: string | null
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    analysis_data: any
+  }
+}
+
+const analyzeResumes = async (payload: AnalyzeResumesPayload): Promise<AnalyzeResumesResponse> => {
   const { data, error } = await supabase.functions.invoke('analyze-resumes', {
     body: payload,
   })
@@ -25,9 +41,7 @@ const analyzeResumes = async (payload: AnalyzeResumesPayload) => {
   return data
 }
 
-type AnalyzeResumesResult = Awaited<ReturnType<typeof analyzeResumes>>;
-
-export const useAnalyzeResumes = (options?: UseMutationOptions<AnalyzeResumesResult, Error, AnalyzeResumesPayload>) => {
+export const useAnalyzeResumes = (options?: UseMutationOptions<AnalyzeResumesResponse, Error, AnalyzeResumesPayload>) => {
   return useMutation({
     mutationFn: analyzeResumes,
     ...options,

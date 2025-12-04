@@ -84,14 +84,14 @@ export const ResumeAnalysisHistory = ({ onViewAnalysis }: ResumeAnalysisHistoryP
                 </div>
 
                 <div className="flex items-center gap-2 mt-2 sm:mt-0">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={() => onViewAnalysis(analysis as AnalysisResult)}
                     className="w-full sm:w-auto rounded-xl"
                   >
                     <Eye className="w-4 h-4 mr-2" />
-                    {t('common:view', 'Просмотр')}
+                    {t('ai-analysis:resumeAnalysis.history.viewButton')}
                   </Button>
                 </div>
               </div>

@@ -13,6 +13,7 @@ import { Progress } from '@/components/ui/progress';
 import { QuestionCard } from '@/features/testing-system/ui/QuestionCard';
 import { MBTIQuestionCard } from '@/features/testing-system/ui/MBTIQuestionCard';
 import { DISCQuestionCard } from '@/features/testing-system/ui/DISCQuestionCard';
+import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { addMonths } from 'date-fns';
 import { getCandidateProfileByUserId } from '@/features/candidate-management/api/getCandidateProfileByUserId';
@@ -86,6 +87,17 @@ const TestPassingPage = () => {
 
   const handleAnswer = (questionNumber: number, value: number) => {
     setAnswers(prev => ({ ...prev, [questionNumber]: value }));
+    
+    // Auto-scroll to next question
+    const nextQuestion = questionNumber + 1;
+    if (nextQuestion <= (test?.test_questions.length || 0)) {
+      setTimeout(() => {
+        const element = questionRefs.current[nextQuestion];
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 300); // Small delay for user to see selection
+    }
   };
 
   const handleSubmit = async () => {
@@ -202,21 +214,26 @@ const TestPassingPage = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-muted/40">
-      <div className="sticky top-0 z-10 bg-background border-b">
-        <div className="max-w-4xl mx-auto p-4">
+    <div className="min-h-screen flex flex-col bg-muted/40 pt-16">
+      <div className="sticky top-16 z-30 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b shadow-sm">
+        <div className="max-w-4xl mx-auto px-4 py-2">
           <div className="flex items-center justify-between mb-2">
-            <Button variant="ghost" size="sm" onClick={() => { if (window.confirm(t('confirmExit'))) { navigate('/candidate/dashboard') } }}>
-              <ArrowLeft className="h-4 w-4 mr-2" />{t('common:back')}
+            <Button variant="ghost" size="sm" onClick={() => { if (window.confirm(t('confirmExit'))) { navigate('/candidate/dashboard') } }} className="h-8">
+              <ArrowLeft className="h-4 w-4 mr-1.5" />{t('common:back')}
             </Button>
-            <div className="text-sm font-medium">{t('progress')}: {answeredCount}/{totalQuestions} ({Math.round(progress)}%)</div>
+            <div className="flex items-center gap-3">
+              <Badge variant="outline" className="h-7">
+                {answeredCount} / {totalQuestions}
+              </Badge>
+              <div className="text-sm font-medium w-12 text-right">{Math.round(progress)}%</div>
+            </div>
           </div>
-          <Progress value={progress} className="h-2" />
+          <Progress value={progress} className="h-1" />
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto">
-        <div className="max-w-4xl mx-auto p-6 space-y-6">
+      <div className="flex-1 overflow-auto pb-20">
+        <div className="max-w-4xl mx-auto p-4 space-y-4">
           {test.test_questions.sort((a: TestQuestion, b: TestQuestion) => a.question_number - b.question_number).map((question: TestQuestion) => (
             <div key={question.id} ref={(el) => { questionRefs.current[question.question_number] = el; }}>
               {test.test_type === 'scale' && <QuestionCard question={question as TestQuestion & { options: { ru: string[], kk: string[], en: string[], values: number[] } }} questionNumber={question.question_number} totalQuestions={totalQuestions} selectedValue={answers[question.question_number]} onAnswer={(value) => handleAnswer(question.question_number, value)} />}

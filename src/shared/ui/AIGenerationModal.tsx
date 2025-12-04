@@ -13,6 +13,8 @@ interface AIGenerationModalProps {
   title: string
   description?: string
   loadingSteps?: string[]
+  progress?: number
+  simulationMode?: 'default' | 'slow'
 }
 
 export const AIGenerationModal = ({
@@ -21,7 +23,9 @@ export const AIGenerationModal = ({
   isPending,
   title,
   description,
-  loadingSteps
+  loadingSteps,
+  progress: externalProgress,
+  simulationMode = 'default'
 }: AIGenerationModalProps) => {
   const { t } = useTranslation('common')
   const [progress, setProgress] = useState(0)
@@ -36,39 +40,59 @@ export const AIGenerationModal = ({
     'aiModal.steps.finalizing'
   ]
 
+  // Internal simulation and steps
   useEffect(() => {
     let progressInterval: ReturnType<typeof setInterval>
     let stepInterval: ReturnType<typeof setInterval>
 
     if (isOpen && isPending) {
-      // Progress simulation
-      progressInterval = setInterval(() => {
-        setProgress(prev => {
-          if (prev >= 90) return prev // Hold at 90% until complete
-          // Slow down as we get higher
-          const increment = Math.max(1, (90 - prev) / 10)
-          return Math.min(90, prev + increment)
-        })
-      }, 500)
+      // Progress simulation (only if no external progress)
+      if (externalProgress === undefined) {
+        const targetMax = 95
+        const duration = simulationMode === 'slow' ? 250000 : 45000 // 250s vs 45s
+        const intervalTime = 500
+        const totalSteps = duration / intervalTime
+        const incrementBase = targetMax / totalSteps
+
+        progressInterval = setInterval(() => {
+          setProgress(prev => {
+            if (prev >= targetMax) return prev // Hold until complete
+            
+            let currentIncrement = incrementBase
+            if (prev > 50) currentIncrement = incrementBase * 0.5
+            if (prev > 80) currentIncrement = incrementBase * 0.2
+
+            return Math.min(targetMax, prev + currentIncrement)
+          })
+        }, intervalTime)
+      }
 
       // Step rotation
       stepInterval = setInterval(() => {
         setCurrentStep(prev => (prev + 1) % steps.length)
       }, 3000)
     } else if (!isOpen) {
-      // Reset on close (delayed to avoid flash)
+      // Reset on close
       const timer = setTimeout(() => {
         setProgress(0)
         setCurrentStep(0)
       }, 300)
       return () => clearTimeout(timer)
+    } else if (isOpen && !isPending) {
+        // Completed
+        const timer = setTimeout(() => {
+            setProgress(100)
+        }, 0)
+        return () => clearTimeout(timer)
     }
 
     return () => {
       if (progressInterval) clearInterval(progressInterval)
       if (stepInterval) clearInterval(stepInterval)
     }
-  }, [isOpen, isPending, steps.length])
+  }, [isOpen, isPending, steps.length, externalProgress, simulationMode])
+
+  const displayProgress = externalProgress !== undefined ? externalProgress : progress
 
   const handleOpenChange = (open: boolean) => {
     if (isPending && !open) {
@@ -131,10 +155,10 @@ export const AIGenerationModal = ({
                         {t(steps[currentStep], { defaultValue: steps[currentStep] })} {/* Fallback if key not found */}
                     </motion.span>
                 </AnimatePresence>
-                <span>{Math.round(progress)}%</span>
+                <span>{Math.round(displayProgress)}%</span>
               </div>
               
-              <Progress value={progress} className="h-2" indicatorClassName="bg-gradient-to-r from-primary to-purple-600" />
+              <Progress value={displayProgress} className="h-2" indicatorClassName="bg-gradient-to-r from-primary to-purple-600" />
               
               <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground bg-muted/50 py-2 px-3 rounded-full w-fit mx-auto">
                 <Loader2 className="w-3 h-3 animate-spin" />

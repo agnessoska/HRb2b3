@@ -47,6 +47,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
   const candidateLinks = [
     { href: '/candidate/dashboard', label: t('nav.dashboard', 'Дашборд') },
     { href: '/candidate/chat', label: t('nav.chat', 'Чат') },
+    { href: '/candidate/profile', label: t('profile', 'Профиль') },
   ];
 
   const links = role === 'hr' ? hrLinks : role === 'candidate' ? candidateLinks : [];

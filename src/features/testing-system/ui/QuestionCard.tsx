@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { RadioGroup } from "@/components/ui/radio-group";
 import { cn } from "@/lib/utils";
 import type { Tables } from "@/shared/types/database";
 import { useTranslation } from "react-i18next";
@@ -38,12 +38,12 @@ export const QuestionCard = ({
 
   return (
     <Card className={cn(
-      "p-6 transition-all",
+      "p-5 transition-all",
       selectedValue !== undefined && "ring-2 ring-primary"
     )}>
-      <div className="space-y-4">
+      <div className="space-y-3">
         <div className="flex items-start justify-between">
-          <h3 className="text-lg font-medium leading-relaxed flex-1">
+          <h3 className="text-base font-medium leading-relaxed flex-1">
             {questionText}
           </h3>
           <Badge variant="outline" className="ml-4 flex-shrink-0">
@@ -61,17 +61,23 @@ export const QuestionCard = ({
               const isSelected = selectedValue === value;
               
               return (
-                <label
+                <div
                   key={index}
                   className={cn(
-                    "flex items-center space-x-3 p-4 rounded-lg border-2 cursor-pointer transition-all",
-                    "hover:bg-accent hover:border-accent-foreground/20",
-                    isSelected && "border-primary bg-primary/5"
+                    "relative flex items-center space-x-3 p-3 rounded-lg border cursor-pointer transition-all duration-200",
+                    "hover:bg-accent hover:border-accent-foreground/20 active:scale-[0.99]",
+                    isSelected ? "border-primary bg-primary/5 ring-1 ring-primary/20" : "border-muted"
                   )}
+                  onClick={() => onAnswer(value)}
                 >
-                  <RadioGroupItem value={value.toString()} id={`q${questionNumber}-${index}`} />
-                  <span className="text-base flex-1">{option}</span>
-                </label>
+                  <div className={cn(
+                    "h-5 w-5 rounded-full border border-primary flex items-center justify-center shrink-0 transition-colors",
+                    isSelected && "bg-primary text-primary-foreground"
+                  )}>
+                    {isSelected && <div className="h-2 w-2 rounded-full bg-white" />}
+                  </div>
+                  <span className="text-base flex-1 font-medium">{option}</span>
+                </div>
               )
             })}
           </div>

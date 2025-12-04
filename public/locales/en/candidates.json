@@ -29,6 +29,7 @@
         "description": "The full analysis of the candidate will be displayed here after it is generated."
       }
     },
+    "chatNotAvailable": "Chat is not available. Add the candidate to your database to start messaging.",
     "documentsCard": {
       "title": "Generated Documents",
       "empty": "No documents have been generated for this candidate yet."
@@ -50,7 +51,24 @@
       "education": "Education",
       "about": "About",
       "testsCompleted": "Tests Completed"
-    }
+    },
+    "fullName": "Full Name",
+    "phone": "Phone",
+    "category": "Category",
+    "skills": "Skills",
+    "experience": "Experience",
+    "experiencePlaceholder": "Describe your work experience...",
+    "education": "Education",
+    "educationPlaceholder": "List your education...",
+    "about": "About Me",
+    "aboutPlaceholder": "Tell us about yourself...",
+    "isPublic": "Public Profile",
+    "isPublicDesc": "Allow HR specialists to see your profile in Talent Market",
+    "updateSuccess": "Profile updated successfully",
+    "updateError": "Error updating profile",
+    "loading": "Loading profile...",
+    "notFound": "Profile not found",
+    "personalInfo": "Personal Information"
   },
   "common": {
     "notAvailable": "N/A",

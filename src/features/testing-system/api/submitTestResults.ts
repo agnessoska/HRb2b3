@@ -61,3 +61,23 @@ export const submitTestResults = async ({ testId, answers }: SubmitTestPayload) 
 
   return submissionData;
 };
+
+
+export const requestTestRetake = async (testId: string, userId: string) => {
+  const profile = await getCandidateProfileByUserId(userId);
+  if (!profile) {
+    return { success: false, error: 'Candidate profile not found' };
+  }
+
+  const { error } = await supabase.rpc('request_test_retake', {
+    p_candidate_id: profile.id,
+    p_test_id: testId,
+  });
+
+  if (error) {
+    console.error('Error requesting test retake:', error);
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
+};

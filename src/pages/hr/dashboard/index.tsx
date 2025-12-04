@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useSearchParams } from 'react-router-dom'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { VacancyList } from '@/features/vacancy-management/ui/VacancyList'
 import { CandidateList } from '@/features/candidate-management/ui/CandidateList'
@@ -10,7 +11,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 export default function HRDashboardPage() {
   const { t } = useTranslation('dashboard')
-  const [activeTab, setActiveTab] = useState('vacancies')
+  const [searchParams, setSearchParams] = useSearchParams()
+  const activeTab = searchParams.get('tab') || 'vacancies'
+
+  // Set default tab if not present
+  useEffect(() => {
+    if (!searchParams.get('tab')) {
+      setSearchParams({ tab: 'vacancies' }, { replace: true })
+    }
+  }, [searchParams, setSearchParams])
+
+  const handleTabChange = (value: string) => {
+    setSearchParams({ tab: value })
+  }
 
   return (
     <div className="space-y-6 sm:space-y-8">
@@ -25,7 +38,7 @@ export default function HRDashboardPage() {
 
       {/* Mobile View: Select */}
       <div className="sm:hidden">
-        <Select value={activeTab} onValueChange={setActiveTab}>
+        <Select value={activeTab} onValueChange={handleTabChange}>
           <SelectTrigger>
             <SelectValue />
           </SelectTrigger>
@@ -52,7 +65,7 @@ export default function HRDashboardPage() {
         </Select>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-6">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full space-y-6">
         {/* Desktop View: TabsList */}
         <TabsList className="hidden sm:grid w-full grid-cols-3 h-12 p-1 bg-muted/50 backdrop-blur supports-[backdrop-filter]:bg-muted/50">
           <TabsTrigger value="resume-analysis" className="gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">

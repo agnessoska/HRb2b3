@@ -12,9 +12,11 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Label } from '@/components/ui/label'
 import { Loader2 } from 'lucide-react'
+import { Textarea } from '@/components/ui/textarea'
 
 const profileSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
+  cultureDescription: z.string().optional(),
 })
 
 export default function HRProfilePage() {
@@ -28,6 +30,7 @@ export default function HRProfilePage() {
     resolver: zodResolver(profileSchema),
     defaultValues: {
       name: '',
+      cultureDescription: '',
     },
   })
 
@@ -35,6 +38,7 @@ export default function HRProfilePage() {
     if (organization) {
       form.reset({
         name: organization.name || '',
+        cultureDescription: organization.culture_description || '',
       })
       if (organization.brand_logo_url) {
         setPreviewUrl(organization.brand_logo_url)
@@ -58,6 +62,7 @@ export default function HRProfilePage() {
       id: organization.id,
       name: values.name,
       logoFile: logoFile || undefined,
+      cultureDescription: values.cultureDescription,
     })
   }
 
@@ -116,14 +121,32 @@ export default function HRProfilePage() {
                 )}
               />
 
-              <Button type="submit" disabled={isPending}>
-                {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {t('saveChanges', 'Save Changes')}
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
-    </div>
-  )
+              <FormField
+              control={form.control}
+              name="cultureDescription"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('cultureCode', 'Cultural Code')}</FormLabel>
+                   <FormControl>
+                      <Textarea
+                        placeholder={t('cultureCodePlaceholder', 'Describe your company culture, values, and work environment...')}
+                        className="resize-y min-h-[150px]"
+                        {...field}
+                      />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Button type="submit" disabled={isPending}>
+              {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {t('saveChanges', 'Save Changes')}
+            </Button>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
+  </div>
+)
 }

@@ -1,28 +1,36 @@
 import { useMemo, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { useGetCandidateById } from '@/features/candidate-management/api/getCandidateById'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Bot, Download, Share2, FileText, PlusCircle } from 'lucide-react'
+import { Bot, Download, Share2, FileText, PlusCircle, MessageCircle, Loader2 } from 'lucide-react'
 import { GenerateFullAnalysisDialog } from '@/features/ai-analysis/ui/GenerateFullAnalysisDialog'
 import { GenerateStructuredInterviewDialog } from '@/features/ai-analysis/ui/GenerateStructuredInterviewDialog'
 import { useOrganization } from '@/shared/hooks/useOrganization'
+import { useHrProfile } from '@/shared/hooks/useHrProfile'
 import { useGetFullAnalysisByCandidate } from '@/features/ai-analysis/api/getFullAnalysisByCandidate'
 import { useGetGeneratedDocumentsByCandidate } from '@/features/ai-analysis/api/getGeneratedDocuments'
 import { GenerateDocumentDialog } from '@/features/ai-analysis/ui/GenerateDocumentDialog'
+import { getChatRoomByParticipants } from '@/features/chat/api'
+import { checkCandidateRelation } from '@/features/candidate-management/api/checkCandidateRelation'
+import { supabase } from '@/shared/lib/supabase'
 import type { DocumentType } from '@/features/ai-analysis/api/generateDocument'
 import { marked } from 'marked'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
+import { useQuery } from '@tanstack/react-query'
 
 export default function CandidateProfilePage() {
   const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
   const { t } = useTranslation(['candidates', 'common'])
   const { data: organization } = useOrganization()
+  const { data: hrProfile } = useHrProfile()
 
-  const { 
-    data: candidate, 
+  const {
+    data: candidate,
     isLoading: isLoadingCandidate, 
     isError: isErrorCandidate, 
     error: errorCandidate 
@@ -43,6 +51,16 @@ export default function CandidateProfilePage() {
   const [isDocumentDialogOpen, setIsDocumentDialogOpen] = useState(false)
   const [documentType, setDocumentType] = useState<DocumentType>('interview_invitation')
   const [additionalInfo, setAdditionalInfo] = useState('')
+  const [isCheckingChat, setIsCheckingChat] = useState(false)
+
+  const { data: isRelated, isLoading: isCheckingRelation } = useQuery({
+    queryKey: ['candidate-relation', id, organization?.id],
+    queryFn: async () => {
+      if (!id || !organization?.id) return false;
+      return checkCandidateRelation(id, organization.id);
+    },
+    enabled: !!id && !!organization?.id,
+  });
 
   const analysisHtml = useMemo(() => {
     if (analysis?.content_markdown) {
@@ -50,6 +68,47 @@ export default function CandidateProfilePage() {
     }
     return ''
   }, [analysis])
+
+  const handleSendMessage = async () => {
+    if (!hrProfile || !id || !organization) return
+    
+    setIsCheckingChat(true)
+    try {
+      // 1. Try to find existing room
+      const room = await getChatRoomByParticipants(hrProfile.id, id)
+      
+      if (room) {
+        navigate(`/hr/chat?candidateId=${id}`)
+        return;
+      }
+
+      // 2. If room doesn't exist but candidate is ours -> create room
+      if (isRelated) {
+        const { data: newRoom, error: createError } = await supabase
+          .from('chat_rooms')
+          .insert({
+            hr_specialist_id: hrProfile.id,
+            candidate_id: id,
+            organization_id: organization.id
+          })
+          .select('id')
+          .single();
+        
+        if (createError) throw createError;
+        
+        if (newRoom) {
+          navigate(`/hr/chat?candidateId=${id}`);
+        }
+      } else {
+        toast.error(t('profile.chatNotAvailable'))
+      }
+    } catch (error) {
+      console.error(error)
+      toast.error(t('common:error'))
+    } finally {
+      setIsCheckingChat(false)
+    }
+  }
 
   const isLoading = isLoadingCandidate || (organization && (isLoadingAnalysis || isLoadingDocuments))
 
@@ -158,10 +217,28 @@ export default function CandidateProfilePage() {
               <CardTitle>{t('profile.actionsCard.title')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              <GenerateFullAnalysisDialog 
-                candidateId={id!} 
-                testsCompleted={candidate?.tests_completed || 0} 
-              />
+              <Button
+                className="w-full gap-2"
+                variant={isRelated ? "default" : "secondary"}
+                onClick={handleSendMessage}
+                disabled={isCheckingChat || isCheckingRelation || !isRelated}
+                title={!isRelated && !isCheckingRelation ? t('profile.chatNotAvailable') : undefined}
+              >
+                {isCheckingChat || isCheckingRelation ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <MessageCircle className="h-4 w-4" />
+                )}
+                {t('common:sendMessage')}
+              </Button>
+              
+              <div className="pt-2">
+                <GenerateFullAnalysisDialog
+                  candidateId={id!}
+                  testsCompleted={candidate?.tests_completed || 0}
+                />
+              </div>
+              
               {(candidate?.tests_completed || 0) < 6 && (
                 <p className="text-xs text-muted-foreground pt-1">
                   {t('profile.actionsCard.analysisDisabledTooltip')}

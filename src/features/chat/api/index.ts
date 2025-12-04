@@ -32,3 +32,21 @@ export const resetUnreadCount = async (
     console.error('Error resetting unread count:', error);
   }
 };
+export const getChatRoomByParticipants = async (
+  hrId: string,
+  candidateId: string
+) => {
+  const { data, error } = await supabase
+    .from('chat_rooms')
+    .select('id')
+    .eq('hr_specialist_id', hrId)
+    .eq('candidate_id', candidateId)
+    .maybeSingle();
+
+  if (error) {
+    console.error('Error fetching chat room:', error);
+    return null;
+  }
+
+  return data;
+};

@@ -1,40 +1,14 @@
-import { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Download, ArrowLeft, User, ThumbsUp, ThumbsDown, MinusCircle, CheckCircle2, XCircle } from 'lucide-react'
+import { Download, ArrowLeft, User, ThumbsUp, ThumbsDown, MinusCircle, CheckCircle2, XCircle, AlertTriangle, Brain, MessageCircle, Heart } from 'lucide-react'
 import { AIBorder } from '@/shared/ui/AIBorder'
 import { AIStreamingText } from '@/shared/ui/AIStreamingText'
 import { Progress } from '@/components/ui/progress'
-import jsPDF from 'jspdf'
-import html2canvas from 'html2canvas'
-
-interface AnalysisCandidate {
-  name: string
-  match_score: number
-  summary: string
-  pros: string[]
-  cons: string[]
-  verdict: 'recommended' | 'maybe' | 'rejected'
-  vacancy_matches: {
-    vacancy_title: string
-    score: number
-    reason: string
-  }[]
-}
-
-interface AnalysisData {
-  candidates: AnalysisCandidate[]
-}
-
-interface AnalysisResult {
-  id: string
-  created_at: string
-  content_html: string | null
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  analysis_data: any
-}
+import { pdf } from '@react-pdf/renderer'
+import { ResumeAnalysisDocument } from './pdf/ResumeAnalysisDocument'
+import type { AnalysisData, AnalysisResult } from '../types'
 
 interface ResumeAnalysisResultProps {
   result: AnalysisResult
@@ -43,32 +17,44 @@ interface ResumeAnalysisResultProps {
 
 export const ResumeAnalysisResult = ({ result, onBack }: ResumeAnalysisResultProps) => {
   const { t } = useTranslation(['ai-analysis', 'common'])
-  const contentRef = useRef<HTMLDivElement>(null)
 
   const analysisData = result.analysis_data as AnalysisData | null
 
   const handleDownloadPDF = async () => {
-    if (!contentRef.current) return
+    if (!analysisData) return
 
     try {
-      const canvas = await html2canvas(contentRef.current, {
-        scale: 2,
-        logging: false,
-        useCORS: true
-      })
-      
-      const imgData = canvas.toDataURL('image/png')
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
-      })
+      const translations = {
+        matchScore: t('ai-analysis:resumeAnalysis.result.matchScore'),
+        matches: t('ai-analysis:resumeAnalysis.result.matches'),
+        hardSkills: t('ai-analysis:resumeAnalysis.result.sections.hardSkills'),
+        softSkills: t('ai-analysis:resumeAnalysis.result.sections.softSkills'),
+        gaps: t('ai-analysis:resumeAnalysis.result.sections.gaps'),
+        redFlags: t('ai-analysis:resumeAnalysis.result.sections.redFlags'),
+        culturalFit: t('ai-analysis:resumeAnalysis.result.sections.culturalFit'),
+        interviewQuestions: t('ai-analysis:resumeAnalysis.result.sections.interviewQuestions'),
+        verdicts: {
+          recommended: t('ai-analysis:resumeAnalysis.result.verdicts.recommended'),
+          maybe: t('ai-analysis:resumeAnalysis.result.verdicts.maybe'),
+          rejected: t('ai-analysis:resumeAnalysis.result.verdicts.rejected'),
+        }
+      }
 
-      const imgWidth = 210
-      const imgHeight = (canvas.height * imgWidth) / canvas.width
+      const blob = await pdf(
+        <ResumeAnalysisDocument
+          data={analysisData}
+          title={t('resumeAnalysis.result.title')}
+          translations={translations}
+        />
+      ).toBlob()
       
-      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight)
-      pdf.save(`resume-analysis-${new Date().toISOString().split('T')[0]}.pdf`)
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `resume-analysis-${new Date().toISOString().split('T')[0]}.pdf`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
     } catch (error) {
       console.error('Failed to generate PDF', error)
     }
@@ -138,14 +124,14 @@ export const ResumeAnalysisResult = ({ result, onBack }: ResumeAnalysisResultPro
         </div>
         <Button onClick={handleDownloadPDF} variant="outline" className="gap-2">
           <Download className="w-4 h-4" />
-          {t('common:downloadPDF', 'Скачать PDF')}
+          {t('ai-analysis:resumeAnalysis.result.downloadPDF')}
         </Button>
       </div>
 
-      <div ref={contentRef} className="bg-background p-4 sm:p-8 rounded-xl">
+      <div className="bg-background p-4 sm:p-8 rounded-xl">
         <div className="space-y-8">
-          {analysisData.candidates.map((candidate, index) => (
-            <Card key={index} className="overflow-hidden border-border/50 shadow-sm">
+          {analysisData.candidates?.map((candidate, index) => (
+            <Card key={index} className="candidate-card overflow-hidden border-border/50 shadow-sm break-inside-avoid">
               <div className="p-6 space-y-6">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row justify-between gap-4">
@@ -159,7 +145,7 @@ export const ResumeAnalysisResult = ({ result, onBack }: ResumeAnalysisResultPro
                         <Badge variant="outline" className={getVerdictColor(candidate.verdict)}>
                           <span className="flex items-center gap-1">
                             {getVerdictIcon(candidate.verdict)}
-                            <span className="capitalize">{candidate.verdict}</span>
+                            <span className="capitalize">{t(`ai-analysis:resumeAnalysis.result.verdicts.${candidate.verdict}`)}</span>
                           </span>
                         </Badge>
                       </div>
@@ -168,7 +154,7 @@ export const ResumeAnalysisResult = ({ result, onBack }: ResumeAnalysisResultPro
                   
                   <div className="flex items-center gap-4 min-w-[200px]">
                     <div className="flex-1 text-right">
-                      <div className="text-sm font-medium text-muted-foreground mb-1">Match Score</div>
+                      <div className="text-sm font-medium text-muted-foreground mb-1">{t('ai-analysis:resumeAnalysis.result.matchScore')}</div>
                       <div className="text-2xl font-bold text-primary">{candidate.match_score}%</div>
                     </div>
                     <div className="h-14 w-14 relative flex items-center justify-center">
@@ -207,9 +193,9 @@ export const ResumeAnalysisResult = ({ result, onBack }: ResumeAnalysisResultPro
 
                 {/* Vacancy Matches */}
                 <div className="space-y-3">
-                  <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">Matches</h4>
+                  <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">{t('ai-analysis:resumeAnalysis.result.matches')}</h4>
                   <div className="grid gap-3">
-                    {candidate.vacancy_matches.map((match, i) => (
+                    {candidate.vacancy_matches?.map((match, i) => (
                       <div key={i} className="bg-card border rounded-lg p-3">
                         <div className="flex justify-between items-center mb-2">
                           <span className="font-medium">{match.vacancy_title}</span>
@@ -222,37 +208,147 @@ export const ResumeAnalysisResult = ({ result, onBack }: ResumeAnalysisResultPro
                   </div>
                 </div>
 
-                {/* Pros & Cons */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <h4 className="font-semibold text-sm text-success mb-3 flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4" />
-                      Pros
-                    </h4>
-                    <ul className="space-y-2">
-                      {candidate.pros.map((pro, i) => (
-                        <li key={i} className="text-sm flex items-start gap-2">
-                          <span className="w-1.5 h-1.5 rounded-full bg-success/50 mt-1.5 shrink-0" />
-                          {pro}
-                        </li>
-                      ))}
-                    </ul>
+                {/* Advanced Skills Analysis (New Structure) */}
+                {candidate.skills ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Hard Skills & Pros */}
+                    <div className="space-y-6">
+                      <div>
+                        <h4 className="font-semibold text-sm text-success mb-3 flex items-center gap-2">
+                          <CheckCircle2 className="w-4 h-4" />
+                          {t('resumeAnalysis.result.sections.hardSkills')}
+                        </h4>
+                        <ul className="space-y-2">
+                          {[...(candidate.pros || []), ...(candidate.skills?.hard_skills_match || [])].map((item, i) => (
+                            <li key={i} className="text-sm flex items-baseline gap-2">
+                              <span className="w-1.5 h-1.5 rounded-full bg-success/50 translate-y-[-2px] shrink-0" />
+                              <span>{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      
+                      {/* Soft Skills */}
+                      {(candidate.skills.soft_skills?.length ?? 0) > 0 && (
+                        <div>
+                          <h4 className="font-semibold text-sm text-purple-500 mb-3 flex items-center gap-2">
+                            <Brain className="w-4 h-4" />
+                            {t('resumeAnalysis.result.sections.softSkills')}
+                          </h4>
+                          <div className="flex flex-wrap gap-2">
+                            {candidate.skills?.soft_skills?.map((skill, i) => (
+                              <Badge key={i} variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+                                {skill}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Missing Skills & Cons */}
+                    <div className="space-y-6">
+                      <div>
+                        <h4 className="font-semibold text-sm text-destructive mb-3 flex items-center gap-2">
+                          <XCircle className="w-4 h-4" />
+                          {t('resumeAnalysis.result.sections.gaps')}
+                        </h4>
+                        <ul className="space-y-2">
+                          {[...(candidate.cons || []), ...(candidate.skills?.missing_skills || [])].map((item, i) => (
+                            <li key={i} className="text-sm flex items-baseline gap-2">
+                              <span className="w-1.5 h-1.5 rounded-full bg-destructive/50 translate-y-[-2px] shrink-0" />
+                              <span>{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      {/* Red Flags */}
+                      {(candidate.red_flags?.length ?? 0) > 0 && (
+                        <div className="bg-destructive/5 border border-destructive/20 rounded-xl p-4">
+                          <h4 className="font-semibold text-sm text-destructive mb-3 flex items-center gap-2">
+                            <AlertTriangle className="w-4 h-4" />
+                            {t('resumeAnalysis.result.sections.redFlags')}
+                          </h4>
+                          <ul className="space-y-2">
+                            {candidate.red_flags?.map((flag, i) => (
+                              <li key={i} className="text-sm text-destructive/90 flex items-baseline gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-destructive translate-y-[-2px] shrink-0" />
+                                <span>{flag}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-semibold text-sm text-destructive mb-3 flex items-center gap-2">
-                      <XCircle className="w-4 h-4" />
-                      Cons
-                    </h4>
-                    <ul className="space-y-2">
-                      {candidate.cons.map((con, i) => (
-                        <li key={i} className="text-sm flex items-start gap-2">
-                          <span className="w-1.5 h-1.5 rounded-full bg-destructive/50 mt-1.5 shrink-0" />
-                          {con}
-                        </li>
-                      ))}
-                    </ul>
+                ) : (
+                  // Fallback for old data structure
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <h4 className="font-semibold text-sm text-success mb-3 flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4" />
+                        Pros
+                      </h4>
+                      <ul className="space-y-2">
+                        {candidate.pros?.map((pro, i) => (
+                          <li key={i} className="text-sm flex items-start gap-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-success/50 mt-1.5 shrink-0" />
+                            {pro}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-sm text-destructive mb-3 flex items-center gap-2">
+                        <XCircle className="w-4 h-4" />
+                        Cons
+                      </h4>
+                      <ul className="space-y-2">
+                        {candidate.cons?.map((con, i) => (
+                          <li key={i} className="text-sm flex items-start gap-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-destructive/50 mt-1.5 shrink-0" />
+                            {con}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
-                </div>
+                )}
+
+                {/* Cultural Fit & Interview Questions */}
+                {(candidate.cultural_fit || (candidate.interview_questions?.length ?? 0) > 0) && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-border/50">
+                    {candidate.cultural_fit && (
+                      <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100">
+                        <h4 className="font-semibold text-sm text-blue-700 mb-2 flex items-center gap-2">
+                          <Heart className="w-4 h-4" />
+                          {t('resumeAnalysis.result.sections.culturalFit')}
+                        </h4>
+                        <p className="text-sm text-blue-900/80 leading-relaxed">
+                          {candidate.cultural_fit}
+                        </p>
+                      </div>
+                    )}
+                    
+                    {candidate.interview_questions && candidate.interview_questions.length > 0 && (
+                      <div className="bg-amber-50/50 p-4 rounded-xl border border-amber-100">
+                        <h4 className="font-semibold text-sm text-amber-700 mb-3 flex items-center gap-2">
+                          <MessageCircle className="w-4 h-4" />
+                          {t('resumeAnalysis.result.sections.interviewQuestions')}
+                        </h4>
+                        <ul className="space-y-3">
+                          {candidate.interview_questions?.map((q, i) => (
+                            <li key={i} className="text-sm text-amber-900/80 flex gap-2">
+                              <span className="font-bold text-amber-500/50">{i + 1}.</span>
+                              {q}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </Card>
           ))}

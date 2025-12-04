@@ -79,10 +79,35 @@
   "skillsSelect": {
     "placeholder": "Add Skill",
     "selected": "selected",
-    "searchPlaceholder": "Search skills...",
+    "searchPlaceholder": "Search by name...",
     "searching": "Searching...",
     "minCharacters": "Enter at least 2 characters",
-    "noSkillsFound": "No skills found"
+    "noSkillsFound": "No skills found",
+    "categories": "Categories",
+    "allSkills": "All Skills"
+  },
+  "skillCategories": {
+    "it_frontend": "Frontend",
+    "it_backend": "Backend",
+    "it_database": "Databases",
+    "it_devops": "DevOps & Cloud",
+    "it_mobile": "Mobile",
+    "it_testing": "Testing & QA",
+    "it_datascience": "Data Science & ML",
+    "it_management": "IT Management",
+    "it_general": "IT General",
+    "it_architecture": "Architecture",
+    "it_api": "API",
+    "design": "Design",
+    "finance": "Finance & Accounting",
+    "hr": "HR",
+    "marketing": "Marketing",
+    "language": "Languages",
+    "soft_skill": "Soft Skills",
+    "management": "Management",
+    "office_tools": "Office Tools",
+    "sales": "Sales",
+    "other": "Other"
   },
   "noCandidatesFound": "No candidates found matching your filters.",
   "noMoreCandidates": "You have viewed all candidates."

@@ -11,8 +11,10 @@
   "loading": "Loading...",
   "error": "An error occurred",
   "success": "Success",
+  "done": "Done",
   "close": "Close",
   "confirm": "Confirm",
+  "sendMessage": "Send message",
   "actions": "Actions",
   "soon": "Coming soon",
   "appName": "HR Platform",
@@ -82,5 +84,10 @@
   "logo": "Logo",
   "logoHelp": "Recommended size: 512x512px. Max file size: 2MB.",
   "organizationName": "Organization Name",
-  "saveChanges": "Save Changes"
+  "cultureCode": "Cultural Code",
+  "cultureCodePlaceholder": "Describe your company culture, values, and work environment...",
+  "saveChanges": "Save Changes",
+  "selectCategory": "Select category",
+  "clearAll": "Clear All",
+  "saving": "Saving..."
 }

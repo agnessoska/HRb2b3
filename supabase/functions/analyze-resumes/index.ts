@@ -174,33 +174,17 @@ async function logAIOperation(
 
 // --- MAIN FUNCTION LOGIC ---
 
-interface Resume {
-  filename: string
-  content_base64: string
-}
-
 interface AnalyzeResumesPayload {
   organization_id: string
   hr_specialist_id: string
   vacancy_ids: string[]
-  resumes: Resume[]
+  file_paths: string[]
   additional_notes?: string
   language: 'ru' | 'kk' | 'en'
+  save_to_db?: boolean
 }
 
 const OPERATION_TYPE = 'resume_analysis'
-
-async function parsePdfFromBase64(base64: string): Promise<string> {
-  const binaryString = atob(base64)
-  const len = binaryString.length
-  const bytes = new Uint8Array(len)
-  for (let i = 0; i < len; i++) {
-    bytes[i] = binaryString.charCodeAt(i)
-  }
-  
-  const { text } = await extractText(bytes);
-  return text;
-}
 
 serve(async (req: Request) => {
   console.log(`[${OPERATION_TYPE}] Function invoked with method: ${req.method}`);
@@ -217,9 +201,9 @@ serve(async (req: Request) => {
   try {
     console.log(`[${OPERATION_TYPE}] Step 1: Parsing request payload.`);
     payload = await req.json()
-    console.log(`[${OPERATION_TYPE}] Step 1 successful. Payload received for ${payload?.resumes?.length} resumes.`);
+    console.log(`[${OPERATION_TYPE}] Step 1 successful. Payload received for ${payload?.file_paths?.length} resumes.`);
 
-    if (!payload || !payload.vacancy_ids || !payload.resumes || !payload.organization_id || !payload.hr_specialist_id) {
+    if (!payload || !payload.vacancy_ids || !payload.file_paths || !payload.organization_id || !payload.hr_specialist_id) {
       throw new Error('Missing required fields in payload')
     }
 
@@ -237,7 +221,7 @@ serve(async (req: Request) => {
     supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey)
     console.log(`[${OPERATION_TYPE}] Step 3 successful. Supabase client created.`);
 
-    console.log(`[${OPERATION_TYPE}] Step 4: Fetching vacancy details.`);
+    console.log(`[${OPERATION_TYPE}] Step 4: Fetching vacancy and organization details.`);
     const { data: vacancies, error: vacanciesError } = await supabaseAdmin
       .from('vacancies')
       .select('title, description, requirements, salary_min, salary_max, currency')
@@ -245,7 +229,16 @@ serve(async (req: Request) => {
 
     if (vacanciesError) throw new Error(`Failed to fetch vacancies: ${vacanciesError.message}`)
     if (!vacancies || vacancies.length === 0) throw new Error('No vacancies found for the given IDs')
-    console.log(`[${OPERATION_TYPE}] Step 4 successful. Fetched details for ${vacancies.length} vacancies.`);
+    
+    const { data: organization, error: orgError } = await supabaseAdmin
+        .from('organizations')
+        .select('culture_description')
+        .eq('id', payload.organization_id)
+        .single()
+
+    if (orgError) throw new Error(`Failed to fetch organization culture: ${orgError.message}`)
+    
+    console.log(`[${OPERATION_TYPE}] Step 4 successful. Fetched details for ${vacancies.length} vacancies and organization culture.`);
 
     const vacanciesDescription = vacancies
       .map((v: { title: string; description: string | null; requirements: string | null; salary_min: number | null; salary_max: number | null; currency: string }) => {
@@ -257,15 +250,25 @@ serve(async (req: Request) => {
       })
       .join('\n\n')
 
-    console.log(`[${OPERATION_TYPE}] Step 5: Parsing resumes from base64.`);
+    console.log(`[${OPERATION_TYPE}] Step 5: Downloading and parsing resumes from storage.`);
     const resumesContent = await Promise.all(
-      payload.resumes.map(async (resume) => {
-        const text = await parsePdfFromBase64(resume.content_base64)
-        return `--- RESUME: ${resume.filename} ---\n${text}\n---`
+      payload.file_paths.map(async (filePath) => {
+        const { data, error } = await supabaseAdmin!.storage
+          .from('resumes')
+          .download(filePath)
+
+        if (error) throw new Error(`Failed to download file ${filePath}: ${error.message}`)
+        
+        const arrayBuffer = await data.arrayBuffer()
+        const uint8Array = new Uint8Array(arrayBuffer)
+        const { text } = await extractText(uint8Array)
+        const filename = filePath.split('/').pop()
+        
+        return `--- RESUME: ${filename} ---\n${text}\n---`
       })
     )
     const resumesText = resumesContent.join('\n\n')
-    console.log(`[${OPERATION_TYPE}] Step 5 successful. Parsed ${payload.resumes.length} resumes.`);
+    console.log(`[${OPERATION_TYPE}] Step 5 successful. Parsed ${payload.file_paths.length} resumes.`);
 
     console.log(`[${OPERATION_TYPE}] Step 6: Fetching AI configuration.`);
     aiConfig = await getAIConfig(supabaseAdmin, OPERATION_TYPE)
@@ -274,6 +277,7 @@ serve(async (req: Request) => {
     console.log(`[${OPERATION_TYPE}] Step 7: Building final prompt.`);
     const finalPrompt = aiConfig.prompt_text
       .replace('{vacancies_description}', vacanciesDescription)
+      .replace('{culture_description}', organization?.culture_description || 'Not specified.')
       .replace('{resumes_content}', resumesText)
       .replace('{additional_notes}', payload.additional_notes || 'Нет.')
       .replace('{language}', payload.language)
@@ -284,6 +288,7 @@ serve(async (req: Request) => {
     console.log(`[${OPERATION_TYPE}] Step 8 successful. Received response from AI.`);
 
     console.log(`[${OPERATION_TYPE}] Step 9: Parsing JSON response.`);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let analysisData: any = null;
     let htmlContent = '';
     
@@ -304,23 +309,40 @@ serve(async (req: Request) => {
     }
     console.log(`[${OPERATION_TYPE}] Step 9 successful.`);
 
-    console.log(`[${OPERATION_TYPE}] Step 10: Saving result to database.`);
-    const { data: savedResult, error: insertError } = await supabaseAdmin
-      .from('resume_analysis_results')
-      .insert({
-        organization_id: payload.organization_id,
-        created_by_hr_id: payload.hr_specialist_id,
-        vacancy_ids: payload.vacancy_ids,
-        resume_count: payload.resumes.length,
-        content_markdown: aiResponse,
-        content_html: htmlContent,
-        analysis_data: analysisData
-      })
-      .select()
-      .single()
+    let savedResult = null;
+    const shouldSave = payload.save_to_db !== false; // Default to true
 
-    if (insertError) throw new Error(`Failed to save resume analysis results: ${insertError.message}`)
-    console.log(`[${OPERATION_TYPE}] Step 10 successful. Result saved with ID: ${savedResult.id}`);
+    if (shouldSave) {
+        console.log(`[${OPERATION_TYPE}] Step 10: Saving result to database.`);
+        const { data, error: insertError } = await supabaseAdmin
+          .from('resume_analysis_results')
+          .insert({
+            organization_id: payload.organization_id,
+            created_by_hr_id: payload.hr_specialist_id,
+            vacancy_ids: payload.vacancy_ids,
+            resume_count: payload.file_paths.length,
+            content_markdown: aiResponse,
+            content_html: htmlContent,
+            analysis_data: analysisData,
+            file_paths: payload.file_paths
+          })
+          .select()
+          .single()
+
+        if (insertError) throw new Error(`Failed to save resume analysis results: ${insertError.message}`)
+        savedResult = data;
+        console.log(`[${OPERATION_TYPE}] Step 10 successful. Result saved with ID: ${savedResult.id}`);
+    } else {
+        console.log(`[${OPERATION_TYPE}] Step 10: Skipping database save (save_to_db=false).`);
+        // Mock saved result structure for response
+        savedResult = {
+            id: 'temp-chunk-' + Date.now(),
+            content_markdown: aiResponse,
+            content_html: htmlContent,
+            analysis_data: analysisData,
+            created_at: new Date().toISOString()
+        }
+    }
 
     console.log(`[${OPERATION_TYPE}] Step 11: Deducting tokens and logging operation.`);
     await deductTokens(supabaseAdmin, payload.organization_id, inputTokens + outputTokens)
@@ -334,14 +356,25 @@ serve(async (req: Request) => {
       success: true,
       metadata: {
         vacancy_ids: payload.vacancy_ids,
-        resume_count: payload.resumes.length,
+        resume_count: payload.file_paths.length,
         result_id: savedResult.id,
+        save_skipped: !shouldSave
       },
     })
     console.log(`[${OPERATION_TYPE}] Step 11 successful.`);
 
     console.log(`[${OPERATION_TYPE}] Function finished successfully.`);
-    return new Response(JSON.stringify({ success: true, result: savedResult }), {
+    
+    // Return structured data even if not saved, so client can merge
+    return new Response(JSON.stringify({ 
+        success: true, 
+        result: savedResult,
+        data: { // Add explicit data object for client consumption
+            content_markdown: aiResponse,
+            content_html: htmlContent,
+            analysis_data: analysisData
+        }
+    }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     })
@@ -360,7 +393,7 @@ serve(async (req: Request) => {
         error_message: (error as Error).message,
         metadata: {
           vacancy_ids: payload.vacancy_ids,
-          resume_count: payload.resumes?.length ?? 0,
+          resume_count: payload.file_paths?.length ?? 0,
         },
       })
     }

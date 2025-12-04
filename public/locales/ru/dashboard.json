@@ -17,6 +17,11 @@
     "completed": "Пройдено {{count}} из 6 тестов",
     "button": "К тестам"
   },
+  "profileCompleteness": {
+    "title": "Заполненность профиля",
+    "completeButton": "Заполнить профиль",
+    "description": "Заполните профиль, чтобы HR могли вас найти."
+  },
   "profileVisibility": {
     "title": "Статус профиля",
     "label": "Показывать в рынке талантов",
@@ -37,6 +42,8 @@
     "testing": "Тестирование",
     "evaluated": "Оценен",
     "interview": "Интервью",
-    "offer": "Оффер"
+    "offer": "Оффер",
+    "hired": "Нанят",
+    "rejected": "Отклонен"
   }
 }

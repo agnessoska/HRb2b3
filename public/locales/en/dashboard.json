@@ -17,6 +17,11 @@
     "completed": "{{count}} of 6 tests completed",
     "button": "Go to Tests"
   },
+  "profileCompleteness": {
+    "title": "Profile Completeness",
+    "completeButton": "Complete Profile",
+    "description": "Complete your profile so HRs can find you."
+  },
   "profileVisibility": {
     "title": "Profile Status",
     "label": "Visible in Talent Market",
@@ -37,6 +42,8 @@
     "testing": "Testing",
     "evaluated": "Evaluated",
     "interview": "Interview",
-    "offer": "Offer"
+    "offer": "Offer",
+    "hired": "Hired",
+    "rejected": "Rejected"
   }
 }

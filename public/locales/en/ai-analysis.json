@@ -19,6 +19,10 @@
       "dragAndDrop": "Drag and drop files here or click to select",
       "fileRequirements": "PDF files, up to 5MB each, maximum 20 files."
     },
+    "uploadProgress": {
+      "uploading": "Uploading file {{current}} of {{total}}...",
+      "analyzing": "Analyzing resumes..."
+    },
     "additionalNotes": {
       "label": "Additional Notes (optional)",
       "placeholder": "E.g., 'Pay attention to candidates with fintech experience...'"
@@ -43,11 +47,28 @@
       "errorDescription": "Failed to complete the resume analysis."
     },
     "result": {
+      "downloadPDF": "Download PDF",
       "title": "Analysis Result",
       "description": "Analyzed on {{date}}",
-      "newAnalysisButton": "Start New Analysis"
+      "newAnalysisButton": "Start New Analysis",
+      "matchScore": "Match Score",
+      "matches": "VACANCY MATCHES",
+      "verdicts": {
+        "recommended": "Recommended",
+        "maybe": "Maybe",
+        "rejected": "Rejected"
+      },
+      "sections": {
+        "hardSkills": "Hard Skills & Pros",
+        "softSkills": "Soft Skills",
+        "gaps": "Gaps & Weaknesses",
+        "redFlags": "Red Flags (Risks)",
+        "culturalFit": "Cultural Fit",
+        "interviewQuestions": "Suggested Interview Questions"
+      }
     },
     "history": {
+      "viewButton": "View",
       "title": "Analysis History",
       "candidatesCount": "Candidates: {{count}}",
       "empty": "Analysis history is empty"
@@ -66,6 +87,8 @@
     }
   },
   "generateDocument": {
+    "processingTitle": "Generating Document",
+    "processingDescription": "AI is composing the document based on candidate profile and vacancy...",
     "title": "Generate Document",
     "description": "Select the document type and add additional information. AI will create a personalized document for the candidate.",
     "documentType": {
@@ -82,7 +105,32 @@
   "errors": {
     "missingData": "Failed to get data about the candidate, HR, or organization."
   },
+  "generateFullAnalysis": {
+    "trigger": "Generate Full Analysis",
+    "title": "Create Full AI Analysis",
+    "description": "Select up to 5 vacancies in the context of which the candidate analysis will be conducted. This action will deduct tokens from your organization's balance.",
+    "selectVacancies": "Vacancies for Analysis",
+    "selectPlaceholder": "Select vacancies...",
+    "searchPlaceholder": "Search vacancies...",
+    "noVacanciesFound": "No vacancies found",
+    "confirm": "Generate Analysis",
+    "processingTitle": "Generating Full Analysis",
+    "processingDescription": "AI is analyzing candidate profile and test results...",
+    "selected": "Selected: {{count}}",
+    "dialog": {
+      "title": "Create Full AI Analysis",
+      "description": "Select up to 5 vacancies in the context of which the candidate analysis will be conducted. This action will deduct tokens from your organization's balance.",
+      "selectVacancies": {
+        "label": "Vacancies for Analysis",
+        "placeholder": "Select vacancies...",
+        "searchPlaceholder": "Search vacancies..."
+      },
+      "confirmButton": "Generate Analysis"
+    }
+  },
   "generateInterview": {
+    "processingTitle": "Generating Interview",
+    "processingDescription": "AI is composing interview questions...",
     "trigger": "Interview Plan",
     "title": "Generate Interview Plan",
     "description": "AI will create a detailed structured interview plan based on the candidate's full analysis and the vacancy requirements.",

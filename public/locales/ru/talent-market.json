@@ -84,10 +84,35 @@
   "skillsSelect": {
     "placeholder": "Добавить навык",
     "selected": "выбрано",
-    "searchPlaceholder": "Поиск навыков...",
+    "searchPlaceholder": "Поиск по названию...",
     "searching": "Поиск...",
     "minCharacters": "Введите минимум 2 символа",
-    "noSkillsFound": "Навыки не найдены"
+    "noSkillsFound": "Навыки не найдены",
+    "categories": "Категории",
+    "allSkills": "Все навыки"
+  },
+  "skillCategories": {
+    "it_frontend": "Frontend",
+    "it_backend": "Backend",
+    "it_database": "Базы данных",
+    "it_devops": "DevOps & Cloud",
+    "it_mobile": "Mobile",
+    "it_testing": "Тестирование & QA",
+    "it_datascience": "Data Science & ML",
+    "it_management": "IT Менеджмент",
+    "it_general": "IT Общее",
+    "it_architecture": "Архитектура",
+    "it_api": "API",
+    "design": "Дизайн",
+    "finance": "Финансы и Бухгалтерия",
+    "hr": "HR",
+    "marketing": "Маркетинг",
+    "language": "Языки",
+    "soft_skill": "Soft Skills",
+    "management": "Менеджмент",
+    "office_tools": "Офисные инструменты",
+    "sales": "Продажи",
+    "other": "Другое"
   },
   "noCandidatesFound": "Кандидаты по вашим фильтрам не найдены.",
   "noMoreCandidates": "Вы просмотрели всех кандидатов."

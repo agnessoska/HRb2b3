@@ -11,8 +11,11 @@
   "loading": "Жүктелуде...",
   "error": "Қате пайда болды",
   "success": "Сәтті",
+  "done": "Дайын",
   "close": "Жабу",
   "confirm": "Растау",
+  "sendMessage": "Хабарлама жазу",
+  "notSpecified": "Көрсетілмеген",
   "actions": "Әрекеттер",
   "soon": "Жақында",
   "appName": "HR Platform",
@@ -82,5 +85,10 @@
   "logo": "Логотип",
   "logoHelp": "Ұсынылатын өлшем: 512x512px. Макс. өлшем: 2MB.",
   "organizationName": "Ұйым атауы",
-  "saveChanges": "Өзгерістерді сақтау"
+  "cultureCode": "Мәдени код",
+  "cultureCodePlaceholder": "Компанияңыздың мәдениетін, құндылықтарын және жұмыс ортасын сипаттаңыз...",
+  "saveChanges": "Өзгерістерді сақтау",
+  "selectCategory": "Санатты таңдаңыз",
+  "clearAll": "Барлығын тазалау",
+  "saving": "Сақталуда..."
 }

@@ -12,8 +12,11 @@ import { supabase } from '@/shared/lib/supabase';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { getCandidateDashboardData } from '@/features/candidate-management/api/getCandidateDashboardData';
+import { getCandidateProfile } from '@/features/candidate-management/api/getCandidateProfile';
+import type { CandidateProfile } from '@/features/candidate-management/api/getCandidateProfile';
 import { ListContainer, ListItem } from '@/shared/ui/ListTransition';
 import type { TDashboardApplication, TDashboardMessage, TDashboardProfile } from '@/features/candidate-management/types';
+import { TestList } from '@/features/candidate-management/ui/TestList';
 
 
 const CandidateDashboardPage = () => {
@@ -23,6 +26,12 @@ const CandidateDashboardPage = () => {
   const { data, isLoading } = useQuery({
     queryKey: ['candidateDashboard', user?.id],
     queryFn: () => getCandidateDashboardData(user!.id),
+    enabled: !!user,
+  });
+
+  const { data: fullProfile, isLoading: isProfileLoading } = useQuery({
+    queryKey: ['candidateProfile', user?.id],
+    queryFn: () => user ? getCandidateProfile(user.id) : Promise.reject('No user'),
     enabled: !!user,
   });
 
@@ -51,6 +60,7 @@ const CandidateDashboardPage = () => {
           <RecentMessagesWidget messages={data?.messages} isLoading={isLoading} />
         </div>
         <div className="space-y-8">
+          <ProfileCompletenessWidget profile={fullProfile} isLoading={isProfileLoading} />
           <TestingProgressWidget profile={data?.profile} isLoading={isLoading} />
           <ProfileStatusWidget
             profile={data?.profile}
@@ -59,11 +69,58 @@ const CandidateDashboardPage = () => {
           />
         </div>
       </div>
+      <div className="mt-8">
+        <h2 className="text-2xl font-bold mb-6">{t('testingProgress.title')}</h2>
+        <TestList />
+      </div>
     </div>
   );
 };
 
 // --- WIDGETS ---
+
+const ProfileCompletenessWidget = ({
+  profile,
+  isLoading,
+}: {
+  profile: CandidateProfile | undefined;
+  isLoading: boolean;
+}) => {
+  const { t } = useTranslation('dashboard');
+  if (isLoading) return <Skeleton className="h-32 w-full" />;
+  if (!profile) return null;
+
+  let score = 0;
+  if (profile.full_name) score += 10;
+  if (profile.phone) score += 10;
+  if (profile.category_id) score += 20;
+  if (profile.candidate_skills && profile.candidate_skills.length > 0) score += 20;
+  if (profile.experience) score += 20;
+  if (profile.about) score += 10;
+  if (profile.education) score += 10;
+
+  if (score >= 100) return null;
+
+  return (
+    <Card className="border-orange-500/50 bg-orange-500/5">
+      <CardHeader>
+        <CardTitle className="text-orange-700 dark:text-orange-400">{t('profileCompleteness.title')}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          <div className="flex justify-between text-sm">
+             <span>{score}%</span>
+          </div>
+          <Progress value={score} className="h-2 bg-orange-200" indicatorClassName="bg-orange-500" />
+          <p className="text-sm text-muted-foreground">{t('profileCompleteness.description')}</p>
+          <Button asChild className="w-full" variant="outline">
+            <Link to="/candidate/profile">{t('profileCompleteness.completeButton')}</Link>
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
 
 const TestingProgressWidget = ({
   profile,
@@ -93,9 +150,6 @@ const TestingProgressWidget = ({
               <p className="font-bold">{Math.round(progress)}%</p>
             </div>
             <Progress value={progress} />
-            <Button asChild className="w-full mt-4">
-              <Link to="/candidate/tests">{t('testingProgress.button')}</Link>
-            </Button>
           </>
         )}
       </CardContent>
@@ -157,15 +211,25 @@ const ActiveApplicationsWidget = ({
         ) : !applications || applications.length === 0 ? (
           <p className="text-muted-foreground">{t('activeApplications.empty')}</p>
         ) : (
-          <ListContainer>
+          <ListContainer className="space-y-4">
             {applications.map(app => (
               <ListItem key={app.id}>
-                <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                  <div>
-                    <p className="font-semibold">{app.vacancy_title}</p>
+                <div className="flex items-center justify-between p-4 bg-muted/30 border rounded-xl hover:bg-muted/50 transition-colors">
+                  <div className="space-y-1">
+                    <p className="font-semibold text-lg">{app.vacancy_title}</p>
                     <p className="text-sm text-muted-foreground">{app.organization_name}</p>
                   </div>
-                  <Badge>{t(`statuses.${app.status}`)}</Badge>
+                  <Badge
+                    variant={
+                      app.status === 'offer' || app.status === 'hired' ? 'success' :
+                      app.status === 'rejected' ? 'destructive' :
+                      app.status === 'interview' ? 'warning' :
+                      'secondary'
+                    }
+                    className="text-sm py-1 px-3"
+                  >
+                    {t(`statuses.${app.status}`)}
+                  </Badge>
                 </div>
               </ListItem>
             ))}

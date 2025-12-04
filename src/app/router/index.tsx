@@ -13,6 +13,7 @@ import TestResultsPage from '@/pages/candidate/test/results'
 import TalentMarketPage from '@/pages/hr/talent-market'
 import HRChatPage from '@/pages/hr/chat'
 import CandidateChatPage from '@/pages/candidate/chat'
+import MyProfilePage from '@/pages/candidate/profile'
 import BuyTokensPage from '@/pages/hr/buy-tokens'
 import PaymentSuccessPage from '@/pages/hr/payment/success'
 import PaymentCancelPage from '@/pages/hr/payment/cancel'
@@ -150,6 +151,14 @@ export const router = createBrowserRouter([
         element: (
           <PageTransition>
             <CandidateDashboardPage />
+          </PageTransition>
+        ),
+      },
+      {
+        path: 'candidate/profile',
+        element: (
+          <PageTransition>
+            <MyProfilePage />
           </PageTransition>
         ),
       },

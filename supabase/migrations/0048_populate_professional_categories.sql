@@ -1,0 +1,15 @@
+INSERT INTO professional_categories (id, name_ru, name_kk, name_en, sort_order) VALUES
+(gen_random_uuid(), 'IT и технологии', 'IT және технологиялар', 'IT & Technology', 1),
+(gen_random_uuid(), 'Финансы и банковское дело', 'Қаржы және банк ісі', 'Finance & Banking', 2),
+(gen_random_uuid(), 'Маркетинг и продажи', 'Маркетинг және сату', 'Marketing & Sales', 3),
+(gen_random_uuid(), 'HR и управление персоналом', 'HR және персоналды басқару', 'HR & Management', 4),
+(gen_random_uuid(), 'Медицина и здравоохранение', 'Медицина және денсаулық сақтау', 'Medicine & Healthcare', 5),
+(gen_random_uuid(), 'Образование', 'Білім беру', 'Education', 6),
+(gen_random_uuid(), 'Строительство и недвижимость', 'Құрылыс және жылжымайтын мүлік', 'Construction & Real Estate', 7),
+(gen_random_uuid(), 'Транспорт и логистика', 'Көлік және логистика', 'Transport & Logistics', 8),
+(gen_random_uuid(), 'Производство', 'Өндіріс', 'Manufacturing', 9),
+(gen_random_uuid(), 'Искусство и развлечения', 'Өнер және ойын-сауық', 'Arts & Entertainment', 10),
+(gen_random_uuid(), 'Наука', 'Ғылым', 'Science', 11),
+(gen_random_uuid(), 'Юриспруденция', 'Заң', 'Legal', 12),
+(gen_random_uuid(), 'Административный персонал', 'Әкімшілік қызметкерлер', 'Administrative', 13),
+(gen_random_uuid(), 'Студенты и начало карьеры', 'Студенттер және мансаптың басы', 'Students & Entry Level', 14);

@@ -1,6 +1,7 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { useTranslation } from 'react-i18next'
+import { useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -14,42 +15,88 @@ import { useGetVacancies } from '@/features/vacancy-management/api/getVacancies'
 import { useSettingsStore } from '@/app/store/settings'
 import { useHrProfile } from '@/shared/hooks/useHrProfile'
 import { useOrganization } from '@/shared/hooks/useOrganization'
-import { useAnalyzeResumes } from '../api/analyzeResumes'
+import { useAnalyzeResumes, type AnalyzeResumesResponse } from '../api/analyzeResumes'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
+import { supabase } from '@/shared/lib/supabase'
 import { AIGenerationModal } from '@/shared/ui/AIGenerationModal'
 import { GlassCard } from '@/shared/ui/GlassCard'
 import { ResumeAnalysisHistory } from './ResumeAnalysisHistory'
 import { ResumeAnalysisResult } from './ResumeAnalysisResult'
+
+interface AnalysisCandidate {
+  name: string
+  match_score: number
+  summary: string
+  pros: string[]
+  cons: string[]
+  skills?: {
+    hard_skills_match: string[]
+    missing_skills: string[]
+    soft_skills: string[]
+  }
+  cultural_fit?: string
+  red_flags?: string[]
+  interview_questions?: string[]
+  verdict: 'recommended' | 'maybe' | 'rejected'
+  vacancy_matches: {
+    vacancy_title: string
+    score: number
+    reason: string
+  }[]
+}
+
+interface AnalysisData {
+  candidates: AnalysisCandidate[]
+}
 
 interface AnalysisResult {
   id: string;
   content_html: string | null;
   content_markdown: string | null;
   created_at: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  analysis_data: any;
+  analysis_data: AnalysisData;
 }
+
+const CHUNK_SIZE = 5;
 
 export const ResumeAnalysis = () => {
   const { t } = useTranslation(['ai-analysis', 'common'])
   const { language } = useSettingsStore()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [files, setFiles] = useState<File[]>([])
   const [selectedVacancies, setSelectedVacancies] = useState<string[]>([])
   const [additionalNotes, setAdditionalNotes] = useState('')
   const [resultLanguage, setResultLanguage] = useState(language)
   const [openPopover, setOpenPopover] = useState(false)
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null)
+  
+  // Clear result view if query param is removed (browser back button)
+  useEffect(() => {
+    if (searchParams.get('view') !== 'result' && analysisResult) {
+      setAnalysisResult(null)
+    }
+  }, [searchParams, analysisResult])
+
+  // Upload state
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [uploadStatus, setUploadStatus] = useState('')
 
   const { data: vacanciesData, isLoading: isLoadingVacancies } = useGetVacancies()
   const { data: hrProfile } = useHrProfile()
   const { data: organization } = useOrganization()
 
   const analyzeResumesMutation = useAnalyzeResumes({
-    onSuccess: (data) => {
-      toast.success(t('resumeAnalysis.notifications.successTitle'))
-      if (data && data.result) {
+    onSuccess: (data: AnalyzeResumesResponse) => {
+      // For single chunks, we set result immediately
+      if (files.length <= CHUNK_SIZE && data.result) {
+        toast.success(t('resumeAnalysis.notifications.successTitle'))
         setAnalysisResult(data.result as AnalysisResult)
+        setSearchParams(prev => {
+          prev.set('view', 'result')
+          return prev
+        })
       }
     },
     onError: (error: Error) => {
@@ -77,40 +124,158 @@ export const ResumeAnalysis = () => {
     setFiles(files.filter(file => file.name !== fileName))
   }
 
+  const uploadFilesChunk = async (chunkFiles: File[], globalIndex: number, totalFiles: number): Promise<string[]> => {
+    const filePaths: string[] = []
+    
+    for (let i = 0; i < chunkFiles.length; i++) {
+      const file = chunkFiles[i]
+      const current = globalIndex + i + 1
+      
+      setUploadStatus(t('resumeAnalysis.uploadProgress.uploading', {
+        current,
+        total: totalFiles,
+        filename: file.name
+      }))
+      
+      // Sanitize filename and make it unique
+      const timestamp = new Date().getTime()
+      const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
+      const filePath = `${organization?.id}/${timestamp}_${sanitizedName}`
+      
+      const { error } = await supabase.storage
+        .from('resumes')
+        .upload(filePath, file)
+        
+      if (error) throw error
+      
+      filePaths.push(filePath)
+      // Upload progress contributes to 50% of total progress in chunk processing
+      const progress = Math.round((current / totalFiles) * 50)
+      setUploadProgress(progress)
+    }
+    
+    return filePaths
+  }
+
   const handleAnalyze = async () => {
     if (!hrProfile || !organization || files.length === 0 || selectedVacancies.length === 0) return
 
-    const resumes = await Promise.all(
-      files.map(async (file) => {
-        const content_base64 = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader()
-          reader.readAsDataURL(file)
-          reader.onload = () => resolve((reader.result as string).split(',')[1])
-          reader.onerror = (error) => reject(error)
-        })
-        return { filename: file.name, content_base64 }
-      })
-    )
+    setIsUploading(true)
+    setUploadProgress(0)
 
-    analyzeResumesMutation.mutate({
-      organization_id: organization.id,
-      hr_specialist_id: hrProfile.id,
-      vacancy_ids: selectedVacancies,
-      resumes,
-      additional_notes: additionalNotes,
-      language: resultLanguage,
-    })
+    try {
+      // Use chunking logic regardless of file count for consistency, but if small enough just one chunk
+      const chunks = []
+      for (let i = 0; i < files.length; i += CHUNK_SIZE) {
+        chunks.push(files.slice(i, i + CHUNK_SIZE))
+      }
+
+      let allCandidates: AnalysisCandidate[] = []
+      let combinedMarkdown = ''
+      let combinedHtml = ''
+      const allFilePaths: string[] = []
+
+      const isMultiChunk = chunks.length > 1;
+
+      for (let i = 0; i < chunks.length; i++) {
+        const chunk = chunks[i]
+        const globalStartIndex = i * CHUNK_SIZE
+        
+        // 1. Upload Chunk
+        const chunkFilePaths = await uploadFilesChunk(chunk, globalStartIndex, files.length)
+        allFilePaths.push(...chunkFilePaths)
+
+        // 2. Analyze Chunk
+        setUploadStatus(t('resumeAnalysis.uploadProgress.analyzing') + (isMultiChunk ? ` (${i + 1}/${chunks.length})` : ''))
+        
+        // Update progress base (50% is upload, next 50% is analysis distributed by chunks)
+        const baseAnalysisProgress = 50
+        const chunkProgressShare = 50 / chunks.length
+        setUploadProgress(baseAnalysisProgress + (i * chunkProgressShare))
+
+        const result = await analyzeResumesMutation.mutateAsync({
+          organization_id: organization.id,
+          hr_specialist_id: hrProfile.id,
+          vacancy_ids: selectedVacancies,
+          file_paths: chunkFilePaths,
+          additional_notes: additionalNotes,
+          language: resultLanguage,
+          save_to_db: !isMultiChunk // Save to DB only if single chunk
+        })
+
+        if (!result || !result.success) throw new Error("No result from analysis");
+
+        if (isMultiChunk) {
+            // Merge data from chunks
+            const data = result.data; // Now typed correctly
+            if (data?.analysis_data?.candidates) {
+                allCandidates = [...allCandidates, ...data.analysis_data.candidates];
+                combinedMarkdown += (data.content_markdown || '') + '\n\n---\n\n';
+                combinedHtml += (data.content_html || '') + '<hr/>';
+            }
+        }
+      }
+
+      // 3. Finalize Multi-Chunk
+      if (isMultiChunk) {
+        setUploadStatus(t('common:saving', 'Сохранение...'))
+        setUploadProgress(95)
+
+        const mergedAnalysisData: AnalysisData = { candidates: allCandidates };
+        
+        // Insert merged result
+        const { data: savedResult, error } = await supabase
+            .from('resume_analysis_results')
+            .insert({
+                organization_id: organization.id,
+                created_by_hr_id: hrProfile.id,
+                vacancy_ids: selectedVacancies,
+                resume_count: files.length,
+                content_markdown: combinedMarkdown,
+                content_html: combinedHtml,
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                analysis_data: mergedAnalysisData as any,
+                file_paths: allFilePaths
+            })
+            .select()
+            .single()
+
+        if (error) throw error;
+
+        setAnalysisResult(savedResult as unknown as AnalysisResult)
+        setSearchParams(prev => {
+          prev.set('view', 'result')
+          return prev
+        })
+        toast.success(t('resumeAnalysis.notifications.successTitle'))
+      }
+
+    } catch (error) {
+      console.error('Analysis error:', error)
+      toast.error(t('resumeAnalysis.notifications.errorTitle'), {
+        description: (error as Error).message,
+      })
+    } finally {
+      setIsUploading(false)
+      setUploadProgress(0)
+    }
   }
 
   const selectedVacanciesDetails = useMemo(() => {
     return vacanciesData?.filter(v => selectedVacancies.includes(v.id)) ?? []
   }, [selectedVacancies, vacanciesData])
 
-  if (analysisResult) {
+  if (analysisResult && searchParams.get('view') === 'result') {
     return (
       <ResumeAnalysisResult
         result={analysisResult}
-        onBack={() => setAnalysisResult(null)}
+        onBack={() => {
+          setAnalysisResult(null)
+          setSearchParams(prev => {
+            prev.delete('view')
+            return prev
+          })
+        }}
       />
     )
   }
@@ -118,11 +283,13 @@ export const ResumeAnalysis = () => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
       <AIGenerationModal
-        isOpen={analyzeResumesMutation.isPending}
+        isOpen={isUploading || analyzeResumesMutation.isPending}
         onOpenChange={() => {}} // Locked
-        isPending={analyzeResumesMutation.isPending}
-        title={t('resumeAnalysis.processingTitle', 'Анализ резюме')}
-        description={t('resumeAnalysis.processingDescription', 'ИИ анализирует резюме и сопоставляет их с вакансиями...')}
+        isPending={isUploading || analyzeResumesMutation.isPending}
+        title={isUploading ? t('resumeAnalysis.uploadingTitle', 'Загрузка файлов') : t('resumeAnalysis.processingTitle', 'Анализ резюме')}
+        description={isUploading ? uploadStatus : t('resumeAnalysis.processingDescription', 'ИИ анализирует резюме и сопоставляет их с вакансиями...')}
+        progress={isUploading ? uploadProgress : undefined}
+        simulationMode="slow"
       />
       <div className="lg:col-span-2 space-y-8">
         <GlassCard className="overflow-hidden border-none shadow-lg bg-gradient-to-br from-card to-card/50">
@@ -336,7 +503,13 @@ export const ResumeAnalysis = () => {
           </CardContent>
         </GlassCard>
 
-        <ResumeAnalysisHistory onViewAnalysis={setAnalysisResult} />
+        <ResumeAnalysisHistory onViewAnalysis={(result) => {
+          setAnalysisResult(result)
+          setSearchParams(prev => {
+            prev.set('view', 'result')
+            return prev
+          })
+        }} />
       </div>
 
       <div className="space-y-6 lg:sticky lg:top-4">
@@ -370,10 +543,11 @@ export const ResumeAnalysis = () => {
               disabled={
                 files.length === 0 ||
                 selectedVacancies.length === 0 ||
+                isUploading ||
                 analyzeResumesMutation.isPending
               }
             >
-              {analyzeResumesMutation.isPending ? (
+              {isUploading || analyzeResumesMutation.isPending ? (
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
               ) : (
                 <Sparkles className="mr-2 h-5 w-5" />
