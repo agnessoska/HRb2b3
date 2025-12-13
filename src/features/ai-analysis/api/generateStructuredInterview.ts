@@ -6,6 +6,7 @@ interface GenerateStructuredInterviewPayload {
   candidate_id: string
   vacancy_id: string
   language: 'ru' | 'kk' | 'en'
+  additional_info?: string
 }
 
 const generateStructuredInterview = async (

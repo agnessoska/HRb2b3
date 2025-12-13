@@ -30,3 +30,23 @@ export const useGetVacancies = () => {
     enabled: !!organization?.id,
   })
 }
+
+export const getVacanciesByIds = async (vacancyIds: string[]) => {
+  if (vacancyIds.length === 0) return []
+  
+  const { data, error } = await supabase
+    .from('vacancies')
+    .select('*')
+    .in('id', vacancyIds)
+
+  if (error) throw error
+  return data
+}
+
+export const useVacanciesByIds = (vacancyIds: string[]) => {
+  return useQuery({
+    queryKey: ['vacancies', vacancyIds],
+    queryFn: () => getVacanciesByIds(vacancyIds),
+    enabled: vacancyIds.length > 0,
+  })
+}

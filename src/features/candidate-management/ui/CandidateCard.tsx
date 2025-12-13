@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import {
   Card,
   CardContent,
@@ -5,16 +6,15 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import type { Database } from '@/shared/types/database'
+import type { CandidateWithVacancies } from '@/shared/types/extended'
 import { Button } from '@/components/ui/button'
 import { useTranslation } from 'react-i18next'
 import { User, ArrowRight, CheckCircle2, Clock, AlertCircle } from 'lucide-react'
 import { Link } from 'react-router-dom'
-
-type Candidate = Database['public']['Tables']['candidates']['Row']
+import { AssignToVacancyDialog } from './AssignToVacancyDialog'
 
 interface CandidateCardProps {
-  candidate: Candidate
+  candidate: CandidateWithVacancies
 }
 
 function getTestStatus(lastUpdatedAt: string | null) {
@@ -42,12 +42,30 @@ function getTestStatus(lastUpdatedAt: string | null) {
 }
 
 export function CandidateCard({ candidate }: CandidateCardProps) {
-  const { t } = useTranslation('candidates')
+  const { t, i18n } = useTranslation('candidates')
+  const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false)
   const testsCompleted = candidate.tests_completed || 0
 
-  // TODO: Get category name from professional_categories table
-  const categoryName = candidate.category_id || t('common.notAvailable')
+  // Получаем локализованное название категории в зависимости от языка
+  const getCategoryName = () => {
+    if (!candidate.category_name_ru && !candidate.category_name_en && !candidate.category_name_kk) {
+      return t('common.notAvailable')
+    }
+    
+    const lang = i18n.language as 'ru' | 'en' | 'kk'
+    switch (lang) {
+      case 'ru':
+        return candidate.category_name_ru || t('common.notAvailable')
+      case 'en':
+        return candidate.category_name_en || t('common.notAvailable')
+      case 'kk':
+        return candidate.category_name_kk || t('common.notAvailable')
+      default:
+        return candidate.category_name_ru || t('common.notAvailable')
+    }
+  }
 
+  const categoryName = getCategoryName()
   const testStatus = getTestStatus(candidate.tests_last_updated_at)
   const StatusIcon = testStatus.icon
   const progressPercentage = (testsCompleted / 6) * 100
@@ -91,7 +109,7 @@ export function CandidateCard({ candidate }: CandidateCardProps) {
                 className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium text-white ${testStatus.color}`}
               >
                 <StatusIcon className="h-3 w-3" />
-                {t(testStatus.textKey)}
+                {t(`card.${testStatus.textKey}`)}
               </div>
             </div>
           )}
@@ -101,11 +119,23 @@ export function CandidateCard({ candidate }: CandidateCardProps) {
         <Button variant="outline" size="sm" className="flex-1" asChild>
           <Link to={`/hr/candidate/${candidate.id}`}>{t('card.profile_button')}</Link>
         </Button>
-        <Button size="sm" className="flex-1 gap-1">
+        <Button
+          size="sm"
+          className="flex-1 gap-1"
+          onClick={() => setIsAssignDialogOpen(true)}
+        >
           {t('card.assign_button')}
           <ArrowRight className="h-3 w-3" />
         </Button>
       </CardFooter>
+
+      <AssignToVacancyDialog
+        isOpen={isAssignDialogOpen}
+        onOpenChange={setIsAssignDialogOpen}
+        candidateId={candidate.id}
+        candidateName={candidate.full_name || t('common.notAvailable')}
+        assignedVacancyIds={candidate.vacancy_ids || []}
+      />
     </Card>
   )
 }

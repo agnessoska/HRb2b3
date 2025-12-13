@@ -6,6 +6,7 @@
     "expired": "Expired"
   },
   "questions": "questions",
+  "tests": "tests",
   "minutes": "minutes",
   "completed": "Completed",
   "startTest": "Start Test",

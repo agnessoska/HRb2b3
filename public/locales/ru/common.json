@@ -90,5 +90,12 @@
   "saveChanges": "Сохранить изменения",
   "selectCategory": "Выберите категорию",
   "clearAll": "Очистить все",
-  "saving": "Сохранение..."
+  "saving": "Сохранение...",
+  "tokens": "токенов",
+  "share": "Поделиться",
+  "downloadPdf": "Скачать PDF",
+  "downloadSuccess": "Файл успешно скачан",
+  "view": "Просмотр",
+  "createdAt": "Создано",
+  "copied": "Скопировано"
 }

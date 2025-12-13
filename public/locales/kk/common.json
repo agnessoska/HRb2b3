@@ -90,5 +90,12 @@
   "saveChanges": "Өзгерістерді сақтау",
   "selectCategory": "Санатты таңдаңыз",
   "clearAll": "Барлығын тазалау",
-  "saving": "Сақталуда..."
+  "saving": "Сақтау...",
+  "tokens": "токендер",
+  "share": "Бөлісу",
+  "downloadPdf": "PDF жүктеп алу",
+  "downloadSuccess": "Файл сәтті жүктелді",
+  "view": "Қарау",
+  "createdAt": "Жасалды",
+  "copied": "Көшірілді"
 }

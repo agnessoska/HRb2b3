@@ -1,0 +1,81 @@
+{
+  "workspace": {
+    "title": "Структурированное интервью",
+    "description": "Интерактивный рабочий инструмент для проведения интервью с кандидатом"
+  },
+  "whatToListenFor": "Что искать:",
+  "redFlags": "Red flags:",
+  "expectedQuestions": "Возможные вопросы кандидата:",
+  "rateAnswer": "Оценка ответа:",
+  "notes": "Заметки:",
+  "notesPlaceholder": "Запишите ответ кандидата, ваши наблюдения...",
+  "minutes": "мин",
+  "progress": "Прогресс",
+  "critical": "Критически важно",
+  "back": "Назад",
+  "started": "Интервью начато",
+  "startedDescription": "Можете делать заметки и оценивать ответы кандидата",
+  "completed": "Интервью завершено",
+  "completeAtLeast80": "Заполните хотя бы 80% интервью перед завершением",
+  "status": {
+    "completed": "Завершено",
+    "inProgress": "В процессе",
+    "planned": "Запланировано"
+  },
+  "startInterview": "Начать интервью",
+  "completeInterview": "Завершить",
+  "downloadPDF": "Скачать PDF",
+  "overallProgress": "Общий прогресс",
+  "items": "пунктов",
+  "duration": "Продолжительность",
+  "recommendation": "Рекомендация",
+  "overallImpression": "Итоговое впечатление",
+  "finalAssessment": "Итоговая оценка",
+  "interviewCompleted": "Интервью успешно завершено",
+  "recommendations": {
+    "hire_strongly": "Нанять немедленно",
+    "hire_strongly_desc": "Отличный кандидат, идеальное совпадение",
+    "hire": "Нанять",
+    "hire_desc": "Хороший кандидат, соответствует требованиям",
+    "consider": "Рассмотреть",
+    "consider_desc": "Есть потенциал, но нужно больше информации",
+    "reject": "Отклонить",
+    "reject_desc": "Не подходит для данной позиции"
+  },
+  "completeDialog": {
+    "title": "Завершение интервью",
+    "description": "Оставьте итоговое впечатление и рекомендацию",
+    "impression": "Итоговое впечатление",
+    "impressionPlaceholder": "Общее впечатление о кандидате, ключевые выводы...",
+    "recommendation": "Рекомендация",
+    "submit": "Завершить интервью"
+  },
+  "impressionRequired": "Пожалуйста, оставьте итоговое впечатление",
+  "impressionTooShort": "Итоговое впечатление должно содержать минимум 10 символов",
+  "completionError": "Ошибка завершения",
+  "history": {
+    "empty": "Нет интервью",
+    "emptyDescription": "Сгенерируйте план интервью для начала работы с кандидатом"
+  },
+  "view": "Открыть",
+  "completedAt": "Завершено",
+  "progressStatus": "Прогресс",
+  "cancel": "Отмена",
+  "pdf": {
+    "title": "Протокол интервью",
+    "candidate": "Кандидат",
+    "vacancy": "Вакансия",
+    "date": "Дата",
+    "duration": "Продолжительность",
+    "status": "Статус",
+    "section": "Секция",
+    "question": "Вопрос",
+    "notes": "Заметки",
+    "rating": "Оценка",
+    "completed": "Завершено",
+    "notCompleted": "Не завершено",
+    "finalImpression": "Итоговое впечатление",
+    "recommendation": "Рекомендация",
+    "minutes": "мин"
+  }
+}

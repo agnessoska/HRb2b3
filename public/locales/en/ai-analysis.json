@@ -7,7 +7,7 @@
   },
   "resumeAnalysis": {
     "title": "Resume Analysis",
-    "description": "Upload candidate resumes and select vacancies to match them using AI.",
+    "description": "Upload candidate resumes and select vacancies for AI matching.",
     "selectVacancies": {
       "label": "Select Vacancies",
       "placeholder": "Select up to 7 vacancies...",
@@ -15,7 +15,7 @@
     },
     "uploadResumes": {
       "label": "Upload Resumes",
-      "dropFiles": "Release files to upload",
+      "dropFiles": "Drop files to upload",
       "dragAndDrop": "Drag and drop files here or click to select",
       "fileRequirements": "PDF files, up to 5MB each, maximum 20 files."
     },
@@ -24,8 +24,8 @@
       "analyzing": "Analyzing resumes..."
     },
     "additionalNotes": {
-      "label": "Additional Notes (optional)",
-      "placeholder": "E.g., 'Pay attention to candidates with fintech experience...'"
+      "label": "Additional Comments (optional)",
+      "placeholder": "For example: 'Pay attention to candidates with fintech experience...'"
     },
     "resultLanguage": {
       "label": "Result Language",
@@ -42,16 +42,16 @@
     "analyzeButton": "Analyze",
     "notifications": {
       "successTitle": "Analysis Complete",
-      "successDescription": "The analysis results have been successfully saved.",
+      "successDescription": "Analysis results were successfully saved.",
       "errorTitle": "Analysis Error",
-      "errorDescription": "Failed to complete the resume analysis."
+      "errorDescription": "Failed to complete resume analysis."
     },
     "result": {
       "downloadPDF": "Download PDF",
       "title": "Analysis Result",
       "description": "Analyzed on {{date}}",
       "newAnalysisButton": "Start New Analysis",
-      "matchScore": "Match Score",
+      "matchScore": "Match",
       "matches": "VACANCY MATCHES",
       "verdicts": {
         "recommended": "Recommended",
@@ -62,10 +62,24 @@
         "hardSkills": "Hard Skills & Pros",
         "softSkills": "Soft Skills",
         "gaps": "Gaps & Weaknesses",
-        "redFlags": "Red Flags (Risks)",
+        "redFlags": "Red Flags",
         "culturalFit": "Cultural Fit",
-        "interviewQuestions": "Suggested Interview Questions"
+        "interviewQuestions": "Interview Questions"
+      },
+      "invite": "Invite",
+      "selectVacancy": "Select Vacancy",
+      "inviteSuccess": "Candidate Added",
+      "inviteCreated": "Invitation Created",
+      "inviteCreatedDesc": "Candidate added to funnel. Send them this link to register:",
+      "status": {
+        "registered": "Registered",
+        "copyLink": "Copy Link"
       }
+    },
+    "documents": {
+      "sendToChat": "Send to Chat",
+      "sentToChat": "Sent to chat",
+      "checkDocument": "Please review this document"
     },
     "history": {
       "viewButton": "View",
@@ -74,78 +88,126 @@
       "empty": "Analysis history is empty"
     }
   },
-  "fullAnalysis": {
-    "dialog": {
-      "title": "Create Full AI Analysis",
-      "description": "Select up to 5 vacancies in the context of which the candidate analysis will be conducted. This action will deduct tokens from your organization's balance.",
-      "selectVacancies": {
-        "label": "Vacancies for Analysis",
-        "placeholder": "Select vacancies...",
-        "searchPlaceholder": "Search vacancies..."
-      },
-      "confirmButton": "Generate Analysis"
-    }
-  },
   "generateDocument": {
     "processingTitle": "Generating Document",
-    "processingDescription": "AI is composing the document based on candidate profile and vacancy...",
+    "processingDescription": "AI is composing document...",
     "title": "Generate Document",
-    "description": "Select the document type and add additional information. AI will create a personalized document for the candidate.",
+    "whatIs": {
+      "title": "What is this?",
+      "description": "AI will create a personalized document based on candidate profile, test results, and vacancy description. The document can be edited and sent to the candidate."
+    },
     "documentType": {
       "label": "Document Type",
       "interview_invitation": "Interview Invitation",
+      "interview_invitation_description": "Invite candidate to an interview",
       "job_offer": "Job Offer",
-      "rejection_letter": "Rejection Letter"
+      "job_offer_description": "Send official job offer",
+      "rejection_letter": "Rejection Letter",
+      "rejection_letter_description": "Politely inform about decision",
+      "structured_interview": "Structured Interview Plan"
+    },
+    "resultLanguage": {
+      "label": "Document Language"
     },
     "additionalInfo": {
       "label": "Additional Information",
-      "placeholder": "E.g., 'Proposed salary...', 'Interview time...'"
-    }
+      "placeholder": "For example: 'Proposed salary...', 'Interview time...'",
+      "hint": "For example: interview date, salary conditions, special requests"
+    },
+    "costEstimate": "Estimated cost",
+    "success": "Document generated successfully!"
   },
-  "errors": {
-    "missingData": "Failed to get data about the candidate, HR, or organization."
-  },
-  "generateFullAnalysis": {
-    "trigger": "Generate Full Analysis",
-    "title": "Create Full AI Analysis",
-    "description": "Select up to 5 vacancies in the context of which the candidate analysis will be conducted. This action will deduct tokens from your organization's balance.",
-    "selectVacancies": "Vacancies for Analysis",
-    "selectPlaceholder": "Select vacancies...",
-    "searchPlaceholder": "Search vacancies...",
-    "noVacanciesFound": "No vacancies found",
-    "confirm": "Generate Analysis",
-    "processingTitle": "Generating Full Analysis",
-    "processingDescription": "AI is analyzing candidate profile and test results...",
-    "selected": "Selected: {{count}}",
-    "dialog": {
-      "title": "Create Full AI Analysis",
-      "description": "Select up to 5 vacancies in the context of which the candidate analysis will be conducted. This action will deduct tokens from your organization's balance.",
-      "selectVacancies": {
-        "label": "Vacancies for Analysis",
-        "placeholder": "Select vacancies...",
-        "searchPlaceholder": "Search vacancies..."
-      },
-      "confirmButton": "Generate Analysis"
-    }
+  "documents": {
+    "dataUnavailable": "Document data unavailable",
+    "types": {
+      "interview_invitation": "Invitation",
+      "job_offer": "Offer",
+      "rejection_letter": "Rejection",
+      "structured_interview": "Interview Plan"
+    },
+    "history": {
+      "empty": "Document history is empty",
+      "public": "Public"
+    },
+    "interview": {
+      "title": "Interview Invitation",
+      "details": "Interview Details",
+      "format": "Format",
+      "duration": "Duration",
+      "stages": "Interview Stages",
+      "preparation": "Interview Preparation",
+      "whatToExpect": "What to Expect",
+      "nextSteps": "Next Steps"
+    },
+    "offer": {
+      "title": "Job Offer",
+      "positionDetails": "Position Details",
+      "position": "Position",
+      "employmentType": "Employment Type",
+      "startDate": "Start Date",
+      "probation": "Probation Period",
+      "compensation": "Compensation Package",
+      "salary": "Salary",
+      "bonuses": "Bonuses",
+      "benefits": "Benefits",
+      "responsibilities": "Key Responsibilities",
+      "growth": "Growth Opportunities",
+      "team": "About the Team",
+      "deadline": "Decision Deadline"
+    },
+    "rejection": {
+      "title": "Rejection Letter",
+      "positiveFeedback": "What We Liked"
+    },
+    "linkCopied": "Link copied to clipboard"
   },
   "generateInterview": {
-    "processingTitle": "Generating Interview",
-    "processingDescription": "AI is composing interview questions...",
+    "processingTitle": "Generating Interview Plan",
+    "processingDescription": "AI is analyzing test results and composing questions...",
     "trigger": "Interview Plan",
-    "title": "Generate Interview Plan",
-    "description": "AI will create a detailed structured interview plan based on the candidate's full analysis and the vacancy requirements.",
-    "confirmation": "Are you sure you want to generate the interview plan? This action will deduct tokens from your organization's balance.",
+    "title": "Generate Structured Interview Plan",
+    "description": "AI will create a detailed structured interview plan based on candidate's full analysis and vacancy requirements.",
+    "vacancy": "Vacancy",
+    "whatIs": {
+      "title": "What is this?",
+      "description": "Structured interview is created based on psychometric data. AI will suggest specific questions to verify risks and strengths of the candidate."
+    },
+    "additionalInfo": {
+      "placeholder": "For example: Focus on team management experience or stress resilience testing"
+    },
+    "confirmation": "Are you sure you want to generate interview plan? This will deduct tokens from your organization's balance.",
     "confirm": "Generate",
     "successTitle": "Plan Created",
-    "successDescription": "The structured interview plan has been successfully generated and saved.",
+    "successDescription": "Structured interview plan was successfully generated and saved.",
     "errorTitle": "Generation Error",
-    "errorDescription": "Failed to generate the interview plan."
+    "errorDescription": "Failed to generate interview plan."
   },
   "compareCandidates": {
     "title": "Compare Candidates",
-    "description": "Select 2 to 5 candidates to create a comparative AI analysis.",
-    "errorProfile": "Failed to get HR or organization profile.",
+    "description": "Select 2-10 candidates for AI comparison. Only candidates who completed all 6 tests are available.",
+    "errorProfile": "Failed to fetch HR profile or organization.",
     "loading": "Generating...",
-    "submit": "Compare"
+    "submit": "Compare with AI",
+    "processingTitle": "Comparing Candidates",
+    "processingDescription": "AI is analyzing profiles and creating detailed comparison...",
+    "whatIs": {
+      "title": "Why compare candidates?",
+      "description": "AI will conduct deep analysis across all parameters and recommend the best hire."
+    },
+    "benefits": {
+      "objective": "Objective Assessment",
+      "ranking": "Clear Ranking"
+    },
+    "tokenCost": "Cost: ~3,000-5,000 tokens (depends on candidate count)",
+    "selectCandidates": "Select Candidates",
+    "minMax": "Minimum 2, maximum 5",
+    "minMaxUpdated": "Minimum 2, maximum 10",
+    "maxLimit": "Maximum reached (10 candidates)",
+    "testIncomplete": "Candidate must complete all 6 tests",
+    "incomplete": "Unavailable for comparison (not all tests completed)",
+    "noCandidates": "No candidates available for comparison"
+  },
+  "errors": {
+    "missingData": "Failed to fetch candidate, HR, or organization data."
   }
 }

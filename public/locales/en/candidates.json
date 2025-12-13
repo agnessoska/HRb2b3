@@ -11,28 +11,57 @@
   "card": {
     "testsCompleted": "{{count}} of 6 tests completed",
     "status": {
-      "ok": "Up-to-date",
+      "ok": "Current",
       "expiring": "Expiring soon",
       "expired": "Outdated"
+    },
+    "statuses": {
+      "relevant": "Relevant",
+      "expiring": "Expiring soon",
+      "outdated": "Outdated"
     },
     "viewProfile": "Profile",
     "testing_progress": "Testing Progress",
     "profile_button": "Profile",
-    "assign_button": "Assign"
+    "assign_button": "Assign",
+    "noVacanciesToAssign": "Candidate is already assigned to all available vacancies",
+    "allVacanciesAssigned": "Already assigned"
   },
   "profile": {
     "title": "Candidate Profile",
+    "tabs": {
+      "analyses": "Analyses",
+      "documents": "Documents",
+      "interviews": "Interviews",
+      "info": "Information"
+    },
+    "backgroundCard": {
+      "title": "Experience & Education"
+    },
     "aiAnalysisCard": {
       "title": "AI Analysis",
       "empty": {
         "title": "Analysis not yet generated",
-        "description": "The full analysis of the candidate will be displayed here after it is generated."
+        "description": "The full analysis of the candidate will be displayed here after it is generated.",
+        "hint": "💡 Analyses are generated from the recruitment funnel"
       }
     },
     "chatNotAvailable": "Chat is not available. Add the candidate to your database to start messaging.",
     "documentsCard": {
       "title": "Generated Documents",
-      "empty": "No documents have been generated for this candidate yet."
+      "empty": {
+        "title": "No documents",
+        "description": "Documents (offers, rejections, invitations) have not been created yet",
+        "hint": "💡 Documents are generated from the recruitment funnel"
+      }
+    },
+    "interviewsCard": {
+      "title": "Interviews",
+      "empty": {
+        "title": "No interviews",
+        "description": "No interviews have been conducted yet",
+        "hint": "💡 Interviews are created from the recruitment funnel"
+      }
     },
     "actionsCard": {
       "title": "Actions",
@@ -41,12 +70,13 @@
       "offer": "Send Offer",
       "reject": "Send Rejection",
       "generateDocument": "Generate Document",
-      "interviewDisabledTooltip": "First, generate the full AI analysis."
+      "interviewDisabledTooltip": "Candidate must complete all 6 tests to generate interview."
     },
     "detailsCard": {
-      "title": "Candidate Data",
+      "title": "Contact Details",
       "email": "Email",
       "phone": "Phone",
+      "category": "Category",
       "experience": "Experience",
       "education": "Education",
       "about": "About",
@@ -71,7 +101,7 @@
     "personalInfo": "Personal Information"
   },
   "common": {
-    "notAvailable": "N/A",
+    "notAvailable": "Not specified",
     "candidates": "Candidates"
   },
   "invite_dialog": {
@@ -94,5 +124,14 @@
       "insufficient_tokens_title": "Insufficient tokens",
       "insufficient_tokens_desc": "Your organization does not have enough tokens to generate a link."
     }
+  },
+  "assignDialog": {
+    "title": "Assign to Vacancy",
+    "description": "Select a vacancy to assign {{name}} to",
+    "selectVacancyError": "Please select a vacancy",
+    "noActiveVacancies": "No active vacancies. Create a vacancy to assign the candidate.",
+    "assignButton": "Assign",
+    "success": "Candidate successfully added to funnel",
+    "alreadyAssigned": "Assigned"
   }
 }

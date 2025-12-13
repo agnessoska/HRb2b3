@@ -24,10 +24,21 @@
         "remote": "Remote"
       },
       "submit": "Create Vacancy",
+      "save": "Save Changes",
       "creating": "Creating...",
+      "saving": "Saving...",
       "cancel": "Cancel"
     },
     "description": "Fill in the details below to post a new job opening.",
+    "edit_description": "Update vacancy information.",
+    "errorLoadingSkills": "Error loading skills",
+    "createSuccess": "Vacancy created successfully",
+    "updateSuccess": "Vacancy updated successfully",
+    "sections": {
+      "basic": "Basic Information",
+      "requirements": "Requirements & Skills",
+      "details": "Work Conditions"
+    },
     "steps": {
       "basic_info": "Basic Info",
       "requirements": "Requirements",
@@ -62,12 +73,46 @@
     "subtitle": "Manage the ideal AI profile for this vacancy.",
     "generateButton": "Generate Ideal Profile",
     "generator": {
-      "title": "AI Generator",
+      "title": "Generate Ideal AI Profile",
       "description": "Generate an ideal profile based on the vacancy description.",
       "generating": "Generating...",
-      "cta": "Generate",
+      "cta": "Generate with AI",
       "processingTitle": "Generating Ideal Profile",
-      "processingDescription": "AI is analyzing vacancy description and creating profile..."
+      "processingDescription": "AI is analyzing vacancy description and creating profile...",
+      "whatIs": {
+        "title": "What is an ideal profile?",
+        "description": "An ideal profile is a psychometric portrait of a candidate perfectly suited for this position. Based on the job description, AI determines optimal values for personality traits, soft skills, and motivational factors."
+      },
+      "whyNeed": {
+        "title": "Why do you need it?",
+        "benefits": [
+          "Automatic matching of suitable candidates from the Talent Market",
+          "Objective compatibility assessment (score 0-100)",
+          "Time savings on preliminary screening",
+          "Reduced hiring errors based on intuition"
+        ]
+      },
+      "howWorks": {
+        "title": "How generation works",
+        "step1": "AI analyzes the vacancy description",
+        "step2": "Determines ideal values across 6 tests",
+        "step3": "You can manually edit the profile"
+      },
+      "testsIncluded": {
+        "title": "What's included in the profile",
+        "bigFive": "Big Five — personality traits",
+        "mbti": "MBTI — personality typology",
+        "disc": "DISC — behavioral style",
+        "eq": "EQ — emotional intelligence",
+        "softSkills": "Soft Skills — interpersonal skills",
+        "motivation": "Motivation — key drivers"
+      },
+      "tokenCost": {
+        "title": "Generation cost",
+        "estimate": "~2,000-3,000 tokens",
+        "note": "Depends on vacancy description length",
+        "oneTime": "One-time operation — editing after generation is free"
+      }
     },
     "generating": "Generating...",
     "noProfileData": "No ideal profile data available.",
@@ -107,13 +152,63 @@
     },
     "disc": {
       "title": "DISC",
-      "type": "Type",
-      "placeholder": "e.g., D or DI"
+      "type": "Dominant behavioral style",
+      "placeholder": "e.g., D or DI",
+      "styles": "D (Dominance) — directness and results orientation | I (Influence) — enthusiasm and ability to inspire | S (Steadiness) — reliability and patience | C (Compliance) — accuracy and attention to detail"
     },
     "mbti": {
       "title": "MBTI",
-      "type": "Type",
-      "placeholder": "e.g., ENTJ"
+      "type": "Psychological personality type",
+      "placeholder": "e.g., ENTJ",
+      "dichotomies": "E/I (energy source: external world or internal) | S/N (information perception: facts or possibilities) | T/F (decision making: logic or emotions) | J/P (life organization: structure or flexibility)"
+    },
+    "testDescriptions": {
+      "bigFive": "Scientifically validated personality model. Measures 5 core traits that determine human behavior at work and in life.",
+      "mbti": "Personality typology based on 4 dichotomies. Determines thinking style, decision-making, and interaction with the world.",
+      "disc": "Behavioral styles model. Shows how a person responds to tasks, challenges, and working with people.",
+      "eq": "Emotional intelligence. The ability to understand one's own and others' emotions and manage them effectively.",
+      "softSkills": "Key professional competencies. Universal skills important for any position.",
+      "motivation": "Internal drivers. Determines what motivates a person to work and achieve goals."
+    },
+    "scaleDescriptions": {
+      "bigFive": {
+        "openness": "Interest in new things, creativity, and curiosity. Affects the ability to innovate and adapt.",
+        "conscientiousness": "Organization, reliability, and self-discipline. Key factor in work effectiveness and goal achievement.",
+        "extraversion": "Sociability and energy. Determines comfort in social interactions and working with people.",
+        "agreeableness": "Empathy and willingness to cooperate. Critical for teamwork and building relationships.",
+        "neuroticism": "Emotional resilience to stress. The lower - the better at handling pressure and uncertainty."
+      },
+      "eq": {
+        "self_awareness": "Understanding your emotions and their impact. Foundation of emotional intelligence and conscious behavior.",
+        "self_management": "Impulse control and emotional flexibility. Ability to manage reactions in difficult situations.",
+        "social_awareness": "Empathy and reading others' emotions. Key to effective interaction and understanding needs.",
+        "relationship_management": "Conflict management and building connections. Important for leadership and team influence."
+      },
+      "softSkills": {
+        "communication": "Clarity of expression and active listening. Basic skill for effective work in any role.",
+        "teamwork": "Ability to collaborate and support colleagues. Foundation of productive teamwork and synergy.",
+        "critical_thinking": "Analytical abilities and making informed decisions. Important for solving complex tasks.",
+        "adaptability": "Flexibility to change and quick learning. Critical in a rapidly changing business environment.",
+        "initiative": "Proactivity and drive for results. Distinguishes strong performers from mediocre ones."
+      },
+      "motivation": {
+        "achievement": "Striving for success and achieving results. Key driver for ambitious goals and growth.",
+        "power": "Desire to influence, control, and lead. Important for management and leadership positions.",
+        "affiliation": "Need for social connections and acceptance. Important for team players and corporate culture.",
+        "autonomy": "Independence and self-reliance at work. Critical for positions with high degree of freedom.",
+        "security": "Striving for stability and predictability. Balance is important for long-term loyalty.",
+        "growth": "Thirst for development, learning, and self-improvement. The higher - the better for growing companies."
+      }
+    },
+    "scaleTypes": {
+      "higher_is_better": "Higher is better",
+      "lower_is_better": "Lower is better",
+      "optimal": "Has optimum"
+    },
+    "valueRanges": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
     }
   },
   "vacancyNotFound": "Vacancy not found.",
@@ -141,5 +236,11 @@
     "vacancyIdNotFound": "Vacancy ID not found"
   },
   "profileUpdatedSuccess": "Vacancy profile updated successfully",
-  "profileUpdatedError": "Error updating vacancy profile"
+  "profileUpdatedError": "Error updating vacancy profile",
+  "tabs": {
+    "idealProfile": "Ideal Profile",
+    "comparison": "Comparison",
+    "comparisonTitle": "Compare Candidates",
+    "comparisonDescription": "Compare multiple candidates for this vacancy using AI"
+  }
 }

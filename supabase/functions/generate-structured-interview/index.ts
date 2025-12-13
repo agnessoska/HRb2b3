@@ -5,8 +5,6 @@ import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-
 // @ts-expect-error deno-types
 import { Anthropic } from 'https://esm.sh/@anthropic-ai/sdk@0.20.1'
 
-// --- SHARED LOGIC (from analyze-resumes) ---
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -61,21 +59,27 @@ async function callAI(config: AIConfig, prompt: string): Promise<{ response: str
   if (config.provider === 'anthropic') {
     // @ts-expect-error Deno global
     const apiKey = Deno.env.get('ANTHROPIC_API_KEY')
-    if (!apiKey) throw new Error('ANTHROPIC_API_KEY is not set in Supabase secrets')
+    if (!apiKey) throw new Error('ANTHROPIC_API_KEY is not set')
+    
     const anthropic = new Anthropic({ apiKey })
     
     const body: Anthropic.Messages.MessageCreateParams = {
-        model: config.model_name,
-        max_tokens: config.max_output_tokens,
-        temperature: config.temperature,
-        messages: [{ role: 'user', content: prompt }],
-    };
-
-    const msg = await anthropic.messages.create(body);
-    const textBlock = msg.content.find((block: { type: string; }) => block.type === 'text');
-    if (!textBlock) {
-      throw new Error('Anthropic API response did not contain a text block.');
+      model: config.model_name,
+      max_tokens: config.max_output_tokens,
+      temperature: config.temperature,
+      messages: [{ role: 'user', content: prompt }],
     }
+
+    if (config.thinking_budget && config.thinking_budget > 0) {
+      body.thinking = {
+        type: "enabled",
+        budget_tokens: config.thinking_budget
+      }
+    }
+
+    const msg = await anthropic.messages.create(body)
+    const textBlock = msg.content.find((block: { type: string }) => block.type === 'text')
+    if (!textBlock) throw new Error('No text block in AI response')
 
     return {
       response: textBlock.text,
@@ -83,7 +87,7 @@ async function callAI(config: AIConfig, prompt: string): Promise<{ response: str
       outputTokens: msg.usage.output_tokens,
     }
   }
-  // Simplified, as only Anthropic is used in this project based on logs
+  
   throw new Error(`Unsupported AI provider: ${config.provider}`)
 }
 
@@ -93,11 +97,11 @@ async function deductTokens(
   tokensToDeduct: number
 ) {
   const { error } = await supabaseClient.rpc('deduct_tokens', {
-    p_organization_id: organization_id,
-    p_tokens_to_deduct: tokensToDeduct,
+    org_id: organization_id,
+    amount: tokensToDeduct,
   })
   if (error) {
-    console.error(`Failed to deduct tokens for organization ${organization_id}:`, error)
+    console.error('Failed to deduct tokens:', error)
   }
 }
 
@@ -124,11 +128,54 @@ async function logAIOperation(
   })
 
   if (error) {
-    console.error(`Failed to log AI operation for organization ${payload.organization_id}:`, error)
+    console.error('Failed to log AI operation:', error)
   }
 }
 
-// --- MAIN FUNCTION LOGIC ---
+interface TestResultWithCode {
+  test_id: string
+  detailed_result?: string | null
+  normalized_scores?: Record<string, number> | null
+  tests: { code: string } | null
+}
+
+function formatTestResults(results: TestResultWithCode[]): string {
+  if (!results || results.length === 0) return "Tests not completed"
+
+  const testsByCode: Record<string, { normalized_scores: unknown; detailed_result: string | null }> = {}
+  results.forEach((tr) => {
+    if (tr.tests?.code) {
+      testsByCode[tr.tests.code] = {
+        normalized_scores: tr.normalized_scores,
+        detailed_result: tr.detailed_result ?? null
+      }
+    }
+  })
+
+  const bigFive = testsByCode['big_five']?.normalized_scores
+    ? JSON.stringify(testsByCode['big_five'].normalized_scores, null, 2)
+    : 'Нет данных'
+  
+  const mbti = testsByCode['mbti']?.detailed_result || 'Нет данных'
+  
+  const disc = testsByCode['disc']?.normalized_scores
+    ? JSON.stringify(testsByCode['disc'].normalized_scores, null, 2)
+    : 'Нет данных'
+  
+  const eq = testsByCode['eq']?.normalized_scores
+    ? JSON.stringify(testsByCode['eq'].normalized_scores, null, 2)
+    : 'Нет данных'
+  
+  const softSkills = testsByCode['soft_skills']?.normalized_scores
+    ? JSON.stringify(testsByCode['soft_skills'].normalized_scores, null, 2)
+    : 'Нет данных'
+  
+  const motivation = testsByCode['motivation']?.normalized_scores
+    ? JSON.stringify(testsByCode['motivation'].normalized_scores, null, 2)
+    : 'Нет данных'
+
+  return `Big Five:\n${bigFive}\n\nMBTI: ${mbti}\n\nDISC:\n${disc}\n\nEQ:\n${eq}\n\nSoft Skills:\n${softSkills}\n\nMotivation:\n${motivation}`
+}
 
 interface GenerateStructuredInterviewPayload {
   candidate_id: string
@@ -136,15 +183,15 @@ interface GenerateStructuredInterviewPayload {
   organization_id: string
   hr_specialist_id: string
   language: 'ru' | 'kk' | 'en'
+  additional_info?: string
 }
 
 const OPERATION_TYPE = 'structured_interview'
 
 serve(async (req: Request) => {
-  console.log(`[${OPERATION_TYPE}] Function invoked with method: ${req.method}`);
+  console.log(`[${OPERATION_TYPE}] Function invoked`)
 
   if (req.method === 'OPTIONS') {
-    console.log(`[${OPERATION_TYPE}] Handling OPTIONS request.`);
     return new Response('ok', { headers: corsHeaders })
   }
 
@@ -153,91 +200,159 @@ serve(async (req: Request) => {
   let aiConfig: AIConfig | null = null
 
   try {
-    console.log(`[${OPERATION_TYPE}] Step 1: Parsing request payload.`);
     payload = await req.json()
-    console.log(`[${OPERATION_TYPE}] Step 1 successful. Payload received for candidate: ${payload?.candidate_id}`);
+    console.log(`[${OPERATION_TYPE}] Payload received`)
 
     if (!payload || !payload.candidate_id || !payload.vacancy_id || !payload.organization_id || !payload.hr_specialist_id) {
-      throw new Error('Missing required fields in payload')
+      throw new Error('Missing required fields')
     }
 
-    console.log(`[${OPERATION_TYPE}] Step 2: Checking environment variables.`);
     // @ts-expect-error Deno global
-    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')
     // @ts-expect-error Deno global
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
     if (!supabaseUrl || !supabaseServiceKey) {
-        throw new Error('Missing Supabase environment variables (URL or Service Key)');
+      throw new Error('Missing Supabase credentials')
     }
-    console.log(`[${OPERATION_TYPE}] Step 2 successful. Supabase env vars are present.`);
 
-    console.log(`[${OPERATION_TYPE}] Step 3: Creating Supabase admin client.`);
     supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey)
-    console.log(`[${OPERATION_TYPE}] Step 3 successful. Supabase client created.`);
-
-    console.log(`[${OPERATION_TYPE}] Step 4: Fetching context data (analysis, vacancy, candidate).`);
-    const { data: analysisData, error: analysisError } = await supabaseAdmin
-      .from('candidate_full_analysis')
-      .select('content_markdown')
-      .eq('candidate_id', payload.candidate_id)
-      .eq('organization_id', payload.organization_id)
-      .single()
-    if (analysisError) throw new Error(`Failed to fetch full analysis: ${analysisError.message}`)
-    if (!analysisData) throw new Error(`No full analysis found for candidate ${payload.candidate_id}`)
-
-    const { data: vacancyData, error: vacancyError } = await supabaseAdmin
-      .from('vacancies')
-      .select('title')
-      .eq('id', payload.vacancy_id)
-      .single()
-    if (vacancyError) throw new Error(`Failed to fetch vacancy: ${vacancyError.message}`)
-    if (!vacancyData) throw new Error(`No vacancy found for id ${payload.vacancy_id}`)
-
+    
+    // Load candidate data
     const { data: candidateData, error: candidateError } = await supabaseAdmin
       .from('candidates')
-      .select('full_name')
+      .select(`
+        *,
+        professional_categories (name_ru, name_en, name_kk)
+      `)
       .eq('id', payload.candidate_id)
       .single()
+    
     if (candidateError) throw new Error(`Failed to fetch candidate: ${candidateError.message}`)
-    if (!candidateData) throw new Error(`No candidate found for id ${payload.candidate_id}`)
-    console.log(`[${OPERATION_TYPE}] Step 4 successful.`);
+    
+    // Load skills
+    const { data: skillsData, error: skillsError } = await supabaseAdmin
+      .from('candidate_skills')
+      .select('canonical_skill')
+      .eq('candidate_id', payload.candidate_id)
+    
+    if (skillsError) throw new Error(`Failed to fetch skills: ${skillsError.message}`)
+    
+    // Load test results
+    const { data: testResultsData, error: testResultsError } = await supabaseAdmin
+      .from('candidate_test_results')
+      .select(`
+        test_id,
+        normalized_scores,
+        detailed_result,
+        tests (code)
+      `)
+      .eq('candidate_id', payload.candidate_id)
+    
+    if (testResultsError) throw new Error(`Failed to fetch tests: ${testResultsError.message}`)
+    if (!testResultsData || testResultsData.length < 6) {
+      throw new Error('Candidate must complete all 6 tests')
+    }
 
-    console.log(`[${OPERATION_TYPE}] Step 5: Fetching AI configuration.`);
+    // Load vacancy
+    const { data: vacancyData, error: vacancyError } = await supabaseAdmin
+      .from('vacancies')
+      .select('title, description, requirements')
+      .eq('id', payload.vacancy_id)
+      .single()
+    
+    if (vacancyError) throw new Error(`Failed to fetch vacancy: ${vacancyError.message}`)
+
+    // Get AI config
     aiConfig = await getAIConfig(supabaseAdmin, OPERATION_TYPE)
-    console.log(`[${OPERATION_TYPE}] Step 5 successful. Using provider: ${aiConfig.provider}, model: ${aiConfig.model_name}`);
+    console.log(`[${OPERATION_TYPE}] Using ${aiConfig.provider} ${aiConfig.model_name}`)
 
-    console.log(`[${OPERATION_TYPE}] Step 6: Building final prompt.`);
+    // Build prompt
+    const getCategoryName = () => {
+      if (!candidateData.professional_categories) return 'Unknown'
+      const lang = payload!.language
+      return candidateData.professional_categories[`name_${lang}`] || candidateData.professional_categories.name_en
+    }
+
+    const formattedTestResults = formatTestResults(testResultsData)
+    const skillsList = skillsData?.map((s: { canonical_skill: string }) => s.canonical_skill).join(', ') || 'None'
+
     const finalPrompt = aiConfig.prompt_text
       .replace('{candidate_name}', candidateData.full_name)
+      .replace('{category}', getCategoryName())
+      .replace('{experience}', candidateData.experience || 'Not specified')
+      .replace('{education}', candidateData.education || 'Not specified')
+      .replace('{skills}', skillsList)
+      .replace('{test_results}', formattedTestResults)
       .replace('{vacancy_title}', vacancyData.title)
-      .replace('{full_analysis_content}', analysisData.content_markdown)
-      .replace('{test_results_summary}', 'Candidate has completed all psychometric tests. Key insights are included in the full analysis.')
-      .replace('{language}', payload.language)
-    console.log(`[${OPERATION_TYPE}] Step 6 successful.`);
+      .replace('{vacancy_description}', `${vacancyData.description}\n\nRequirements:\n${vacancyData.requirements}`)
+      .replace('{language}', payload.language === 'kk' ? 'Kazakh' : payload.language === 'ru' ? 'Russian' : 'English')
+      + (payload.additional_info ? `\n\nADDITIONAL INSTRUCTIONS:\n${payload.additional_info}` : '')
 
-    console.log(`[${OPERATION_TYPE}] Step 7: Calling AI API.`);
+    // Call AI
+    console.log(`[${OPERATION_TYPE}] Calling AI`)
     const { response: aiResponse, inputTokens, outputTokens } = await callAI(aiConfig, finalPrompt)
-    console.log(`[${OPERATION_TYPE}] Step 7 successful. Received response from AI.`);
 
-    console.log(`[${OPERATION_TYPE}] Step 8: Saving result to database.`);
-    const { data: savedDocument, error: insertError } = await supabaseAdmin
-      .from('generated_documents')
+    // Parse JSON response with auto-fixing
+    console.log(`[${OPERATION_TYPE}] Parsing AI response`)
+    let interviewPlan
+    try {
+      let cleanedResponse = aiResponse.trim()
+      
+      // Remove markdown code blocks
+      cleanedResponse = cleanedResponse.replace(/^```json\s*/i, '').replace(/\s*```$/,' ')
+      
+      // Fix common JSON issues
+      cleanedResponse = cleanedResponse
+        .replace(/,(\s*[}\]])/g, '$1') // Remove trailing commas
+        .replace(/\\n/g, ' ') // Replace \n with space
+        .replace(/\n/g, ' ') // Replace newlines with space in strings
+      
+      interviewPlan = JSON.parse(cleanedResponse)
+      
+      // Validate structure
+      if (!interviewPlan.sections || !Array.isArray(interviewPlan.sections)) {
+        throw new Error('Invalid structure: missing sections array')
+      }
+      if (interviewPlan.sections.length < 3) {
+        throw new Error('Invalid structure: need at least 3 sections')
+      }
+    } catch (parseError) {
+      console.error('Failed to parse AI response:', parseError)
+      console.log('Response length:', aiResponse.length)
+      console.log('Response preview:', aiResponse.substring(0, 1000))
+      throw new Error(`AI returned invalid JSON: ${(parseError as Error).message}`)
+    }
+
+    // Save to interview_sessions table
+    console.log(`[${OPERATION_TYPE}] Saving to database`)
+    const { data: savedSession, error: insertError } = await supabaseAdmin
+      .from('interview_sessions')
       .insert({
         organization_id: payload.organization_id,
+        hr_specialist_id: payload.hr_specialist_id,
         candidate_id: payload.candidate_id,
         vacancy_id: payload.vacancy_id,
-        created_by_hr_id: payload.hr_specialist_id,
-        document_type: 'structured_interview',
-        title: `Structured Interview Plan for ${candidateData.full_name}`,
-        content_markdown: aiResponse,
+        interview_plan: interviewPlan,
+        session_data: {
+          notes: {},
+          ratings: {},
+          completed_items: [],
+          progress: {
+            current_section: 'intro',
+            sections_completed: []
+          }
+        },
+        status: 'planned',
+        language: payload.language,
+        version: 'v3'
       })
       .select()
       .single()
 
-    if (insertError) throw new Error(`Failed to save generated document: ${insertError.message}`)
-    console.log(`[${OPERATION_TYPE}] Step 8 successful. Result saved with ID: ${savedDocument.id}`);
+    if (insertError) throw new Error(`Failed to save session: ${insertError.message}`)
 
-    console.log(`[${OPERATION_TYPE}] Step 9: Deducting tokens and logging operation.`);
+    // Deduct tokens and log
+    console.log(`[${OPERATION_TYPE}] Logging operation`)
     await deductTokens(supabaseAdmin, payload.organization_id, inputTokens + outputTokens)
     await logAIOperation(supabaseAdmin, {
       organization_id: payload.organization_id,
@@ -251,26 +366,31 @@ serve(async (req: Request) => {
       metadata: {
         candidate_id: payload.candidate_id,
         vacancy_id: payload.vacancy_id,
-        document_id: savedDocument.id,
+        session_id: savedSession.id,
       },
     })
-    console.log(`[${OPERATION_TYPE}] Step 9 successful.`);
 
-    console.log(`[${OPERATION_TYPE}] Function finished successfully.`);
-    return new Response(JSON.stringify({ success: true, data: savedDocument }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 200,
-    })
+    console.log(`[${OPERATION_TYPE}] Success`)
+    return new Response(
+      JSON.stringify({ 
+        success: true, 
+        data: savedSession 
+      }), 
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      }
+    )
   } catch (error) {
-    console.error(`[${OPERATION_TYPE}] Error caught in main block:`, error);
-    if (payload && supabaseAdmin) {
-      console.log(`[${OPERATION_TYPE}] Logging failed operation.`);
+    console.error(`[${OPERATION_TYPE}] Error:`, error)
+    
+    if (payload && supabaseAdmin && aiConfig) {
       await logAIOperation(supabaseAdmin, {
         organization_id: payload.organization_id,
         hr_specialist_id: payload.hr_specialist_id,
         operation_type: OPERATION_TYPE,
-        model_used: aiConfig?.model_name ?? 'N/A',
-        prompt_version: aiConfig?.prompt_version ?? 'N/A',
+        model_used: aiConfig.model_name,
+        prompt_version: aiConfig.prompt_version,
         input_tokens: 0,
         output_tokens: 0,
         success: false,
@@ -281,9 +401,13 @@ serve(async (req: Request) => {
         },
       })
     }
-    return new Response(JSON.stringify({ error: (error as Error).message }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 500,
-    })
+    
+    return new Response(
+      JSON.stringify({ error: (error as Error).message }), 
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500,
+      }
+    )
   }
 })

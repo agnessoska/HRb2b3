@@ -1,0 +1,81 @@
+{
+  "workspace": {
+    "title": "Құрылымдық сұхбат",
+    "description": "Үміткермен сұхбат өткізуге арналған интерактивті жұмыс құралы"
+  },
+  "whatToListenFor": "Не тыңдау керек:",
+  "redFlags": "Қауіпті белгілер:",
+  "expectedQuestions": "Үміткердің мүмкін сұрақтары:",
+  "rateAnswer": "Жауапты бағалау:",
+  "notes": "Жазбалар:",
+  "notesPlaceholder": "Үміткердің жауабын, бақылауларыңызды жазыңыз...",
+  "minutes": "мин",
+  "progress": "Прогресс",
+  "critical": "Өте маңызды",
+  "back": "Артқа",
+  "started": "Сұхбат басталды",
+  "startedDescription": "Енді үміткердің жауаптарына жазба жасап, бағалай аласыз",
+  "completed": "Сұхбат аяқталды",
+  "completeAtLeast80": "Аяқтаудан бұрын сұхбаттың кем дегенде 80% толтырыңыз",
+  "status": {
+    "completed": "Аяқталды",
+    "inProgress": "Процесте",
+    "planned": "Жоспарланған"
+  },
+  "startInterview": "Сұхбатты бастау",
+  "completeInterview": "Аяқтау",
+  "downloadPDF": "PDF жүктеу",
+  "overallProgress": "Жалпы прогресс",
+  "items": "пункттер",
+  "duration": "Ұзақтығы",
+  "recommendation": "Ұсыныс",
+  "overallImpression": "Жалпы әсер",
+  "finalAssessment": "Қорытынды бағалау",
+  "interviewCompleted": "Сұхбат сәтті аяқталды",
+  "recommendations": {
+    "hire_strongly": "Дереу жалдау",
+    "hire_strongly_desc": "Керемет үміткер, мінсіз сәйкестік",
+    "hire": "Жалдау",
+    "hire_desc": "Жақсы үміткер, талаптарға сай",
+    "consider": "Қарастыру",
+    "consider_desc": "Әлеуеті бар, бірақ қосымша ақпарат қажет",
+    "reject": "Қабылдамау",
+    "reject_desc": "Бұл лауазымға сәйкес емес"
+  },
+  "completeDialog": {
+    "title": "Сұхбатты аяқтау",
+    "description": "Жалпы әсер мен ұсынысты қалдырыңыз",
+    "impression": "Жалпы әсер",
+    "impressionPlaceholder": "Үміткер туралы жалпы әсер, негізгі қорытындылар...",
+    "recommendation": "Ұсыныс",
+    "submit": "Сұхбатты аяқтау"
+  },
+  "impressionRequired": "Жалпы әсерді қалдырыңыз",
+  "impressionTooShort": "Жалпы әсер кемінде 10 таңбадан тұруы керек",
+  "completionError": "Аяқтау қатесі",
+  "history": {
+    "empty": "Сұхбат жоқ",
+    "emptyDescription": "Үміткермен жұмыс істеуді бастау үшін сұхбат жоспарын жасаңыз"
+  },
+  "view": "Ашу",
+  "completedAt": "Аяқталды",
+  "progressStatus": "Прогресс",
+  "cancel": "Болдырмау",
+  "pdf": {
+    "title": "Сұхбат хаттамасы",
+    "candidate": "Үміткер",
+    "vacancy": "Вакансия",
+    "date": "Күні",
+    "duration": "Ұзақтығы",
+    "status": "Статус",
+    "section": "Бөлім",
+    "question": "Сұрақ",
+    "notes": "Жазбалар",
+    "rating": "Бағалау",
+    "completed": "Аяқталды",
+    "notCompleted": "Аяқталмады",
+    "finalImpression": "Соңғы әсер",
+    "recommendation": "Ұсыныс",
+    "minutes": "мин"
+  }
+}

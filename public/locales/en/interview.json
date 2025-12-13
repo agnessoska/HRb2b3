@@ -1,0 +1,81 @@
+{
+  "workspace": {
+    "title": "Structured Interview",
+    "description": "Interactive workspace for conducting candidate interviews"
+  },
+  "whatToListenFor": "What to listen for:",
+  "redFlags": "Red flags:",
+  "expectedQuestions": "Expected candidate questions:",
+  "rateAnswer": "Rate the answer:",
+  "notes": "Notes:",
+  "notesPlaceholder": "Record candidate's answer, your observations...",
+  "minutes": "min",
+  "progress": "Progress",
+  "critical": "Critically important",
+  "back": "Back",
+  "started": "Interview started",
+  "startedDescription": "You can now take notes and rate candidate's answers",
+  "completed": "Interview completed",
+  "completeAtLeast80": "Complete at least 80% of the interview before finishing",
+  "status": {
+    "completed": "Completed",
+    "inProgress": "In Progress",
+    "planned": "Planned"
+  },
+  "startInterview": "Start Interview",
+  "completeInterview": "Complete",
+  "downloadPDF": "Download PDF",
+  "overallProgress": "Overall Progress",
+  "items": "items",
+  "duration": "Duration",
+  "recommendation": "Recommendation",
+  "overallImpression": "Overall Impression",
+  "finalAssessment": "Final Assessment",
+  "interviewCompleted": "Interview successfully completed",
+  "recommendations": {
+    "hire_strongly": "Hire Immediately",
+    "hire_strongly_desc": "Excellent candidate, perfect match",
+    "hire": "Hire",
+    "hire_desc": "Good candidate, meets requirements",
+    "consider": "Consider",
+    "consider_desc": "Has potential, need more information",
+    "reject": "Reject",
+    "reject_desc": "Not suitable for this position"
+  },
+  "completeDialog": {
+    "title": "Complete Interview",
+    "description": "Leave your overall impression and recommendation",
+    "impression": "Overall Impression",
+    "impressionPlaceholder": "General impression of the candidate, key takeaways...",
+    "recommendation": "Recommendation",
+    "submit": "Complete Interview"
+  },
+  "impressionRequired": "Please leave your overall impression",
+  "impressionTooShort": "Overall impression must be at least 10 characters",
+  "completionError": "Completion error",
+  "history": {
+    "empty": "No Interviews",
+    "emptyDescription": "Generate an interview plan to start working with the candidate"
+  },
+  "view": "View",
+  "completedAt": "Completed",
+  "progressStatus": "Progress",
+  "cancel": "Cancel",
+  "pdf": {
+    "title": "Interview Protocol",
+    "candidate": "Candidate",
+    "vacancy": "Vacancy",
+    "date": "Date",
+    "duration": "Duration",
+    "status": "Status",
+    "section": "Section",
+    "question": "Question",
+    "notes": "Notes",
+    "rating": "Rating",
+    "completed": "Completed",
+    "notCompleted": "Not Completed",
+    "finalImpression": "Final Impression",
+    "recommendation": "Recommendation",
+    "minutes": "min"
+  }
+}

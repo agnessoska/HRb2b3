@@ -1,15 +1,23 @@
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { GitCompare } from 'lucide-react';
 import { CandidateCard } from './CandidateCard.tsx';
-import type { Application } from '../../types';
+import type { SmartApplication } from '@/shared/types/extended';
 
 interface KanbanColumnProps {
   id: string;
   title: string;
   count: number;
-  applications: Application[];
-  onStatusChange?: (applicationId: string, newStatus: string) => void;
+  applications: SmartApplication[];
+  onStatusChange?: (action: string, applicationId?: string) => void;
+  onInviteToInterview?: (applicationId: string) => void;
+  onMoveToOffer?: (applicationId: string) => void;
+  onOpenInterview?: (sessionId: string) => void;
+  onCompare?: () => void;
+  onViewComparisonHistory?: () => void;
+  compareAvailableCount?: number;
 }
 
 const statusColors: Record<string, string> = {
@@ -28,8 +36,17 @@ export const KanbanColumn = ({
   count,
   applications,
   onStatusChange,
+  onInviteToInterview,
+  onMoveToOffer,
+  onOpenInterview,
+  onCompare,
+  onViewComparisonHistory,
+  compareAvailableCount = 0,
 }: KanbanColumnProps) => {
-  const { t } = useTranslation('vacancies');
+  const { t } = useTranslation(['funnel', 'common']);
+  
+  const isEvaluatedColumn = id === 'evaluated';
+  const canCompare = isEvaluatedColumn && compareAvailableCount >= 2;
 
   return (
     <div
@@ -48,19 +65,46 @@ export const KanbanColumn = ({
             {count}
           </Badge>
         </div>
+        
+        {/* Compare buttons for evaluated column */}
+        {isEvaluatedColumn && (
+          <div className="space-y-1.5 mt-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onCompare}
+              disabled={!canCompare}
+              className="w-full gap-2 h-8 text-xs"
+            >
+              <GitCompare className="h-3 w-3" />
+              {canCompare ? t('compareButton', { count: compareAvailableCount }) : t('compareDisabled')}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onViewComparisonHistory}
+              className="w-full gap-2 h-7 text-xs bg-background/50"
+            >
+              {t('compareHistory')}
+            </Button>
+          </div>
+        )}
       </div>
 
       <div className="flex-1 overflow-y-auto p-2 space-y-3 min-h-[150px] scrollbar-thin scrollbar-thumb-rounded-md scrollbar-thumb-muted-foreground/20 hover:scrollbar-thumb-muted-foreground/40">
         {applications.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-32 text-sm text-muted-foreground/50 border-2 border-dashed border-muted-foreground/10 rounded-lg mx-1">
-            <span className="text-xs font-medium">{t('funnel.noCandidates')}</span>
+            <span className="text-xs font-medium">{t('noCandidates')}</span>
           </div>
         ) : (
-          applications.map((application: Application) => (
+          applications.map((application) => (
             <CandidateCard
               key={application.id}
               application={application}
-              onStatusChange={(status) => onStatusChange?.(application.id, status)}
+              onStatusChange={onStatusChange}
+              onInviteToInterview={onInviteToInterview}
+              onMoveToOffer={onMoveToOffer}
+              onOpenInterview={onOpenInterview}
             />
           ))
         )}

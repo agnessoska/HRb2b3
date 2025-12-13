@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
@@ -23,42 +23,9 @@ import { AIGenerationModal } from '@/shared/ui/AIGenerationModal'
 import { GlassCard } from '@/shared/ui/GlassCard'
 import { ResumeAnalysisHistory } from './ResumeAnalysisHistory'
 import { ResumeAnalysisResult } from './ResumeAnalysisResult'
-
-interface AnalysisCandidate {
-  name: string
-  match_score: number
-  summary: string
-  pros: string[]
-  cons: string[]
-  skills?: {
-    hard_skills_match: string[]
-    missing_skills: string[]
-    soft_skills: string[]
-  }
-  cultural_fit?: string
-  red_flags?: string[]
-  interview_questions?: string[]
-  verdict: 'recommended' | 'maybe' | 'rejected'
-  vacancy_matches: {
-    vacancy_title: string
-    score: number
-    reason: string
-  }[]
-}
-
-interface AnalysisData {
-  candidates: AnalysisCandidate[]
-}
-
-interface AnalysisResult {
-  id: string;
-  content_html: string | null;
-  content_markdown: string | null;
-  created_at: string;
-  analysis_data: AnalysisData;
-}
-
+import type { AnalysisResult, AnalysisData, AnalysisCandidate } from '../types'
 const CHUNK_SIZE = 5;
+const ANALYSIS_STORAGE_KEY = 'resume_analysis_current_result';
 
 export const ResumeAnalysis = () => {
   const { t } = useTranslation(['ai-analysis', 'common'])
@@ -69,14 +36,35 @@ export const ResumeAnalysis = () => {
   const [additionalNotes, setAdditionalNotes] = useState('')
   const [resultLanguage, setResultLanguage] = useState(language)
   const [openPopover, setOpenPopover] = useState(false)
-  const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null)
   
-  // Clear result view if query param is removed (browser back button)
-  useEffect(() => {
-    if (searchParams.get('view') !== 'result' && analysisResult) {
-      setAnalysisResult(null)
+  // Initialize from sessionStorage if viewing result
+  const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(() => {
+    const view = searchParams.get('view')
+    if (view === 'result') {
+      const stored = sessionStorage.getItem(ANALYSIS_STORAGE_KEY)
+      return stored ? JSON.parse(stored) : null
     }
-  }, [searchParams, analysisResult])
+    return null
+  })
+
+  // Helper functions for result management
+  const setResultAndNavigate = (result: AnalysisResult) => {
+    sessionStorage.setItem(ANALYSIS_STORAGE_KEY, JSON.stringify(result))
+    setAnalysisResult(result)
+    setSearchParams(prev => {
+      prev.set('view', 'result')
+      return prev
+    })
+  }
+
+  const clearResultAndNavigate = () => {
+    sessionStorage.removeItem(ANALYSIS_STORAGE_KEY)
+    setAnalysisResult(null)
+    setSearchParams(prev => {
+      prev.delete('view')
+      return prev
+    })
+  }
 
   // Upload state
   const [isUploading, setIsUploading] = useState(false)
@@ -92,11 +80,7 @@ export const ResumeAnalysis = () => {
       // For single chunks, we set result immediately
       if (files.length <= CHUNK_SIZE && data.result) {
         toast.success(t('resumeAnalysis.notifications.successTitle'))
-        setAnalysisResult(data.result as AnalysisResult)
-        setSearchParams(prev => {
-          prev.set('view', 'result')
-          return prev
-        })
+        setResultAndNavigate(data.result as AnalysisResult)
       }
     },
     onError: (error: Error) => {
@@ -242,11 +226,7 @@ export const ResumeAnalysis = () => {
 
         if (error) throw error;
 
-        setAnalysisResult(savedResult as unknown as AnalysisResult)
-        setSearchParams(prev => {
-          prev.set('view', 'result')
-          return prev
-        })
+        setResultAndNavigate(savedResult as unknown as AnalysisResult)
         toast.success(t('resumeAnalysis.notifications.successTitle'))
       }
 
@@ -269,13 +249,7 @@ export const ResumeAnalysis = () => {
     return (
       <ResumeAnalysisResult
         result={analysisResult}
-        onBack={() => {
-          setAnalysisResult(null)
-          setSearchParams(prev => {
-            prev.delete('view')
-            return prev
-          })
-        }}
+        onBack={clearResultAndNavigate}
       />
     )
   }
@@ -503,13 +477,7 @@ export const ResumeAnalysis = () => {
           </CardContent>
         </GlassCard>
 
-        <ResumeAnalysisHistory onViewAnalysis={(result) => {
-          setAnalysisResult(result)
-          setSearchParams(prev => {
-            prev.set('view', 'result')
-            return prev
-          })
-        }} />
+        <ResumeAnalysisHistory onViewAnalysis={setResultAndNavigate} />
       </div>
 
       <div className="space-y-6 lg:sticky lg:top-4">

@@ -2,23 +2,107 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Download, ArrowLeft, User, ThumbsUp, ThumbsDown, MinusCircle, CheckCircle2, XCircle, AlertTriangle, Brain, MessageCircle, Heart } from 'lucide-react'
+import { Download, ArrowLeft, User, ThumbsUp, ThumbsDown, MinusCircle, CheckCircle2, XCircle, AlertTriangle, Brain, MessageCircle, Heart, UserPlus, Copy } from 'lucide-react'
 import { AIBorder } from '@/shared/ui/AIBorder'
 import { AIStreamingText } from '@/shared/ui/AIStreamingText'
 import { Progress } from '@/components/ui/progress'
 import { pdf } from '@react-pdf/renderer'
 import { ResumeAnalysisDocument } from './pdf/ResumeAnalysisDocument'
-import type { AnalysisData, AnalysisResult } from '../types'
+import type { AnalysisCandidate, AnalysisData, AnalysisResult } from '../types'
+import { useVacanciesByIds } from '@/features/vacancy-management/api/getVacancies'
+import { useCreateCandidateFromAnalysis } from '../api/createCandidateFromAnalysis'
+import { useCheckInviteTokensStatus } from '../api/checkInviteTokensStatus'
+import { useGetResumeAnalysisById } from '../api/getResumeAnalysisById'
+import { useUpdateAnalysisInvite } from '../api/updateAnalysisInvite'
+import { useHrProfile } from '@/shared/hooks/useHrProfile'
+import { toast } from 'sonner'
+import { useState } from 'react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 
 interface ResumeAnalysisResultProps {
   result: AnalysisResult
   onBack: () => void
 }
 
-export const ResumeAnalysisResult = ({ result, onBack }: ResumeAnalysisResultProps) => {
+export const ResumeAnalysisResult = ({ result: initialResult, onBack }: ResumeAnalysisResultProps) => {
   const { t } = useTranslation(['ai-analysis', 'common'])
+  const { data: hrProfile } = useHrProfile()
+  const [inviteDialogData, setInviteDialogData] = useState<{ id?: string, link: string } | null>(null)
+  
+  // Subscribe to analysis updates (to get new invite tokens)
+  const { data: result } = useGetResumeAnalysisById(initialResult.id, initialResult)
+  
+  // Get vacancies involved in this analysis
+  const { data: vacancies = [] } = useVacanciesByIds(result?.vacancy_ids || [])
+  
+  const analysisData = (result?.analysis_data || null) as AnalysisData | null
 
-  const analysisData = result.analysis_data as AnalysisData | null
+  // Check status for all tokens
+  const tokens = analysisData?.candidates
+    .map(c => c.invite_token)
+    .filter(Boolean) as string[] || []
+    
+  const { data: tokensStatus } = useCheckInviteTokensStatus(tokens)
+
+  const { mutate: createCandidate, isPending: isCreating } = useCreateCandidateFromAnalysis()
+  const { mutate: updateInvite } = useUpdateAnalysisInvite()
+
+  const handleInvite = (candidate: AnalysisCandidate, vacancyId: string, index: number) => {
+    if (!hrProfile || !result) return
+
+    createCandidate({
+      candidateData: candidate,
+      vacancyId,
+      hrId: hrProfile.id
+    }, {
+      onSuccess: (data) => {
+        toast.success(t('ai-analysis:resumeAnalysis.result.inviteSuccess'))
+        const inviteLink = `${window.location.origin}/auth/login?token=${data.invite_token}`
+        setInviteDialogData({ id: data.candidate_id, link: inviteLink })
+        
+        // Save token to analysis result
+        if (result) {
+          updateInvite({
+            analysisId: result.id,
+            candidateIndex: index,
+            inviteToken: data.invite_token
+          })
+        }
+      },
+      onError: (error) => {
+        console.error(error)
+        toast.error(t('common:error'))
+      }
+    })
+  }
+
+  const handleShowLink = (token: string) => {
+    const inviteLink = `${window.location.origin}/auth/login?token=${token}`
+    setInviteDialogData({ link: inviteLink })
+  }
+
+  const handleCopyLink = () => {
+    if (inviteDialogData?.link) {
+      navigator.clipboard.writeText(inviteDialogData.link)
+      toast.success(t('common:copied'))
+    }
+  }
 
   const handleDownloadPDF = async () => {
     if (!analysisData) return
@@ -102,7 +186,7 @@ export const ResumeAnalysisResult = ({ result, onBack }: ResumeAnalysisResultPro
             <CardContent>
               <div
                 className="prose dark:prose-invert max-w-none"
-                dangerouslySetInnerHTML={{ __html: result.content_html || '' }}
+                dangerouslySetInnerHTML={{ __html: result?.content_html || '' }}
               />
             </CardContent>
           </Card>
@@ -349,11 +433,110 @@ export const ResumeAnalysisResult = ({ result, onBack }: ResumeAnalysisResultPro
                     )}
                   </div>
                 )}
+
+                {/* Actions Footer */}
+                <div className="pt-4 mt-4 border-t border-border/50 flex justify-end gap-3">
+                  {(() => {
+                    const token = candidate.invite_token
+                    const status = token ? tokensStatus?.find(s => s.token === token) : null
+                    
+                    if (status?.is_used) {
+                      return (
+                        <Button disabled variant="secondary" className="gap-2 bg-success/10 text-success hover:bg-success/20">
+                          <User className="w-4 h-4" />
+                          {t('ai-analysis:resumeAnalysis.result.status.registered')}
+                        </Button>
+                      )
+                    }
+
+                    if (token) {
+                      return (
+                        <Button
+                          variant="outline"
+                          className="gap-2"
+                          onClick={() => handleShowLink(token)}
+                        >
+                          <Copy className="w-4 h-4" />
+                          {t('ai-analysis:resumeAnalysis.result.status.copyLink')}
+                        </Button>
+                      )
+                    }
+
+                    return vacancies.length > 1 ? (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button className="gap-2" disabled={isCreating}>
+                            <UserPlus className="w-4 h-4" />
+                            {t('ai-analysis:resumeAnalysis.result.invite')}
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-56">
+                          <DropdownMenuLabel>{t('ai-analysis:resumeAnalysis.result.selectVacancy')}</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          {vacancies.map((vacancy) => {
+                            const match = candidate.vacancy_matches?.find(m => m.vacancy_title === vacancy.title)
+                            return (
+                              <DropdownMenuItem
+                                key={vacancy.id}
+                                onClick={() => handleInvite(candidate, vacancy.id, index)}
+                                className="flex justify-between items-center"
+                              >
+                                <span className="truncate">{vacancy.title}</span>
+                                {match && <span className="text-xs text-muted-foreground ml-2">{match.score}%</span>}
+                              </DropdownMenuItem>
+                            )
+                          })}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    ) : (
+                      <Button
+                        className="gap-2"
+                        disabled={isCreating}
+                        onClick={() => vacancies[0] && handleInvite(candidate, vacancies[0].id, index)}
+                      >
+                        <UserPlus className="w-4 h-4" />
+                        {t('ai-analysis:resumeAnalysis.result.invite')}
+                      </Button>
+                    )
+                  })()}
+                </div>
               </div>
             </Card>
           ))}
         </div>
       </div>
+
+      <Dialog open={!!inviteDialogData} onOpenChange={(open) => !open && setInviteDialogData(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t('ai-analysis:resumeAnalysis.result.inviteCreated')}</DialogTitle>
+            <DialogDescription>
+              {t('ai-analysis:resumeAnalysis.result.inviteCreatedDesc')}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex items-center space-x-2">
+            <div className="grid flex-1 gap-2">
+              <Label htmlFor="link" className="sr-only">
+                Link
+              </Label>
+              <Input
+                id="link"
+                defaultValue={inviteDialogData?.link}
+                readOnly
+              />
+            </div>
+            <Button size="sm" className="px-3" onClick={handleCopyLink}>
+              <span className="sr-only">Copy</span>
+              <Copy className="h-4 w-4" />
+            </Button>
+          </div>
+          <div className="flex justify-end">
+            <Button type="button" variant="secondary" onClick={() => setInviteDialogData(null)}>
+              {t('common:close')}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

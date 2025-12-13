@@ -7,16 +7,7 @@ import { Eye, History, Calendar, Users } from 'lucide-react'
 import { ListContainer, ListItem } from '@/shared/ui/ListTransition'
 import { GlassCard } from '@/shared/ui/GlassCard'
 import { Badge } from '@/components/ui/badge'
-
-interface AnalysisResult {
-  id: string
-  created_at: string
-  resume_count: number | null
-  content_html: string | null
-  content_markdown: string | null
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  analysis_data: any
-}
+import type { AnalysisResult } from '../types'
 
 interface ResumeAnalysisHistoryProps {
   onViewAnalysis: (analysis: AnalysisResult) => void
@@ -87,7 +78,7 @@ export const ResumeAnalysisHistory = ({ onViewAnalysis }: ResumeAnalysisHistoryP
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => onViewAnalysis(analysis as AnalysisResult)}
+                    onClick={() => onViewAnalysis(analysis)}
                     className="w-full sm:w-auto rounded-xl"
                   >
                     <Eye className="w-4 h-4 mr-2" />

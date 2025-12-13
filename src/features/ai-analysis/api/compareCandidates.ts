@@ -19,12 +19,11 @@ const compareCandidates = async (params: CompareCandidatesParams) => {
     throw new Error(`Failed to compare candidates: ${error.message}`)
   }
 
-  // The function returns { success: true, result: savedResult }
   if (data.error) {
     throw new Error(data.error)
   }
 
-  return data.result
+  return data
 }
 
 export const useCompareCandidates = () => {

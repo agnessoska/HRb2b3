@@ -1,57 +1,57 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useGetCandidateById } from '@/features/candidate-management/api/getCandidateById'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Bot, Download, Share2, FileText, PlusCircle, MessageCircle, Loader2 } from 'lucide-react'
-import { GenerateFullAnalysisDialog } from '@/features/ai-analysis/ui/GenerateFullAnalysisDialog'
-import { GenerateStructuredInterviewDialog } from '@/features/ai-analysis/ui/GenerateStructuredInterviewDialog'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { ArrowLeft, MessageCircle, Loader2, FileText, MessageSquare, User } from 'lucide-react'
 import { useOrganization } from '@/shared/hooks/useOrganization'
 import { useHrProfile } from '@/shared/hooks/useHrProfile'
-import { useGetFullAnalysisByCandidate } from '@/features/ai-analysis/api/getFullAnalysisByCandidate'
 import { useGetGeneratedDocumentsByCandidate } from '@/features/ai-analysis/api/getGeneratedDocuments'
-import { GenerateDocumentDialog } from '@/features/ai-analysis/ui/GenerateDocumentDialog'
+import { DocumentHistory } from '@/features/ai-analysis/ui/DocumentHistory'
+import { DocumentView } from '@/features/ai-analysis/ui/DocumentView'
 import { getChatRoomByParticipants } from '@/features/chat/api'
 import { checkCandidateRelation } from '@/features/candidate-management/api/checkCandidateRelation'
 import { supabase } from '@/shared/lib/supabase'
-import type { DocumentType } from '@/features/ai-analysis/api/generateDocument'
-import { marked } from 'marked'
+import { InterviewWorkspace, InterviewHistory } from '@/features/structured-interview/ui'
+import { useGetInterviewSessions } from '@/features/structured-interview/api'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 
 export default function CandidateProfilePage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { t } = useTranslation(['candidates', 'common'])
+  const { t } = useTranslation(['candidates', 'common', 'ai-analysis'])
   const { data: organization } = useOrganization()
   const { data: hrProfile } = useHrProfile()
+  const queryClient = useQueryClient()
 
   const {
     data: candidate,
-    isLoading: isLoadingCandidate, 
-    isError: isErrorCandidate, 
-    error: errorCandidate 
+    isLoading: isLoadingCandidate,
   } = useGetCandidateById(id!)
 
-  const { 
-    data: analysis, 
-    isLoading: isLoadingAnalysis,
-    isError: isErrorAnalysis,
-    error: errorAnalysis
-  } = useGetFullAnalysisByCandidate(id!, organization?.id)
-
   const {
-    data: documents,
+    data: documents = [],
     isLoading: isLoadingDocuments,
   } = useGetGeneratedDocumentsByCandidate(id!, organization?.id)
 
-  const [isDocumentDialogOpen, setIsDocumentDialogOpen] = useState(false)
-  const [documentType, setDocumentType] = useState<DocumentType>('interview_invitation')
-  const [additionalInfo, setAdditionalInfo] = useState('')
+  const [viewingDocumentId, setViewingDocumentId] = useState<string | null>(null)
+  const viewingDocument = documents.find(d => d.id === viewingDocumentId) || null
+  
+  const {
+    data: interviewSessions = [],
+    isLoading: isLoadingInterviews,
+  } = useGetInterviewSessions(id!)
+  
+  const [viewingInterviewId, setViewingInterviewId] = useState<string | null>(null)
+  const viewingInterview = interviewSessions.find(s => s.id === viewingInterviewId) || null
+  
   const [isCheckingChat, setIsCheckingChat] = useState(false)
+  const [isSharing, setIsSharing] = useState(false)
 
   const { data: isRelated, isLoading: isCheckingRelation } = useQuery({
     queryKey: ['candidate-relation', id, organization?.id],
@@ -60,21 +60,42 @@ export default function CandidateProfilePage() {
       return checkCandidateRelation(id, organization.id);
     },
     enabled: !!id && !!organization?.id,
-  });
+  })
 
-  const analysisHtml = useMemo(() => {
-    if (analysis?.content_markdown) {
-      return marked.parse(analysis.content_markdown)
+  const handleShareDocument = async () => {
+    if (!viewingDocument?.id || isSharing) return
+    
+    setIsSharing(true)
+    
+    try {
+      const publicUrl = `${window.location.origin}/public/document/${viewingDocument.id}`
+      
+      if (viewingDocument.is_public) {
+        await navigator.clipboard.writeText(publicUrl)
+        toast.success(t('ai-analysis:documents.linkCopied', 'Ссылка скопирована'))
+      } else {
+        await supabase
+          .from('generated_documents')
+          .update({ is_public: true })
+          .eq('id', viewingDocument.id)
+        
+        await navigator.clipboard.writeText(publicUrl)
+        queryClient.invalidateQueries({ queryKey: ['documents', id, organization?.id] })
+        toast.success(t('ai-analysis:documents.linkCopied', 'Ссылка скопирована'))
+      }
+    } catch (error) {
+      console.error('Failed to share document', error)
+      toast.error(t('common:error'))
+    } finally {
+      setIsSharing(false)
     }
-    return ''
-  }, [analysis])
+  }
 
   const handleSendMessage = async () => {
     if (!hrProfile || !id || !organization) return
     
     setIsCheckingChat(true)
     try {
-      // 1. Try to find existing room
       const room = await getChatRoomByParticipants(hrProfile.id, id)
       
       if (room) {
@@ -82,7 +103,6 @@ export default function CandidateProfilePage() {
         return;
       }
 
-      // 2. If room doesn't exist but candidate is ours -> create room
       if (isRelated) {
         const { data: newRoom, error: createError } = await supabase
           .from('chat_rooms')
@@ -110,7 +130,7 @@ export default function CandidateProfilePage() {
     }
   }
 
-  const isLoading = isLoadingCandidate || (organization && (isLoadingAnalysis || isLoadingDocuments))
+  const isLoading = isLoadingCandidate || isLoadingDocuments || isLoadingInterviews
 
   if (isLoading) {
     return (
@@ -131,162 +151,189 @@ export default function CandidateProfilePage() {
     )
   }
 
-  if (isErrorCandidate || isErrorAnalysis) {
+  if (!candidate) {
     return (
       <div className="container mx-auto py-8 px-4">
         <Alert variant="destructive">
           <AlertTitle>{t('common:error')}</AlertTitle>
-          <AlertDescription>{errorCandidate?.message || errorAnalysis?.message}</AlertDescription>
+          <AlertDescription>{t('candidates:profile.notFound')}</AlertDescription>
         </Alert>
       </div>
     )
   }
 
+  // Get category name from candidate data
+  const categoryName = (() => {
+    if (!candidate.category_id) return t('common:notSpecified');
+    // Category name is loaded via RPC function get_organization_candidates
+    // For now, just show category_id or "Not specified"
+    return t('common:notSpecified');
+  })();
+
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold tracking-tight">{candidate?.full_name}</h1>
-        <p className="mt-2 text-muted-foreground">{t('profile.title')}</p>
-      </div>
-
-      <div className="grid gap-8 lg:grid-cols-3">
-        <div className="lg:col-span-2 space-y-8">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>{t('profile.aiAnalysisCard.title')}</CardTitle>
-              {analysis && (
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" className="gap-2">
-                    <Share2 className="h-4 w-4" />
-                    {t('common:share')}
-                  </Button>
-                  <Button variant="outline" size="sm" className="gap-2">
-                    <Download className="h-4 w-4" />
-                    {t('common:downloadPdf')}
-                  </Button>
-                </div>
-              )}
-            </CardHeader>
-            <CardContent>
-              {analysis ? (
-                <div 
-                  className="prose dark:prose-invert max-w-none" 
-                  dangerouslySetInnerHTML={{ __html: analysisHtml as string }} 
-                />
-              ) : (
-                <div className="text-center py-12">
-                  <Bot className="mx-auto h-12 w-12 text-muted-foreground" />
-                  <h3 className="mt-4 text-lg font-semibold">{t('profile.aiAnalysisCard.empty.title')}</h3>
-                  <p className="mt-2 text-sm text-muted-foreground">{t('profile.aiAnalysisCard.empty.description')}</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('profile.documentsCard.title')}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {documents && documents.length > 0 ? (
-                <ul className="space-y-3">
-                  {documents.map((doc) => (
-                    <li key={doc.id} className="flex items-center justify-between p-2 rounded-md border hover:bg-muted/50">
-                      <div className="flex items-center gap-3">
-                        <FileText className="h-5 w-5 text-muted-foreground" />
-                        <div>
-                          <p className="font-medium">{doc.title}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {t('common:createdAt')} {new Date(doc.created_at).toLocaleDateString()}
-                          </p>
-                        </div>
-                      </div>
-                      <Button variant="ghost" size="sm">{t('common:view')}</Button>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-sm text-muted-foreground text-center py-4">{t('profile.documentsCard.empty')}</p>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('profile.actionsCard.title')}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
+    <div className="container mx-auto py-8 px-4 max-w-6xl">
+      {viewingInterview ? (
+        <InterviewWorkspace
+          session={viewingInterview}
+          onBack={() => setViewingInterviewId(null)}
+        />
+      ) : viewingDocument ? (
+        <DocumentView
+          document={viewingDocument}
+          onBack={() => setViewingDocumentId(null)}
+          onShare={handleShareDocument}
+          isSharing={isSharing}
+        />
+      ) : (
+        <>
+          {/* Header */}
+          <div className="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
               <Button
-                className="w-full gap-2"
-                variant={isRelated ? "default" : "secondary"}
-                onClick={handleSendMessage}
-                disabled={isCheckingChat || isCheckingRelation || !isRelated}
-                title={!isRelated && !isCheckingRelation ? t('profile.chatNotAvailable') : undefined}
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate('/hr/dashboard?tab=candidates')}
               >
-                {isCheckingChat || isCheckingRelation ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <MessageCircle className="h-4 w-4" />
-                )}
-                {t('common:sendMessage')}
+                <ArrowLeft className="h-4 w-4" />
               </Button>
-              
-              <div className="pt-2">
-                <GenerateFullAnalysisDialog
-                  candidateId={id!}
-                  testsCompleted={candidate?.tests_completed || 0}
-                />
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight">{candidate.full_name}</h1>
+                <p className="text-muted-foreground mt-1">{categoryName}</p>
               </div>
-              
-              {(candidate?.tests_completed || 0) < 6 && (
-                <p className="text-xs text-muted-foreground pt-1">
-                  {t('profile.actionsCard.analysisDisabledTooltip')}
-                </p>
+            </div>
+            
+            <Button
+              variant={isRelated ? "default" : "secondary"}
+              onClick={handleSendMessage}
+              disabled={isCheckingChat || isCheckingRelation || !isRelated}
+              title={!isRelated && !isCheckingRelation ? t('profile.chatNotAvailable') : undefined}
+              className="gap-2"
+            >
+              {isCheckingChat || isCheckingRelation ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <MessageCircle className="h-4 w-4" />
               )}
-              <Button className="w-full gap-2" onClick={() => setIsDocumentDialogOpen(true)}>
-                <PlusCircle className="h-4 w-4" />
-                {t('profile.actionsCard.generateDocument')}
-              </Button>
-              <GenerateDocumentDialog
-                isOpen={isDocumentDialogOpen}
-                onOpenChange={setIsDocumentDialogOpen}
-                candidateId={id!}
-                vacancyId={documents?.[0]?.vacancy_id || undefined}
-                documentType={documentType}
-                onDocumentTypeChange={setDocumentType}
-                additionalInfo={additionalInfo}
-                onAdditionalInfoChange={setAdditionalInfo}
-              />
-              <GenerateStructuredInterviewDialog
-                candidateId={id!}
-                // TODO: Pass a relevant vacancy ID. Using a placeholder for now.
-                vacancyId={documents?.[0]?.vacancy_id || ''}
-                disabled={!analysis}
-              />
-              {!analysis && (
-                <p className="text-xs text-muted-foreground pt-1">
-                  {t('profile.actionsCard.interviewDisabledTooltip')}
-                </p>
-              )}
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('profile.detailsCard.title')}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-sm">
-              <p><strong>{t('profile.detailsCard.email')}:</strong> {candidate?.id}</p>
-              <p><strong>{t('profile.detailsCard.phone')}:</strong> {candidate?.phone || t('common:notSpecified')}</p>
-              <p><strong>{t('profile.detailsCard.experience')}:</strong> {candidate?.experience || t('common:notSpecified')}</p>
-              <p><strong>{t('profile.detailsCard.education')}:</strong> {candidate?.education || t('common:notSpecified')}</p>
-              <p><strong>{t('profile.detailsCard.about')}:</strong> {candidate?.about || t('common:notSpecified')}</p>
-              <p><strong>{t('profile.detailsCard.testsCompleted')}:</strong> {candidate?.tests_completed || 0}/6</p>
-            </CardContent>
-          </Card>
+              {t('common:sendMessage')}
+            </Button>
+          </div>
+
+          {/* Tabs for History */}
+          <Tabs defaultValue="documents" className="w-full">
+            <TabsList className="grid w-full grid-cols-1 lg:grid-cols-3">
+              <TabsTrigger value="documents" className="gap-2">
+                <FileText className="h-4 w-4" />
+                {t('profile.tabs.documents')}
+              </TabsTrigger>
+              <TabsTrigger value="interviews" className="gap-2">
+                <MessageSquare className="h-4 w-4" />
+                {t('profile.tabs.interviews')}
+              </TabsTrigger>
+              <TabsTrigger value="info" className="gap-2">
+                <User className="h-4 w-4" />
+                {t('profile.tabs.info')}
+              </TabsTrigger>
+            </TabsList>
+
+            {/* Documents Tab */}
+            <TabsContent value="documents" className="mt-6">
+  <Card>
+    <CardHeader>
+      <CardTitle>{t('profile.documentsCard.title')}</CardTitle>
+    </CardHeader>
+    <CardContent>
+      {documents.length > 0 ? (
+        <DocumentHistory
+          documents={documents}
+          onView={(doc) => setViewingDocumentId(doc.id)}
+        />
+      ) : (
+        <div className="text-center py-12">
+          <FileText className="mx-auto h-12 w-12 text-muted-foreground/50" />
+          <h3 className="mt-4 text-lg font-semibold">{t('profile.documentsCard.empty.title')}</h3>
+          <p className="mt-2 text-sm text-muted-foreground">{t('profile.documentsCard.empty.description')}</p>
+          <p className="mt-4 text-xs text-muted-foreground">{t('profile.documentsCard.empty.hint')}</p>
         </div>
-      </div>
+      )}
+              </CardContent>
+            </Card>
+            </TabsContent>
+
+            {/* Interviews Tab */}
+            <TabsContent value="interviews" className="mt-6">
+  <Card>
+    <CardHeader>
+      <CardTitle>{t('profile.interviewsCard.title')}</CardTitle>
+    </CardHeader>
+    <CardContent>
+      {interviewSessions.length > 0 ? (
+        <InterviewHistory
+          candidateId={id!}
+          onViewSession={(session) => setViewingInterviewId(session.id)}
+        />
+      ) : (
+        <div className="text-center py-12">
+          <MessageSquare className="mx-auto h-12 w-12 text-muted-foreground/50" />
+          <h3 className="mt-4 text-lg font-semibold">{t('profile.interviewsCard.empty.title')}</h3>
+          <p className="mt-2 text-sm text-muted-foreground">{t('profile.interviewsCard.empty.description')}</p>
+          <p className="mt-4 text-xs text-muted-foreground">{t('profile.interviewsCard.empty.hint')}</p>
+        </div>
+      )}
+              </CardContent>
+            </Card>
+            </TabsContent>
+
+            {/* Info Tab */}
+            <TabsContent value="info" className="mt-6">
+              <div className="grid gap-6 md:grid-cols-2">
+    <Card>
+      <CardHeader>
+        <CardTitle>{t('profile.detailsCard.title')}</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div>
+          <p className="text-sm font-medium text-muted-foreground">{t('profile.detailsCard.email')}</p>
+          <p className="text-sm mt-1">{candidate.email || t('common:notSpecified')}</p>
+        </div>
+        <div>
+          <p className="text-sm font-medium text-muted-foreground">{t('profile.detailsCard.phone')}</p>
+          <p className="text-sm mt-1">{candidate.phone || t('common:notSpecified')}</p>
+        </div>
+        <div>
+          <p className="text-sm font-medium text-muted-foreground">{t('profile.detailsCard.category')}</p>
+          <p className="text-sm mt-1">{categoryName}</p>
+        </div>
+        <div>
+          <p className="text-sm font-medium text-muted-foreground">{t('profile.detailsCard.testsCompleted')}</p>
+          <p className="text-sm mt-1">{candidate.tests_completed || 0}/6</p>
+        </div>
+      </CardContent>
+    </Card>
+
+    <Card>
+      <CardHeader>
+        <CardTitle>{t('profile.backgroundCard.title')}</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div>
+          <p className="text-sm font-medium text-muted-foreground">{t('profile.detailsCard.experience')}</p>
+          <p className="text-sm mt-1 whitespace-pre-wrap">{candidate.experience || t('common:notSpecified')}</p>
+        </div>
+        <div>
+          <p className="text-sm font-medium text-muted-foreground">{t('profile.detailsCard.education')}</p>
+          <p className="text-sm mt-1 whitespace-pre-wrap">{candidate.education || t('common:notSpecified')}</p>
+        </div>
+        <div>
+          <p className="text-sm font-medium text-muted-foreground">{t('profile.detailsCard.about')}</p>
+          <p className="text-sm mt-1 whitespace-pre-wrap">{candidate.about || t('common:notSpecified')}</p>
+        </div>
+                </CardContent>
+              </Card>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </>
+      )}
     </div>
   )
 }

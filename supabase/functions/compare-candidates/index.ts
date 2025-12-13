@@ -4,8 +4,6 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
 // @ts-expect-error deno-types
 import { Anthropic } from 'https://esm.sh/@anthropic-ai/sdk@0.20.1'
-// @ts-expect-error deno-types
-import { marked } from 'https://esm.sh/marked@12.0.2'
 
 // --- SHARED LOGIC ---
 
@@ -58,77 +56,77 @@ async function getAIConfig(
 }
 
 async function callAI(config: AIConfig, prompt: string): Promise<{ response: string; inputTokens: number; outputTokens: number }> {
-    if (config.provider === 'anthropic') {
-      // @ts-expect-error Deno global
-      const apiKey = Deno.env.get('ANTHROPIC_API_KEY')
-      if (!apiKey) throw new Error('ANTHROPIC_API_KEY is not set in Supabase secrets')
-      const anthropic = new Anthropic({ apiKey })
-      
-      const body: Anthropic.Messages.MessageCreateParams = {
-          model: config.model_name,
-          max_tokens: config.max_output_tokens,
-          temperature: config.temperature,
-          messages: [{ role: 'user', content: prompt }],
-      };
-  
-      if (config.thinking_budget && config.thinking_budget > 0) {
-          body.thinking = {
-              type: 'enabled',
-              budget_tokens: config.thinking_budget,
-          }
-      }
-  
-      const msg = await anthropic.messages.create(body);
-      const textBlock = msg.content.find((block: { type: string; }) => block.type === 'text');
-      if (!textBlock) {
-        throw new Error('Anthropic API response did not contain a text block.');
-      }
-  
-      return {
-        response: textBlock.text,
-        inputTokens: msg.usage.input_tokens,
-        outputTokens: msg.usage.output_tokens,
-      }
-    } else if (config.provider === 'google') {
-      // @ts-expect-error Deno global
-      const API_KEY = Deno.env.get('GEMINI_API_KEY')
-      if (!API_KEY) throw new Error('GEMINI_API_KEY is not set in Supabase secrets')
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${config.model_name}:generateContent?key=${API_KEY}`
-  
-      const body = {
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: config.temperature,
-          maxOutputTokens: config.max_output_tokens,
-          ...(config.thinking_budget && {
-            thinkingConfig: {
-              thinkingBudget: config.thinking_budget,
-            },
-          }),
-        },
-      }
-  
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      })
-  
-      if (!res.ok) {
-        const error = await res.json()
-        throw new Error(`Google AI API error: ${error.error.message}`)
-      }
-  
-      const data = await res.json()
-      return {
-        response: data.candidates[0].content.parts[0].text,
-        inputTokens: 0,
-        outputTokens: 0,
-      }
-    } else {
-      throw new Error(`Unsupported AI provider: ${config.provider}`)
+  if (config.provider === 'anthropic') {
+    // @ts-expect-error Deno global
+    const apiKey = Deno.env.get('ANTHROPIC_API_KEY')
+    if (!apiKey) throw new Error('ANTHROPIC_API_KEY is not set in Supabase secrets')
+    const anthropic = new Anthropic({ apiKey })
+    
+    const body: Anthropic.Messages.MessageCreateParams = {
+        model: config.model_name,
+        max_tokens: config.max_output_tokens,
+        temperature: config.temperature,
+        messages: [{ role: 'user', content: prompt }],
+    };
+
+    if (config.thinking_budget && config.thinking_budget > 0) {
+        body.thinking = {
+            type: 'enabled',
+            budget_tokens: config.thinking_budget,
+        }
     }
+
+    const msg = await anthropic.messages.create(body);
+    const textBlock = msg.content.find((block: { type: string; }) => block.type === 'text');
+    if (!textBlock) {
+      throw new Error('Anthropic API response did not contain a text block.');
+    }
+
+    return {
+      response: textBlock.text,
+      inputTokens: msg.usage.input_tokens,
+      outputTokens: msg.usage.output_tokens,
+    }
+  } else if (config.provider === 'google') {
+    // @ts-expect-error Deno global
+    const API_KEY = Deno.env.get('GEMINI_API_KEY')
+    if (!API_KEY) throw new Error('GEMINI_API_KEY is not set in Supabase secrets')
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${config.model_name}:generateContent?key=${API_KEY}`
+
+    const body = {
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: {
+        temperature: config.temperature,
+        maxOutputTokens: config.max_output_tokens,
+        ...(config.thinking_budget && {
+          thinkingConfig: {
+            thinkingBudget: config.thinking_budget,
+          },
+        }),
+      },
+    }
+
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    })
+
+    if (!res.ok) {
+      const error = await res.json()
+      throw new Error(`Google AI API error: ${error.error.message}`)
+    }
+
+    const data = await res.json()
+    return {
+      response: data.candidates[0].content.parts[0].text,
+      inputTokens: 0,
+      outputTokens: 0,
+    }
+  } else {
+    throw new Error(`Unsupported AI provider: ${config.provider}`)
   }
+}
 
 async function deductTokens(
   supabaseClient: SupabaseClient,
@@ -176,7 +174,7 @@ interface CompareCandidatesPayload {
   organization_id: string
   hr_specialist_id: string
   vacancy_id: string
-  candidate_ids: string[] // 2-5 candidates
+  candidate_ids: string[]
   language: 'ru' | 'kk' | 'en'
 }
 
@@ -220,53 +218,123 @@ serve(async (req: Request) => {
     supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey)
     console.log(`[${OPERATION_TYPE}] Step 3 successful. Supabase client created.`);
 
-    console.log(`[${OPERATION_TYPE}] Step 4: Fetching vacancy details.`);
+    console.log(`[${OPERATION_TYPE}] Step 4: Fetching vacancy details with ideal profile.`);
     const { data: vacancy, error: vacancyError } = await supabaseAdmin
       .from('vacancies')
-      .select('title, description')
+      .select('title, description, requirements, salary_min, salary_max, currency, employment_type, ideal_profile')
       .eq('id', payload.vacancy_id)
       .single()
 
     if (vacancyError) throw new Error(`Failed to fetch vacancy: ${vacancyError.message}`)
     if (!vacancy) throw new Error('Vacancy not found')
-    console.log(`[${OPERATION_TYPE}] Step 4 successful. Fetched details for vacancy: ${vacancy.title}`);
+    if (!vacancy.ideal_profile) throw new Error('Vacancy does not have an ideal profile. Generate it first.')
+    console.log(`[${OPERATION_TYPE}] Step 4 successful. Fetched vacancy: ${vacancy.title}`);
 
-    console.log(`[${OPERATION_TYPE}] Step 5: Fetching candidate analyses.`);
-    const { data: analyses, error: analysesError } = await supabaseAdmin
-        .from('candidate_full_analysis')
-        .select('candidate_id, content_markdown')
-        .in('candidate_id', payload.candidate_ids)
-
-    if(analysesError) throw new Error(`Failed to fetch candidate analyses: ${analysesError.message}`);
-    if(!analyses || analyses.length !== payload.candidate_ids.length) throw new Error('Could not find full analysis for all specified candidates.');
+    console.log(`[${OPERATION_TYPE}] Step 5: Fetching candidates data (profile + skills + all test results).`);
     
-    const candidateAnalysesText = analyses.map((a: { candidate_id: string; content_markdown: string | null }, index: number) =>
-        `--- CANDIDATE ${index + 1} ---\n${a.content_markdown || 'No analysis content.'}\n---`
-    ).join('\n\n');
-    console.log(`[${OPERATION_TYPE}] Step 5 successful. Fetched ${analyses.length} analyses.`);
+    const candidatesDataPromises = payload.candidate_ids.map(async (candidateId) => {
+      // Получаем профиль кандидата
+      const { data: candidate, error: candError } = await supabaseAdmin!
+        .from('candidates')
+        .select('id, full_name, phone, experience, education, about, tests_completed')
+        .eq('id', candidateId)
+        .single()
+      
+      if (candError) throw new Error(`Failed to fetch candidate ${candidateId}: ${candError.message}`)
+      
+      // Получаем навыки кандидата
+      const { data: skills, error: skillsError } = await supabaseAdmin!
+        .from('candidate_skills')
+        .select('canonical_skill')
+        .eq('candidate_id', candidateId)
+      
+      if (skillsError) throw new Error(`Failed to fetch skills for candidate ${candidateId}: ${skillsError.message}`)
+      
+      // Получаем результаты всех тестов
+      const { data: testResults, error: testsError } = await supabaseAdmin!
+        .from('candidate_test_results')
+        .select(`
+          test_id,
+          normalized_scores,
+          detailed_result,
+          tests (code, name_ru, name_en, name_kk)
+        `)
+        .eq('candidate_id', candidateId)
+      
+      if (testsError) throw new Error(`Failed to fetch test results for candidate ${candidateId}: ${testsError.message}`)
+      
+      return {
+        candidate,
+        skills: skills?.map((s: { canonical_skill: string }) => s.canonical_skill) || [],
+        testResults: testResults || []
+      }
+    })
+    
+    const candidatesFullData = await Promise.all(candidatesDataPromises)
+    console.log(`[${OPERATION_TYPE}] Step 5 successful. Fetched full data for ${candidatesFullData.length} candidates.`);
+
+    // Форматируем данные кандидатов для промпта
+    const candidatesDataText = candidatesFullData.map((data, index) => {
+      const testResultsText = data.testResults.map((tr: { tests: { name_ru?: string } | null; normalized_scores: unknown; detailed_result: unknown }) => {
+        const testName = tr.tests?.name_ru || 'Unknown Test'
+        return `  - ${testName}: ${JSON.stringify(tr.normalized_scores || tr.detailed_result)}`
+      }).join('\n')
+      
+      return `
+--- КАНДИДАТ ${index + 1}: ${data.candidate.full_name} ---
+ID: ${data.candidate.id}
+Опыт: ${data.candidate.experience || 'Не указан'}
+Образование: ${data.candidate.education || 'Не указано'}
+О себе: ${data.candidate.about || 'Не указано'}
+Навыки: ${data.skills.join(', ') || 'Нет навыков'}
+Тестов пройдено: ${data.candidate.tests_completed}/6
+
+РЕЗУЛЬТАТЫ ПСИХОМЕТРИЧЕСКИХ ТЕСТОВ:
+${testResultsText || '  Тесты не пройдены'}
+---`
+    }).join('\n\n')
 
     console.log(`[${OPERATION_TYPE}] Step 6: Fetching AI configuration.`);
     aiConfig = await getAIConfig(supabaseAdmin, OPERATION_TYPE)
     console.log(`[${OPERATION_TYPE}] Step 6 successful. Using provider: ${aiConfig.provider}, model: ${aiConfig.model_name}`);
 
     console.log(`[${OPERATION_TYPE}] Step 7: Building final prompt.`);
+    
+    let salaryInfo = 'Не указана'
+    if (vacancy.salary_min || vacancy.salary_max) {
+      salaryInfo = `${vacancy.salary_min || 0} - ${vacancy.salary_max || '∞'} ${vacancy.currency || 'RUB'}`
+    }
+    
     const finalPrompt = aiConfig.prompt_text
       .replace('{vacancy_title}', vacancy.title)
-      .replace('{vacancy_description}', vacancy.description || 'No description provided.')
-      .replace('{candidates_analyses}', candidateAnalysesText)
+      .replace('{vacancy_description}', vacancy.description || 'Описание отсутствует')
+      .replace('{requirements}', vacancy.requirements || 'Требования отсутствуют')
+      .replace('{salary_info}', salaryInfo)
+      .replace('{employment_type}', vacancy.employment_type || 'Не указан')
+      .replace('{ideal_profile}', JSON.stringify(vacancy.ideal_profile, null, 2))
+      .replace('{candidates_data}', candidatesDataText)
       .replace('{language}', payload.language)
     console.log(`[${OPERATION_TYPE}] Step 7 successful.`);
 
     console.log(`[${OPERATION_TYPE}] Step 8: Calling AI API.`);
     const { response: aiResponse, inputTokens, outputTokens } = await callAI(aiConfig, finalPrompt)
-    console.log(`[${OPERATION_TYPE}] Step 8 successful. Received response from AI.`);
+    console.log(`[${OPERATION_TYPE}] Step 8 successful. Received response from AI. Tokens: ${inputTokens} + ${outputTokens}`);
 
-    console.log(`[${OPERATION_TYPE}] Step 9: Converting markdown to HTML.`);
-    const htmlContent = await marked.parse(aiResponse);
-    console.log(`[${OPERATION_TYPE}] Step 9 successful.`);
-
-    // Note: Parsing ranking from response is omitted for simplicity, as per TZ it's just saved.
-    // A more robust solution would parse a JSON block from the markdown.
+    console.log(`[${OPERATION_TYPE}] Step 9: Parsing JSON response.`);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let comparisonData: any = null;
+    
+    try {
+      // Пытаемся найти JSON блок, если он обернут в markdown
+      const jsonMatch = aiResponse.match(/```json\n([\s\S]*?)\n```/) || aiResponse.match(/```\n([\s\S]*?)\n```/);
+      const jsonString = jsonMatch ? jsonMatch[1] : aiResponse;
+      
+      comparisonData = JSON.parse(jsonString);
+      console.log(`[${OPERATION_TYPE}] Step 9 successful. Parsed JSON with ${comparisonData.ranked_candidates?.length || 0} candidates.`);
+    } catch (e) {
+      console.error(`[${OPERATION_TYPE}] Failed to parse JSON from AI response:`, e);
+      throw new Error('AI returned invalid JSON format. Please try again.');
+    }
 
     console.log(`[${OPERATION_TYPE}] Step 10: Saving result to database.`);
     const { data: savedResult, error: insertError } = await supabaseAdmin
@@ -277,13 +345,13 @@ serve(async (req: Request) => {
         created_by_hr_id: payload.hr_specialist_id,
         candidate_ids: payload.candidate_ids,
         content_markdown: aiResponse,
-        content_html: htmlContent,
-        // ranking: parsedRanking, // Omitted for now
+        content_html: '', // We'll use JSON data directly in UI
+        ranking: comparisonData,
       })
       .select()
       .single()
 
-    if (insertError) throw new Error(`Failed to save candidate comparison results: ${insertError.message}`)
+    if (insertError) throw new Error(`Failed to save comparison results: ${insertError.message}`)
     console.log(`[${OPERATION_TYPE}] Step 10 successful. Result saved with ID: ${savedResult.id}`);
 
     console.log(`[${OPERATION_TYPE}] Step 11: Deducting tokens and logging operation.`);
@@ -305,13 +373,17 @@ serve(async (req: Request) => {
     console.log(`[${OPERATION_TYPE}] Step 11 successful.`);
 
     console.log(`[${OPERATION_TYPE}] Function finished successfully.`);
-    return new Response(JSON.stringify({ success: true, result: savedResult }), {
+    return new Response(JSON.stringify({ 
+      success: true, 
+      result: savedResult,
+      data: comparisonData
+    }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     })
   } catch (error) {
     console.error(`[${OPERATION_TYPE}] Error caught in main block:`, error);
-    if (payload && supabaseAdmin) {
+    if (payload && supabaseAdmin && aiConfig) {
       console.log(`[${OPERATION_TYPE}] Logging failed operation.`);
       await logAIOperation(supabaseAdmin, {
         organization_id: payload.organization_id,

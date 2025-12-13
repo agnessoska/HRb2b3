@@ -5,7 +5,7 @@ import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-
 // @ts-expect-error deno-types
 import { Anthropic } from 'https://esm.sh/@anthropic-ai/sdk@0.20.1'
 
-// --- SHARED LOGIC (Mirrored from analyze-resumes) ---
+// --- SHARED LOGIC ---
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -69,8 +69,15 @@ async function callAI(config: AIConfig, prompt: string): Promise<{ response: str
         messages: [{ role: 'user', content: prompt }],
     };
 
+    if (config.thinking_budget && config.thinking_budget > 0) {
+      body.thinking = {
+        type: 'enabled',
+        budget_tokens: config.thinking_budget,
+      };
+    }
+
     const msg = await anthropic.messages.create(body);
-    const textBlock = msg.content.find((block: { type: string; }) => block.type === 'text');
+    const textBlock = msg.content.find((block: { type: string }) => block.type === 'text');
     if (!textBlock) {
       throw new Error('Anthropic API response did not contain a text block.');
     }
@@ -165,56 +172,107 @@ serve(async (req: Request) => {
     supabaseAdmin = createClient(Deno.env.get('SUPABASE_URL') ?? '', Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '')
     console.log(`[${operation_type}] Step 2 successful.`);
 
-    console.log(`[${operation_type}] Step 3: Gathering context data (candidate, vacancy, org).`);
+    console.log(`[${operation_type}] Step 3: Gathering comprehensive candidate data.`);
+    // Получаем данные кандидата
     const { data: candidateData, error: candidateError } = await supabaseAdmin
       .from('candidates')
-      .select('full_name')
+      .select('full_name, experience, education, about')
       .eq('id', payload.candidate_id)
       .single()
     if (candidateError) throw new Error(`Candidate not found: ${candidateError.message}`)
 
-    let vacancyTitle = 'N/A'
+    // Получаем навыки кандидата
+    const { data: candidateSkills } = await supabaseAdmin
+      .from('candidate_skills')
+      .select('canonical_skill')
+      .eq('candidate_id', payload.candidate_id)
+    const skillsList = candidateSkills?.map((s: { canonical_skill: string }) => s.canonical_skill).join(', ') || 'Не указаны'
+
+    // Получаем полный анализ кандидата если есть
+    const { data: analysisData } = await supabaseAdmin
+      .from('candidate_full_analysis')
+      .select('analysis_data')
+      .eq('candidate_id', payload.candidate_id)
+      .eq('organization_id', payload.organization_id)
+      .single()
+    
+    const candidateStrengths = analysisData?.analysis_data?.professional_profile?.key_strengths?.join(', ') || 'Анализ недоступен'
+
+    console.log(`[${operation_type}] Step 3 successful.`);
+
+    console.log(`[${operation_type}] Step 4: Gathering vacancy and organization data.`);
+    let vacancyTitle = 'Не указана'
+    let vacancyDescription = ''
+    let vacancyRequirements = ''
+    let salaryInfo = 'По договоренности'
+
     if (payload.vacancy_id) {
       const { data: vacancyData, error: vacancyError } = await supabaseAdmin
         .from('vacancies')
-        .select('title, salary_min, salary_max, currency')
+        .select('title, description, requirements, salary_min, salary_max, currency')
         .eq('id', payload.vacancy_id)
         .single()
-      if (vacancyError) console.warn(`Vacancy not found: ${vacancyError.message}`)
-      else {
+      
+      if (!vacancyError && vacancyData) {
         vacancyTitle = vacancyData.title
+        vacancyDescription = vacancyData.description || 'Не указано'
+        vacancyRequirements = vacancyData.requirements || 'Не указаны'
+        
         if (vacancyData.salary_min || vacancyData.salary_max) {
-            vacancyTitle += ` (Salary: ${vacancyData.salary_min || 0} - ${vacancyData.salary_max || 'unlimited'} ${vacancyData.currency})`
+          const currencySymbol = vacancyData.currency === 'USD' ? '$' : vacancyData.currency === 'KZT' ? '₸' : vacancyData.currency === 'EUR' ? '€' : '₽'
+          salaryInfo = `${vacancyData.salary_min || 0} - ${vacancyData.salary_max || '∞'} ${currencySymbol}`
         }
       }
     }
     
     const { data: orgData, error: orgError } = await supabaseAdmin
         .from('organizations')
-        .select('name')
+        .select('name, culture_description')
         .eq('id', payload.organization_id)
         .single()
     if (orgError) throw new Error(`Organization not found: ${orgError.message}`)
-    console.log(`[${operation_type}] Step 3 successful.`);
+    
+    console.log(`[${operation_type}] Step 4 successful.`);
 
-    console.log(`[${operation_type}] Step 4: Fetching AI configuration for "${document_type}".`);
+    console.log(`[${operation_type}] Step 5: Fetching AI configuration for "${document_type}".`);
     aiConfig = await getAIConfig(supabaseAdmin, document_type)
-    console.log(`[${operation_type}] Step 4 successful. Using provider: ${aiConfig.provider}, model: ${aiConfig.model_name}`);
+    console.log(`[${operation_type}] Step 5 successful. Using provider: ${aiConfig.provider}, model: ${aiConfig.model_name}`);
 
-    console.log(`[${operation_type}] Step 5: Building final prompt.`);
+    console.log(`[${operation_type}] Step 6: Building final prompt.`);
     const finalPrompt = aiConfig.prompt_text
       .replace('{candidate_name}', candidateData.full_name)
+      .replace('{candidate_experience}', candidateData.experience || 'Не указан')
+      .replace('{candidate_skills}', skillsList)
+      .replace('{candidate_strengths}', candidateStrengths)
       .replace('{vacancy_title}', vacancyTitle)
+      .replace('{vacancy_description}', vacancyDescription)
+      .replace('{vacancy_requirements}', vacancyRequirements)
+      .replace('{salary_info}', salaryInfo)
       .replace('{organization_name}', orgData.name)
+      .replace('{organization_culture}', orgData.culture_description || 'Не указана')
       .replace('{additional_info}', payload.additional_info || 'Нет.')
       .replace('{language}', payload.language)
-    console.log(`[${operation_type}] Step 5 successful.`);
+    console.log(`[${operation_type}] Step 6 successful.`);
 
-    console.log(`[${operation_type}] Step 6: Calling AI API.`);
-    const { response: contentMarkdown, inputTokens, outputTokens } = await callAI(aiConfig, finalPrompt)
-    console.log(`[${operation_type}] Step 6 successful. Received response from AI.`);
+    console.log(`[${operation_type}] Step 7: Calling AI API.`);
+    const { response: aiResponse, inputTokens, outputTokens } = await callAI(aiConfig, finalPrompt)
+    console.log(`[${operation_type}] Step 7 successful. Received response from AI.`);
 
-    console.log(`[${operation_type}] Step 7: Saving result to database.`);
+    console.log(`[${operation_type}] Step 8: Processing markdown response.`);
+    // Clean up any potential markdown code block markers if AI wraps the response
+    let contentMarkdown = aiResponse
+      .replace(/^```markdown\s*/, '')
+      .replace(/^```\s*/, '')
+      .replace(/```$/, '')
+      .trim()
+    
+    // Also remove just ``` if it wasn't caught by the above regexes due to newlines
+    if (contentMarkdown.startsWith('```')) {
+      contentMarkdown = contentMarkdown.replace(/^```/, '').replace(/```$/, '').trim()
+    }
+    console.log(`[${operation_type}] Step 8 successful. Markdown processed.`);
+
+    console.log(`[${operation_type}] Step 9: Saving result to database.`);
     const { data: savedDocument, error: saveError } = await supabaseAdmin
       .from('generated_documents')
       .insert({
@@ -223,15 +281,17 @@ serve(async (req: Request) => {
         vacancy_id: payload.vacancy_id,
         created_by_hr_id: payload.hr_specialist_id,
         document_type: payload.document_type,
-        title: `${payload.document_type} for ${candidateData.full_name}`,
+        title: `${payload.document_type} - ${candidateData.full_name}`,
         content_markdown: contentMarkdown,
+        document_data: { language: payload.language }, // Save language for future reference
+        is_public: false,
       })
       .select()
       .single()
     if (saveError) throw new Error(`Failed to save document: ${saveError.message}`)
-    console.log(`[${operation_type}] Step 7 successful. Document saved with ID: ${savedDocument.id}`);
+    console.log(`[${operation_type}] Step 9 successful. Document saved with ID: ${savedDocument.id}`);
 
-    console.log(`[${operation_type}] Step 8: Deducting tokens and logging operation.`);
+    console.log(`[${operation_type}] Step 10: Deducting tokens and logging operation.`);
     await deductTokens(supabaseAdmin, payload.organization_id, inputTokens + outputTokens)
     await logAIOperation(supabaseAdmin, {
       organization_id: payload.organization_id,
@@ -241,9 +301,14 @@ serve(async (req: Request) => {
       input_tokens: inputTokens,
       output_tokens: outputTokens,
       success: true,
-      metadata: { candidate_id: payload.candidate_id, vacancy_id: payload.vacancy_id, document_id: savedDocument.id },
+      metadata: { 
+        candidate_id: payload.candidate_id, 
+        vacancy_id: payload.vacancy_id, 
+        document_id: savedDocument.id,
+        language: payload.language
+      },
     })
-    console.log(`[${operation_type}] Step 8 successful.`);
+    console.log(`[${operation_type}] Step 10 successful.`);
 
     console.log(`[${operation_type}] Function finished successfully.`);
     return new Response(JSON.stringify({ success: true, data: savedDocument }), {
@@ -252,7 +317,7 @@ serve(async (req: Request) => {
     })
   } catch (error) {
     console.error(`[${operation_type}] Error caught in main block:`, error);
-    if (payload && supabaseAdmin) {
+    if (payload && supabaseAdmin && aiConfig) {
       console.log(`[${operation_type}] Logging failed operation.`);
       await logAIOperation(supabaseAdmin, {
         organization_id: payload.organization_id,

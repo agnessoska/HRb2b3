@@ -24,12 +24,17 @@ i18n
       'tests',
       'ai-analysis',
       'talent-market',
+      'interview',
+      'funnel',
+      'chat',
+      'payments',
+      'team',
     ],
     defaultNS: 'common',
     backend: {
       // Path where translation files are located
       // Added version query param to bust cache
-      loadPath: '/locales/{{lng}}/{{ns}}.json?v=20251203-2',
+      loadPath: '/locales/{{lng}}/{{ns}}.json?v=20251209-remove-full-analysis',
     },
   })
 

@@ -20,6 +20,7 @@ import PaymentCancelPage from '@/pages/hr/payment/cancel'
 import BillingPage from '@/pages/hr/billing'
 import TeamPage from '@/pages/hr/team'
 import HRProfilePage from '@/pages/hr/profile'
+import PublicDocumentPage from '@/pages/public/document'
 import { PageTransition } from '@/shared/ui/PageTransition'
 
 export const router = createBrowserRouter([
@@ -27,7 +28,15 @@ export const router = createBrowserRouter([
     element: <PublicRoute />,
     children: [
       {
-        path: 'auth',
+        path: 'public/document/:id',
+        element: (
+          <PageTransition>
+            <PublicDocumentPage />
+          </PageTransition>
+        ),
+      },
+      {
+      path: 'auth',
         element: <AuthLayout />,
         children: [
           {

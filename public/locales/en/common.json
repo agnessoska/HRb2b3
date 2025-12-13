@@ -15,6 +15,7 @@
   "close": "Close",
   "confirm": "Confirm",
   "sendMessage": "Send message",
+  "notSpecified": "Not specified",
   "actions": "Actions",
   "soon": "Coming soon",
   "appName": "HR Platform",
@@ -88,6 +89,13 @@
   "cultureCodePlaceholder": "Describe your company culture, values, and work environment...",
   "saveChanges": "Save Changes",
   "selectCategory": "Select category",
-  "clearAll": "Clear All",
-  "saving": "Saving..."
+  "clearAll": "Clear all",
+  "saving": "Saving...",
+  "tokens": "tokens",
+  "share": "Share",
+  "downloadPdf": "Download PDF",
+  "downloadSuccess": "File downloaded successfully",
+  "view": "View",
+  "createdAt": "Created",
+  "copied": "Copied"
 }
