@@ -9,7 +9,6 @@ export interface TokenStatus {
 export const checkInviteTokensStatus = async (tokens: string[]): Promise<TokenStatus[]> => {
   if (tokens.length === 0) return []
 
-  // @ts-expect-error RPC function type is not yet generated
   const { data, error } = await supabase.rpc('check_invite_tokens_status', {
     p_tokens: tokens,
   })

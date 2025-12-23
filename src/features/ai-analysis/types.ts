@@ -8,16 +8,31 @@ export interface AnalysisCandidate {
   email?: string
   phone?: string
   verdict: 'recommended' | 'maybe' | 'rejected'
+  match_score: number
+  summary: string
   matches: Array<{
     vacancy: string
     score: number
   }>
-  hard_skills: string[]
-  soft_skills: string[]
-  gaps: string[]
-  red_flags: string[]
-  cultural_fit: string
-  interview_questions: string[]
+  vacancy_matches?: Array<{
+    vacancy_title: string
+    score: number
+    reason: string
+  }>
+  skills?: {
+    hard_skills_match: string[]
+    missing_skills: string[]
+    soft_skills: string[]
+  }
+  pros?: string[]
+  cons?: string[]
+  invite_token?: string
+  hard_skills?: string[]
+  soft_skills?: string[]
+  gaps?: string[]
+  red_flags?: string[]
+  cultural_fit?: string
+  interview_questions?: string[]
 }
 
 export interface AnalysisResult {
@@ -26,7 +41,7 @@ export interface AnalysisResult {
   organization_id: string
   created_by_hr_id: string
   vacancy_ids: string[] | null
-  resume_count: number
+  resume_count: number | null
   content_markdown: string | null
   content_html: string | null
   analysis_data: AnalysisData | null
@@ -151,4 +166,20 @@ export interface GeneratedDocumentResult {
   content_html: string | null
   is_public: boolean
   document_data: GeneratedDocumentData | null
+}
+
+export interface TAiOperation {
+  id: string
+  created_at: string
+  organization_id: string
+  hr_specialist_id: string
+  operation_type: string
+  model_used: string | null
+  prompt_version: string | null
+  input_tokens: number | null
+  output_tokens: number | null
+  total_tokens: number | null
+  success: boolean
+  error_message: string | null
+  metadata: Record<string, unknown> | null
 }

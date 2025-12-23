@@ -8,6 +8,7 @@ export type UpdateCandidateProfilePayload = {
   education?: string | null
   about?: string | null
   is_public?: boolean
+  avatar_url?: string | null
   skills?: string[]
 }
 

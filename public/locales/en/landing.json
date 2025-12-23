@@ -1,0 +1,33 @@
+{
+  "hero": {
+    "title": "Smart HR Platform for Modern Recruiting",
+    "description": "Automate your hiring process with AI and deep psychometric assessments. Find ideal candidates faster and more effectively.",
+    "ctaStart": "Get Started",
+    "ctaLogin": "Login"
+  },
+  "features": {
+    "title": "Why Choose Us",
+    "aiAnalysis": {
+      "title": "AI Resume Analysis",
+      "description": "Instant processing and ranking of hundreds of resumes based on your requirements."
+    },
+    "psychometry": {
+      "title": "Psychometrics",
+      "description": "6 science-based tests for a deep understanding of a candidate's personality and motivation."
+    },
+    "smartFunnel": {
+      "title": "Smart Funnel",
+      "description": "Automatic progress tracking and intelligent hints at every stage of the hiring process."
+    }
+  },
+  "footer": {
+    "tagline": "HR Platform v2.0 — the future of recruiting is here.",
+    "links": "Links",
+    "legal": "Legal",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "support": "Support",
+    "copyright": "© 2025 LabPro HR Platform. All rights reserved."
+  }
+}
+

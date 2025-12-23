@@ -3,6 +3,9 @@ import { AuthLayout } from '@/shared/ui/layouts/AuthLayout'
 import { ProtectedRoute } from './ProtectedRoute'
 import { PublicRoute } from './PublicRoute'
 import LoginPage from '@/pages/auth/login'
+import LandingPage from '@/pages/public/landing'
+import AuthCallbackPage from '@/pages/auth/callback'
+import OnboardingPage from '@/pages/auth/onboarding'
 import HRDashboardPage from '@/pages/hr/dashboard'
 import CandidateProfilePage from '@/pages/hr/candidate/profile'
 import VacancyProfilePage from '@/pages/hr/vacancy/profile'
@@ -21,17 +24,40 @@ import BillingPage from '@/pages/hr/billing'
 import TeamPage from '@/pages/hr/team'
 import HRProfilePage from '@/pages/hr/profile'
 import PublicDocumentPage from '@/pages/public/document'
+import PrivacyPolicyPage from '@/pages/public/privacy'
+import TermsPage from '@/pages/public/terms'
 import { PageTransition } from '@/shared/ui/PageTransition'
 
 export const router = createBrowserRouter([
   {
+    path: '/',
     element: <PublicRoute />,
     children: [
+      {
+        index: true,
+        element: <LandingPage />,
+      },
       {
         path: 'public/document/:id',
         element: (
           <PageTransition>
             <PublicDocumentPage />
+          </PageTransition>
+        ),
+      },
+      {
+        path: 'public/privacy',
+        element: (
+          <PageTransition>
+            <PrivacyPolicyPage />
+          </PageTransition>
+        ),
+      },
+      {
+        path: 'public/terms',
+        element: (
+          <PageTransition>
+            <TermsPage />
           </PageTransition>
         ),
       },
@@ -68,12 +94,23 @@ export const router = createBrowserRouter([
     ],
   },
   {
-    path: '/',
+    path: 'auth/callback',
+    element: <AuthCallbackPage />,
+  },
+  {
+    path: 'auth/onboarding',
+    element: (
+      <PageTransition>
+        <OnboardingPage />
+      </PageTransition>
+    ),
+  },
+  {
     element: <ProtectedRoute />,
     children: [
       {
-        index: true,
-        element: null, // ProtectedRoute will handle the redirect
+        path: 'dashboard',
+        element: null, // ProtectedRoute handles the redirect
       },
       {
         path: 'hr/dashboard',

@@ -6,6 +6,7 @@ import { useAuth } from '@/shared/hooks/useAuth';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from 'sonner';
 import { ArrowLeft, User, Send, Loader2, Paperclip, X, ChevronDown } from 'lucide-react';
 import { ChatMessage } from './';
@@ -304,9 +305,12 @@ export const ChatArea = ({ chatRoomId, userType, onBack, initialChatRoom }: Chat
             </Button>
           )}
           <div className="flex items-center gap-3 flex-1">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center ring-1 ring-border/50">
-              <User className="h-4 w-4 text-primary" />
-            </div>
+            <Avatar className="h-8 w-8 ring-1 ring-border/50">
+              <AvatarImage src={otherPerson.avatar_url} />
+              <AvatarFallback className="bg-gradient-to-br from-primary/10 to-primary/5 text-primary text-xs">
+                {otherPerson.full_name?.substring(0, 2).toUpperCase() || 'U'}
+              </AvatarFallback>
+            </Avatar>
             <div className="flex-1 min-w-0">
               <h3 className="font-medium text-sm truncate">{otherPerson.full_name || 'User'}</h3>
               {isOtherUserTyping && (

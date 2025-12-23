@@ -15,5 +15,8 @@ export const getAiOperationsLog = async (
     throw new Error(error.message)
   }
 
-  return data || []
+  return (data?.map((item) => ({
+    ...item,
+    metadata: item.metadata as Record<string, unknown> | null,
+  })) || []) as TAiOperation[]
 }

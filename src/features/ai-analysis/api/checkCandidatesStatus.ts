@@ -11,7 +11,6 @@ export interface CandidateStatus {
 export const checkCandidatesStatus = async (emails: string[], hrId: string): Promise<CandidateStatus[]> => {
   if (emails.length === 0) return []
 
-  // @ts-expect-error RPC function type is not yet generated
   const { data, error } = await supabase.rpc('check_candidates_status', {
     p_emails: emails,
     p_hr_id: hrId,

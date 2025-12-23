@@ -164,9 +164,13 @@ export default function CandidateProfilePage() {
 
   // Get category name from candidate data
   const categoryName = (() => {
-    if (!candidate.category_id) return t('common:notSpecified');
-    // Category name is loaded via RPC function get_organization_candidates
-    // For now, just show category_id or "Not specified"
+    // If we have full category object (from join)
+    if (candidate.category && candidate.category.name_ru) {
+      // @ts-expect-error: dynamic key access
+      return candidate.category[`name_${i18n.language}`] || candidate.category.name_ru;
+    }
+    
+    // Fallback if no category data
     return t('common:notSpecified');
   })();
 

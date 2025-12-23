@@ -1,9 +1,9 @@
 import { useTranslation } from 'react-i18next';
 import { formatDistanceToNow } from 'date-fns';
 import { ru, enUS, kk } from 'date-fns/locale';
-import { User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import type { ChatRoom } from '../types';
 
 interface ChatListItemProps {
@@ -40,6 +40,8 @@ export const ChatListItem = ({
       ? chatRoom.unread_count_hr
       : chatRoom.unread_count_candidate;
 
+  const initials = otherPerson.full_name?.substring(0, 2).toUpperCase() || 'U';
+
   return (
     <div className="px-2 py-1">
       <button
@@ -52,14 +54,23 @@ export const ChatListItem = ({
         )}
       >
         <div className="flex items-center gap-3">
-          <div className={cn(
-            "w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 transition-all",
-            isActive
-              ? "bg-primary text-primary-foreground shadow-md scale-105"
-              : "bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
+          <Avatar className={cn(
+            "w-9 h-9 border-2 border-background shadow-sm transition-transform",
+            isActive ? "scale-105 ring-2 ring-primary/20" : ""
           )}>
-            <User className="h-4 w-4" />
-          </div>
+            {/*
+              TODO: Add avatar_url to ChatRoom types (needs updating get_my_chat_rooms RPC or join logic)
+              For now we rely on the fact that otherPerson might not have avatar_url yet in the ChatRoom type
+              We can add it if we update the RPC. For now let's assume it might be there or fallback.
+            */}
+            {/* @ts-expect-error: avatar_url might be missing in type but present in data if we update RPC */}
+            <AvatarImage src={otherPerson.avatar_url} />
+            <AvatarFallback className={cn(
+              isActive ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+            )}>
+              {initials}
+            </AvatarFallback>
+          </Avatar>
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between gap-2">
               <p className="font-medium text-sm truncate text-foreground/90">

@@ -12,7 +12,6 @@ export const updateAnalysisInvite = async ({
   candidateIndex,
   inviteToken,
 }: UpdateInvitePayload) => {
-  // @ts-expect-error RPC function type is not yet generated
   const { data, error } = await supabase.rpc('update_analysis_candidate_invite', {
     p_analysis_id: analysisId,
     p_candidate_index: candidateIndex,

@@ -33,6 +33,7 @@ async function getApplicationsByVacancy(vacancyId: string): Promise<SmartApplica
         tests_completed,
         tests_last_updated_at,
         is_public,
+        avatar_url,
         invited_by_hr_id,
         invited_by_organization_id,
         created_at,
@@ -64,6 +65,7 @@ async function getApplicationsByVacancy(vacancyId: string): Promise<SmartApplica
     sent_documents: Array.isArray(app.sent_documents) ? app.sent_documents : [],
     candidate: {
       ...app.candidate,
+      avatar_url: app.candidate?.avatar_url ?? null,
       category_name_ru: app.candidate?.category?.name_ru ?? null,
       category_name_en: app.candidate?.category?.name_en ?? null,
       category_name_kk: app.candidate?.category?.name_kk ?? null,

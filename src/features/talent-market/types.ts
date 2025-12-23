@@ -13,6 +13,7 @@ export type ScoredCandidate = {
   compatibility_details: Json;
   skills: Json;
   category: Json;
+  avatar_url?: string | null;
 };
 
 // A candidate in the talent market can be from the scoring RPC (with candidate_id)
@@ -21,4 +22,5 @@ export type TalentMarketCandidate = Partial<ScoredCandidate> & {
   id?: string;
   candidate_id?: string;
   full_name: string | null;
+  avatar_url?: string | null;
 };

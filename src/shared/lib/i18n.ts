@@ -29,12 +29,13 @@ i18n
       'chat',
       'payments',
       'team',
+      'landing',
     ],
     defaultNS: 'common',
     backend: {
       // Path where translation files are located
       // Added version query param to bust cache
-      loadPath: '/locales/{{lng}}/{{ns}}.json?v=20251209-remove-full-analysis',
+      loadPath: '/locales/{{lng}}/{{ns}}.json?v=20251222-landing',
     },
   })
 

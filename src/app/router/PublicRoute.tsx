@@ -14,9 +14,9 @@ export function PublicRoute() {
     return <Outlet />
   }
 
-  // Redirect logged in users from auth pages
-  if (session) {
-    return <Navigate to="/" replace />
+  // Redirect logged in users from auth pages (login/register) to dashboard
+  if (session && location.pathname.startsWith('/auth/')) {
+    return <Navigate to="/dashboard" replace />
   }
 
   return <Outlet />

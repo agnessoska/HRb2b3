@@ -19,7 +19,6 @@ export const createCandidateFromAnalysis = async ({
   vacancyId,
   hrId,
 }: CreateCandidatePayload): Promise<CreateCandidateResponse> => {
-  // @ts-expect-error RPC function type is not yet generated
   const { data, error } = await supabase.rpc('create_candidate_from_analysis', {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     p_candidate_data: candidateData as any,

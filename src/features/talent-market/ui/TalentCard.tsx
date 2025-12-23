@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
@@ -42,16 +43,24 @@ export const TalentCard = ({ candidate, isAcquired, onAcquire }: TalentCardProps
     return 'text-blue-500';
   };
 
+  const initials = candidate.full_name?.substring(0, 2).toUpperCase() || '??';
+
   return (
     <>
       <Card className="h-full flex flex-col">
         <CardHeader>
           <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <CardTitle className="text-lg">{candidate.full_name}</CardTitle>
-              <CardDescription>{(candidate.category as { [key: string]: string })?.[`name_${lang}`]}</CardDescription>
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <Avatar className="h-10 w-10">
+                <AvatarImage src={candidate.avatar_url || undefined} />
+                <AvatarFallback>{initials}</AvatarFallback>
+              </Avatar>
+              <div className="min-w-0">
+                <CardTitle className="text-lg truncate">{candidate.full_name}</CardTitle>
+                <CardDescription className="truncate">{(candidate.category as { [key: string]: string })?.[`name_${lang}`]}</CardDescription>
+              </div>
             </div>
-            <Badge variant={testsStatus.badge as "default" | "destructive" | "outline" | "secondary" | "success" | "warning"}>
+            <Badge variant={testsStatus.badge as "default" | "destructive" | "outline" | "secondary" | "success" | "warning"} className="ml-2 shrink-0">
               {candidate.tests_completed}/6
             </Badge>
           </div>

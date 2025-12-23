@@ -21,8 +21,8 @@ export function ProtectedRoute() {
     return <Navigate to="/auth/login" replace />
   }
 
-  // Redirect from root path based on user role
-  if (location.pathname === '/') {
+  // Redirect from dashboard path based on user role
+  if (location.pathname === '/dashboard' || location.pathname === '/dashboard/') {
     const role = user?.user_metadata?.role
     if (role === 'hr') {
       return <Navigate to="/hr/dashboard" replace />
@@ -30,8 +30,8 @@ export function ProtectedRoute() {
     if (role === 'candidate') {
       return <Navigate to="/candidate/dashboard" replace />
     }
-    // Fallback if role is not defined, though this shouldn't happen
-    return <Navigate to="/auth/login" replace />
+    // Fallback if role is not defined, redirect to onboarding
+    return <Navigate to="/auth/onboarding" replace />
   }
 
   return (

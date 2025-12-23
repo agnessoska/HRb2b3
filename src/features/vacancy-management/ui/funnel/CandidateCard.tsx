@@ -18,7 +18,7 @@ import {
 import { cn } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import {
@@ -62,6 +62,8 @@ export const CandidateCard = ({
       .toUpperCase()
       .slice(0, 2);
   };
+
+  const avatarUrl = application.candidate.avatar_url;
 
   // Dynamic badges based on status
   const renderDynamicBadges = () => {
@@ -334,6 +336,7 @@ export const CandidateCard = ({
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-3 min-w-0">
             <Avatar className="h-9 w-9 border-2 border-background shadow-sm">
+              <AvatarImage src={avatarUrl || undefined} />
               <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/10 text-primary text-xs font-bold">
                 {getInitials(application.candidate.full_name)}
               </AvatarFallback>

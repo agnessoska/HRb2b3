@@ -13,6 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Label } from '@/components/ui/label'
 import { Loader2 } from 'lucide-react'
 import { Textarea } from '@/components/ui/textarea'
+import { HrProfileSettings } from '@/features/hr-specialist/ui/HrProfileSettings'
 
 const profileSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -77,6 +78,8 @@ export default function HRProfilePage() {
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">{t('profile')}</h1>
+
+      <HrProfileSettings />
 
       <Card>
         <CardHeader>

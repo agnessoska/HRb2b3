@@ -1,11 +1,9 @@
-import { Outlet } from 'react-router-dom'
+import { Outlet, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Briefcase } from 'lucide-react'
-import { LanguageSwitcher } from '@/shared/ui/LanguageSwitcher'
-import { ModeToggle } from '@/shared/ui/ModeToggle'
+import { PublicHeader } from '../PublicHeader'
 
 export function AuthLayout() {
-  const { t } = useTranslation('common')
+  const { t } = useTranslation(['common', 'landing'])
 
   return (
     <div className="relative flex min-h-screen flex-col bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
@@ -16,26 +14,31 @@ export function AuthLayout() {
       </div>
 
       {/* Header */}
-      <div className="w-full max-w-7xl mx-auto flex justify-between items-center relative md:absolute top-0 left-0 right-0 p-4 md:p-8 z-20">
-        {/* Logo/Brand */}
-        <div className="flex items-center gap-2">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-md">
-            <Briefcase className="h-6 w-6" />
-          </div>
-          <span className="text-xl font-bold tracking-tight">{t('appName')}</span>
-        </div>
-
-        {/* Controls */}
-        <div className="flex items-center gap-2">
-          <LanguageSwitcher />
-          <ModeToggle />
-        </div>
-      </div>
+      <PublicHeader showAuthButtons={false} />
 
       {/* Content Wrapper */}
-      <div className="relative z-10 w-full flex-1 flex items-center justify-center p-4 md:p-8 mt-20">
-        <Outlet />
+      <div className="relative z-10 w-full flex-1 flex items-center justify-center p-4 md:p-8">
+        <div className="w-full max-w-md mx-auto">
+          <Outlet />
+        </div>
       </div>
+
+      {/* Footer */}
+      <footer className="relative z-20 w-full border-t bg-background/50 backdrop-blur-sm py-6">
+        <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
+          <p className="text-sm text-muted-foreground">
+            {t('landing:footer.copyright')}
+          </p>
+          <div className="flex flex-wrap justify-center md:justify-end items-center gap-4 md:gap-6">
+            <Link to="/public/privacy" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+              {t('landing:footer.privacy')}
+            </Link>
+            <Link to="/public/terms" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+              {t('landing:footer.terms')}
+            </Link>
+          </div>
+        </div>
+      </footer>
     </div>
   )
 }

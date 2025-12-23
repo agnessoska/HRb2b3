@@ -4,7 +4,7 @@ import { supabase } from '@/shared/lib/supabase'
 export const getCandidateById = async (candidateId: string) => {
   const { data, error } = await supabase
     .from('candidates')
-    .select('*')
+    .select('*, category:professional_categories(*)')
     .eq('id', candidateId)
     .single()
 

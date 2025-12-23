@@ -14,6 +14,10 @@ import type { CandidateProfile } from '../api/getCandidateProfile'
 import { toast } from 'sonner'
 import { useState, useEffect } from 'react'
 import { Loader2 } from 'lucide-react'
+import { uploadAvatar } from '@/shared/api/uploadAvatar'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Label } from '@/components/ui/label'
+import { useAuth } from '@/shared/hooks/useAuth'
 
 const profileSchema = z.object({
   full_name: z.string().min(2, 'Name is required'),
@@ -35,7 +39,10 @@ interface CandidateProfileFormProps {
 
 export function CandidateProfileForm({ initialData, onUpdate }: CandidateProfileFormProps) {
   const { t } = useTranslation(['candidates', 'common'])
+  const { user } = useAuth()
   const [loading, setLoading] = useState(false)
+  const [avatarFile, setAvatarFile] = useState<File | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
@@ -64,9 +71,32 @@ export function CandidateProfileForm({ initialData, onUpdate }: CandidateProfile
     })
   }, [initialData, form])
 
+  const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      setAvatarFile(file)
+      const url = URL.createObjectURL(file)
+      setPreviewUrl(url)
+    }
+  }
+
+  const avatarSrc = previewUrl || initialData.avatar_url || user?.user_metadata?.avatar_url || ''
+
   async function onSubmit(data: ProfileFormValues) {
     setLoading(true)
     try {
+      let avatarUrl = initialData.avatar_url
+
+      if (avatarFile && user) {
+        try {
+          avatarUrl = await uploadAvatar(avatarFile, user.id)
+        } catch (error) {
+          console.error('Failed to upload avatar:', error)
+          toast.error('Failed to upload avatar')
+          // Continue saving profile even if avatar fails
+        }
+      }
+
       await updateCandidateProfile(initialData.id, {
         full_name: data.full_name,
         phone: data.phone || null,
@@ -76,6 +106,7 @@ export function CandidateProfileForm({ initialData, onUpdate }: CandidateProfile
         about: data.about || null,
         is_public: data.is_public,
         skills: data.skills,
+        avatar_url: avatarUrl,
       })
       toast.success(t('profile.updateSuccess', 'Профиль успешно обновлен'))
       onUpdate?.()
@@ -91,6 +122,35 @@ export function CandidateProfileForm({ initialData, onUpdate }: CandidateProfile
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <div className="flex items-center space-x-6">
+          <Avatar className="h-24 w-24">
+            <AvatarImage src={avatarSrc} />
+            <AvatarFallback>{initialData.full_name?.substring(0, 2).toUpperCase() || 'CN'}</AvatarFallback>
+          </Avatar>
+          <div className="space-y-2">
+            <Label>{t('profile.avatar', 'Avatar')}</Label>
+            <div className="flex items-center gap-2">
+              <Input
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarChange}
+                className="hidden"
+                style={{ display: 'none' }}
+                id="candidate-avatar-upload"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => document.getElementById('candidate-avatar-upload')?.click()}
+              >
+                {t('uploadAvatarBtn', { ns: 'common', defaultValue: 'Upload Photo' })}
+              </Button>
+              {avatarFile && <span className="text-sm text-muted-foreground truncate max-w-[150px]">{avatarFile.name}</span>}
+            </div>
+          </div>
+        </div>
+
         <FormField
           control={form.control}
           name="full_name"

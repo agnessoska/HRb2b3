@@ -10,11 +10,10 @@ async function getHrProfile(userId: string): Promise<HrProfile | null> {
     .from('hr_specialists')
     .select('*')
     .eq('user_id', userId)
-    .single()
+    .maybeSingle()
 
   if (error) {
     console.error('Error fetching HR profile:', error)
-    // Return null instead of throwing, allows for graceful UI handling
     return null
   }
 

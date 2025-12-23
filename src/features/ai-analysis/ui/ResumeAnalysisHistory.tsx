@@ -7,7 +7,7 @@ import { Eye, History, Calendar, Users } from 'lucide-react'
 import { ListContainer, ListItem } from '@/shared/ui/ListTransition'
 import { GlassCard } from '@/shared/ui/GlassCard'
 import { Badge } from '@/components/ui/badge'
-import type { AnalysisResult } from '../types'
+import type { AnalysisData, AnalysisResult } from '../types'
 
 interface ResumeAnalysisHistoryProps {
   onViewAnalysis: (analysis: AnalysisResult) => void
@@ -78,7 +78,10 @@ export const ResumeAnalysisHistory = ({ onViewAnalysis }: ResumeAnalysisHistoryP
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => onViewAnalysis(analysis)}
+                    onClick={() => onViewAnalysis({
+                      ...analysis,
+                      analysis_data: analysis.analysis_data as unknown as AnalysisData | null
+                    })}
                     className="w-full sm:w-auto rounded-xl"
                   >
                     <Eye className="w-4 h-4 mr-2" />
