@@ -217,6 +217,32 @@ serve(async (req: Request) => {
 
     supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey)
     
+    // Check for existing planned session (idempotency)
+    // If a session was created in the last 5 minutes and is still 'planned', return it
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString()
+    const { data: existingSession } = await supabaseAdmin
+      .from('interview_sessions')
+      .select('*')
+      .eq('candidate_id', payload.candidate_id)
+      .eq('vacancy_id', payload.vacancy_id)
+      .eq('status', 'planned')
+      .gt('created_at', fiveMinutesAgo)
+      .maybeSingle()
+
+    if (existingSession) {
+      console.log(`[${OPERATION_TYPE}] Found existing planned session, returning it`)
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          data: existingSession 
+        }), 
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
+        }
+      )
+    }
+
     // Load candidate data
     const { data: candidateData, error: candidateError } = await supabaseAdmin
       .from('candidates')

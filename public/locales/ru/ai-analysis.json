@@ -17,7 +17,7 @@
       "label": "Загрузите резюме",
       "dropFiles": "Отпустите файлы для загрузки",
       "dragAndDrop": "Перетащите файлы сюда или кликните для выбора",
-      "fileRequirements": "PDF файлы, до 5MB каждый, максимум 20 файлов."
+      "fileRequirements": "PDF, DOC, DOCX файлы, до 5MB каждый, максимум 20 файлов."
     },
     "uploadProgress": {
       "uploading": "Загрузка файла {{current}} из {{total}}...",
@@ -67,6 +67,8 @@
         "interviewQuestions": "Предлагаемые вопросы для интервью"
       },
       "invite": "Пригласить",
+      "viewResume": "Посмотреть резюме",
+      "fileNotFound": "Файл резюме не найден",
       "selectVacancy": "Выбрать вакансию",
       "inviteSuccess": "Кандидат добавлен",
       "inviteCreated": "Приглашение создано",
@@ -86,7 +88,15 @@
       "title": "История анализов",
       "candidatesCount": "Кандидатов: {{count}}",
       "empty": "История анализов пуста"
-    }
+    },
+    "noCandidatesFound": "Кандидаты не найдены",
+    "resetFilters": "Сбросить все фильтры",
+    "noCandidatesFoundDesc": "Попробуйте изменить поисковый запрос, минимальный балл или фильтры.",
+    "topChoice": "Лучший выбор",
+    "executiveSummary": "Краткий обзор",
+    "detailedSkillsUnavailable": "Детальное сопоставление навыков недоступно для этой записи.",
+    "resumeVerified": "Резюме проверено",
+    "insightEngine": "Система анализа v4"
   },
   "generateDocument": {
     "processingTitle": "Генерация документа",

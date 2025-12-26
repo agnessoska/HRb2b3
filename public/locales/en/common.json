@@ -102,5 +102,7 @@
   "downloadSuccess": "File downloaded successfully",
   "view": "View",
   "createdAt": "Created",
-  "copied": "Copied"
+  "copied": "Copied",
+  "search": "Search",
+  "filters": "Filters"
 }

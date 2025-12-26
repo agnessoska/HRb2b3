@@ -67,6 +67,7 @@
     "optimalValue": "Optimal",
     "ideal": "Ideal",
     "candidate": "Candidate",
+    "level": "Level",
     "matches": "Matches",
     "doesNotMatch": "Does Not Match",
     "of4": "of 4",
@@ -88,8 +89,13 @@
     "low": "Low",
     "highLevel": "High",
     "mediumLevel": "Medium",
-    "requiresDevelopment": "Requires Development"
+    "requiresDevelopment": "Requires Development",
+    "interpretation": "Interpretation",
+    "developmentTip": "Development Tip"
   },
+  "testsRequired": "6 tests required",
+  "completeAllTestsDesc": "To proceed, you must complete all available psychometric tests.",
+  "allTestsRequired": "All 6 tests required",
   "psychometric": {
     "bigFive": {
       "openness": {

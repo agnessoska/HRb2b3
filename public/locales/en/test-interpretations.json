@@ -1,0 +1,323 @@
+{
+  "testDescriptions": {
+    "bigFive": "The Big Five is the most scientifically validated personality model, describing an individual through five key traits. This test helps understand how you interact with the world, make decisions, and react to stress.",
+    "mbti": "The Myers-Briggs Type Indicator (MBTI) helps identify your innate preferences in perceiving the world and making decisions. Knowing your personality type helps better understand yourself and others, and choose the most suitable professional environment.",
+    "disc": "The DISC model describes behavioral characteristics in various situations. It helps understand how you act, communicate, and react to challenges, as well as how to better interact with people of other types.",
+    "eq": "Emotional Intelligence (EQ) is the ability to recognize your own and others' emotions, understand the intentions and motivation of an interlocutor, and manage your emotions to achieve goals.",
+    "softSkills": "Soft Skills are non-technical competencies responsible for successful participation in the work process and high productivity. They are not related to a specific subject area but are critical for a career.",
+    "motivation": "The motivational profile determines the internal drivers that prompt you to action. Understanding your motivation helps choose tasks and working conditions that bring the most satisfaction and results."
+  },
+  "scaleDescriptions": {
+    "openness": "Reflects your openness to new experiences, curiosity, and creativity. High scores indicate a desire for novelty, low scores — a preference for tradition and predictability.",
+    "conscientiousness": "Shows the level of self-discipline, organization, and responsibility. High scores are characteristic of reliable and purposeful people, low scores — more spontaneous and flexible ones.",
+    "extraversion": "Characterizes your need for external stimuli and communication. High scores indicate sociability and energy, low scores — restraint and a preference for solitude.",
+    "agreeableness": "Describes your attitude towards other people: level of empathy, trust, and willingness to cooperate. High scores indicate benevolence, low scores — skepticism and competitiveness.",
+    "neuroticism": "Reflects the level of emotional instability and susceptibility to stress. High scores may indicate anxiety, low scores — calmness and self-confidence."
+  },
+  "scaleTypes": {
+    "higher_is_better": "The higher, the better",
+    "lower_is_better": "The lower, the better",
+    "optimal": "Optimal value"
+  },
+  "valueRanges": {
+    "low": "0-35: Low level",
+    "medium": "36-65: Medium level",
+    "high": "66-100: High level"
+  },
+  "psychometric": {
+    "bigFive": {
+      "openness": {
+        "name": "Openness",
+        "description": "Interest in new things, curiosity, creativity",
+        "interpretation": "Your level of openness determines how ready you are for experiments and new ideas.",
+        "tips": "Develop creativity through new hobbies and learning. Try non-standard approaches at work.",
+        "high": "High: creative, loves novelty and change. You easily generate ideas and adapt to innovations.",
+        "medium": "Medium: balanced, open to new things when necessary. You value stability but are not afraid of change.",
+        "low": "Low: conservative, prefers the familiar. You are reliable in executing proven methods and procedures."
+      },
+      "conscientiousness": {
+        "name": "Conscientiousness",
+        "description": "Organization, reliability, self-discipline",
+        "interpretation": "This indicator reflects your ability to set goals and achieve them.",
+        "tips": "Use planning tools to increase efficiency. Do not forget about work-life balance.",
+        "high": "High: very organized, disciplined, reliable. You are a perfectionist who can always be relied upon.",
+        "medium": "Medium: moderately organized, flexible approach. You can be collected when important but allow spontaneity.",
+        "low": "Low: spontaneous, flexible, less structured. You are good in situations requiring quick reaction and improvisation."
+      },
+      "extraversion": {
+        "name": "Extraversion",
+        "description": "Sociability, energy, positive emotions",
+        "interpretation": "Shows where you draw energy from: the outside world or from within.",
+        "tips": "Find a balance between social interaction and recovery time.",
+        "high": "High: very sociable, energetic, loves being the center of attention. You recharge from communication and teamwork.",
+        "medium": "Medium: ambivert, comfortable both alone and in company. You flexibly adapt to the social situation.",
+        "low": "Low: introvert, prefers a quiet environment, solitude. You immerse deeply in tasks and value privacy."
+      },
+      "agreeableness": {
+        "name": "Agreeableness",
+        "description": "Empathy, willingness to cooperate, trust",
+        "interpretation": "Reflects your style of interaction with people: from competition to cooperation.",
+        "tips": "Develop negotiation and assertiveness skills to protect your interests while maintaining good relationships.",
+        "high": "High: very responsive, willing to compromise, empathetic. You are an excellent team player and peacemaker.",
+        "medium": "Medium: balanced, able to defend interests and consider others. You are diplomatic and objective.",
+        "low": "Low: straightforward, competitive, critical. You are not afraid of conflicts and can make unpopular but necessary decisions."
+      },
+      "neuroticism": {
+        "name": "Neuroticism",
+        "description": "Emotional stability, stress level",
+        "interpretation": "Shows your resilience to stressors and emotional swings.",
+        "tips": "Practice relaxation and mindfulness techniques for stress management.",
+        "high": "High: sensitive to stress, anxious, emotionally reactive. You keenly sense risks and problems.",
+        "medium": "Medium: moderately emotional, copes with stress. You react to stress adequately to the situation.",
+        "low": "Low: emotionally stable, calm, stress-resistant. You maintain composure even in crisis situations."
+      }
+    },
+    "mbti": {
+      "types": {
+        "ENTJ": "Commander",
+        "INTJ": "Architect",
+        "ENTP": "Debater",
+        "INTP": "Logician",
+        "ENFJ": "Protagonist",
+        "INFJ": "Advocate",
+        "ENFP": "Campaigner",
+        "INFP": "Mediator",
+        "ESTJ": "Executive",
+        "ISTJ": "Logistician",
+        "ESFJ": "Consul",
+        "ISFJ": "Defender",
+        "ESTP": "Entrepreneur",
+        "ISTP": "Virtuoso",
+        "ESFP": "Entertainer",
+        "ISFP": "Adventurer",
+        "unknown": "Unknown Type"
+      },
+      "tags": {
+        "ENTJ": ["Leader", "Strategist", "Decisive", "Efficient"],
+        "INTJ": ["Analyst", "Visionary", "Independent", "Logical"],
+        "ENTP": ["Inventor", "Energetic", "Curious", "Adaptive"],
+        "INTP": ["Thinker", "Theorist", "Original", "Logical"],
+        "ENFJ": ["Charismatic", "Inspiring", "Empathetic", "Organizer"],
+        "INFJ": ["Insightful", "Idealist", "Organized", "Deep"],
+        "ENFP": ["Enthusiast", "Creative", "Sociable", "Spontaneous"],
+        "INFP": ["Idealist", "Creative", "Loyal", "Flexible"],
+        "ESTJ": ["Organizer", "Practical", "Decisive", "Traditional"],
+        "ISTJ": ["Responsible", "Realist", "Logical", "Systematic"],
+        "ESFJ": ["Caring", "Sociable", "Reliable", "Practical"],
+        "ISFJ": ["Loyal", "Patient", "Attentive", "Practical"],
+        "ESTP": ["Energetic", "Realist", "Spontaneous", "Pragmatic"],
+        "ISTP": ["Master", "Analyst", "Practical", "Adaptive"],
+        "ESFP": ["Enthusiast", "Sociable", "Spontaneous", "Practical"],
+        "ISFP": ["Artist", "Friendly", "Sensitive", "Flexible"]
+      },
+      "typeDescription": "Description for type",
+      "yourType": "Your Personality Type",
+      "dichotomies": {
+        "E": {
+          "name": "Extraversion",
+          "description": "Energy from the outer world",
+          "interpretation": "Focus on the outer world, people, and actions."
+        },
+        "I": {
+          "name": "Introversion",
+          "description": "Energy from within",
+          "interpretation": "Focus on the inner world of ideas and reflections."
+        },
+        "S": {
+          "name": "Sensing",
+          "description": "Concreteness, facts",
+          "interpretation": "Reliance on facts, details, and current reality."
+        },
+        "N": {
+          "name": "Intuition",
+          "description": "Abstraction, concepts",
+          "interpretation": "Reliance on ideas, possibilities, and the future."
+        },
+        "T": {
+          "name": "Thinking",
+          "description": "Logic, objectivity",
+          "interpretation": "Making decisions based on logic and objective analysis."
+        },
+        "F": {
+          "name": "Feeling",
+          "description": "Values, emotions",
+          "interpretation": "Making decisions based on values and impact on people."
+        },
+        "J": {
+          "name": "Judging",
+          "description": "Structure, planning",
+          "interpretation": "Preference for certainty, planning, and completion."
+        },
+        "P": {
+          "name": "Perceiving",
+          "description": "Flexibility, spontaneity",
+          "interpretation": "Preference for open possibilities and spontaneity."
+        }
+      },
+      "recommendations": {
+        "title": "Development Recommendations",
+        "E": "Use your communication skills for networking, but learn to listen and give space to others.",
+        "I": "Value your ability for deep concentration, but don't forget to step out of your comfort zone for communication.",
+        "S": "Your attention to detail is invaluable, but try to look at the big picture sometimes.",
+        "N": "Your ideas are inspiring, but don't forget to work out practical steps for their implementation.",
+        "T": "Logic helps in complex decisions, but consider the emotional context and impact on people.",
+        "F": "Your empathy unites people, but learn to make tough decisions when necessary.",
+        "J": "Planning is your strength, but develop flexibility to react to unexpected changes.",
+        "P": "Your adaptability helps in crises, but try to finish what you started and meet deadlines."
+      },
+      "descriptions": {
+        "ENTJ": "Decisive leaders, able to see inefficiency and develop long-term plans to solve problems.",
+        "INTJ": "Have an original mind and strong drive for implementing their ideas and achieving goals.",
+        "ENTP": "Smart and curious thinkers who cannot resist an intellectual challenge.",
+        "INTP": "Inventive dreamers with a unique worldview and powerful intellect.",
+        "ENFJ": "Charismatic and inspiring leaders, able to mesmerize their listeners.",
+        "INFJ": "Quiet and mystical, yet very inspiring and tireless idealists.",
+        "ENFP": "Enthusiastic, creative and sociable free spirits who can always find a reason to smile.",
+        "INFP": "Poetic, kind and altruistic people, always eager to help a good cause.",
+        "ESTJ": "Excellent administrators, unsurpassed at managing things or people.",
+        "ISTJ": "Practical and fact-minded individuals, whose reliability cannot be doubted.",
+        "ESFJ": "Extraordinarily caring, social and popular people, always eager to help.",
+        "ISFJ": "Very dedicated and warm protectors, always ready to defend their loved ones.",
+        "ESTP": "Smart, energetic and very perceptive people, who truly enjoy living on the edge.",
+        "ISTP": "Bold and practical experimenters, masters of all kinds of tools.",
+        "ESFP": "Spontaneous, energetic and enthusiastic people – life is never boring around them.",
+        "ISFP": "Flexible and charming artists, always ready to explore and experience something new."
+      }
+    },
+    "disc": {
+      "D": {
+        "name": "Dominance",
+        "description": "Assertiveness, results-oriented",
+        "interpretation": "Characterizes how you handle problems and challenges.",
+        "tips": "Learn patience and listen to others' opinions. Practice delegation.",
+        "high": "Decisive leader, takes initiative, direct. Results-oriented and quick problem solver.",
+        "low": "Cautious, prefers cooperation and measured decisions. Avoids risks and conflicts."
+      },
+      "I": {
+        "name": "Influence",
+        "description": "Sociability, optimism, persuasiveness",
+        "interpretation": "Characterizes how you interact with people and influence them.",
+        "tips": "Focus on details and following through. Learn to listen without interrupting.",
+        "high": "Enthusiast, team motivator, communicative. Easily makes contacts and inspires others.",
+        "low": "Reserved, focused on facts and tasks. Prefers working independently or in a small group."
+      },
+      "S": {
+        "name": "Steadiness",
+        "description": "Reliability, patience, stability",
+        "interpretation": "Characterizes how you respond to changes and maintain pace.",
+        "tips": "Be more open to change and new working methods. Learn to say 'no' to avoid overworking yourself.",
+        "high": "Loyal, supportive, patient. Values stability, harmony, and predictability.",
+        "low": "Dynamic, loves change and variety. Adapts quickly but can be impatient."
+      },
+      "C": {
+        "name": "Compliance",
+        "description": "Accuracy, analytical, rule-following",
+        "interpretation": "Characterizes how you relate to rules and procedures.",
+        "tips": "Don't get hung up on perfection, sometimes 'good enough' is the best choice. Be more flexible.",
+        "high": "Detail-oriented, cautious, precise. Strives for quality and adherence to standards.",
+        "low": "Flexible, prone to risk and experimentation. Focuses on the big picture, not details."
+      }
+    },
+    "eq": {
+      "selfAwareness": {
+        "name": "Self-Awareness",
+        "description": "Understanding own emotions and their impact",
+        "interpretation": "Ability to recognize your feelings as they happen.",
+        "tips": "Keep an emotion journal. Practice pausing before reacting to events."
+      },
+      "selfManagement": {
+        "name": "Self-Management",
+        "description": "Impulse control, adaptability",
+        "interpretation": "Ability to manage your emotional reactions.",
+        "tips": "Learn breathing techniques for calming down. Plan your reactions to stressful situations."
+      },
+      "socialAwareness": {
+        "name": "Social Awareness",
+        "description": "Empathy, understanding others' feelings",
+        "interpretation": "Ability to accurately read others' emotions and moods.",
+        "tips": "Practice active listening. Observe interlocutors' non-verbal signals."
+      },
+      "relationshipManagement": {
+        "name": "Relationship Management",
+        "description": "Influence, conflict resolution",
+        "interpretation": "Ability to use emotional knowledge to build successful interactions.",
+        "tips": "Work on constructive feedback skills. Learn to inspire and motivate others."
+      }
+    },
+    "softSkills": {
+      "communication": {
+        "name": "Communication",
+        "shortName": "Comm.",
+        "description": "Clarity of expression",
+        "interpretation": "Skill of effective information exchange.",
+        "tips": "Practice brevity and clarity of speech. Ask for feedback on your communication style."
+      },
+      "teamwork": {
+        "name": "Teamwork",
+        "shortName": "Team",
+        "description": "Collaboration",
+        "interpretation": "Ability to work effectively in a group to achieve a common goal.",
+        "tips": "Offer help to colleagues. Be open to others' ideas and opinions."
+      },
+      "criticalThinking": {
+        "name": "Critical Thinking",
+        "shortName": "Thinking",
+        "description": "Analysis, decision making",
+        "interpretation": "Ability to analyze information and make informed decisions.",
+        "tips": "Ask 'why?' and 'how?'. Consider problems from different perspectives."
+      },
+      "adaptability": {
+        "name": "Adaptability",
+        "shortName": "Adapt.",
+        "description": "Flexibility to change",
+        "interpretation": "Ability to quickly adjust to new conditions.",
+        "tips": "Perceive changes as opportunities, not threats. Learn new things constantly."
+      },
+      "initiative": {
+        "name": "Initiative",
+        "shortName": "Init.",
+        "description": "Proactivity",
+        "interpretation": "Readiness to act without external pressure.",
+        "tips": "Don't wait for instructions, suggest solutions to problems. Take responsibility for results."
+      }
+    },
+    "motivation": {
+      "achievement": {
+        "name": "Achievement",
+        "description": "Striving for success, results",
+        "interpretation": "Desire to set difficult goals and achieve them.",
+        "tips": "Set ambitious but achievable goals. Celebrate intermediate victories."
+      },
+      "power": {
+        "name": "Power",
+        "description": "Influence, control, leadership",
+        "interpretation": "Desire to influence others and control the situation.",
+        "tips": "Develop leadership qualities. Take on the role of a mentor or project manager."
+      },
+      "affiliation": {
+        "name": "Affiliation",
+        "description": "Social connections, acceptance",
+        "interpretation": "Need for good relationships with others.",
+        "tips": "Participate in team events. Build a network of professional contacts."
+      },
+      "autonomy": {
+        "name": "Autonomy",
+        "description": "Independence, self-reliance",
+        "interpretation": "Desire to work independently and make decisions.",
+        "tips": "Look for projects where you are trusted and given freedom of action. Develop self-discipline."
+      },
+      "security": {
+        "name": "Security",
+        "description": "Stability, predictability",
+        "interpretation": "Need for stability, order, and predictability of the future.",
+        "tips": "Create a financial safety cushion. Plan your career for the long term."
+      },
+      "growth": {
+        "name": "Growth",
+        "description": "Development, learning, self-improvement",
+        "interpretation": "Striving to develop one's abilities and potential.",
+        "tips": "Constantly learn new things. Look for mentors and opportunities for advanced training."
+      }
+    }
+  }
+}

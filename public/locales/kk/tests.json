@@ -67,6 +67,7 @@
     "optimalValue": "Оптималды",
     "ideal": "Идеал",
     "candidate": "Кандидат",
+    "level": "Деңгей",
     "matches": "Сәйкес келеді",
     "doesNotMatch": "Сәйкес келмейді",
     "of4": "4-тен",
@@ -88,8 +89,13 @@
     "low": "Төмен",
     "highLevel": "Жоғары",
     "mediumLevel": "Орташа",
-    "requiresDevelopment": "Дамытуды қажет етеді"
+    "requiresDevelopment": "Дамытуды қажет етеді",
+    "interpretation": "Интерпретация",
+    "developmentTip": "Дамыту бойынша ұсыныс"
   },
+  "testsRequired": "6 тест қажет",
+  "completeAllTestsDesc": "Жалғастыру үшін барлық қолжетімді психометриялық тесттерді аяқтау қажет.",
+  "allTestsRequired": "Барлық 6 тестті аяқтау қажет",
   "psychometric": {
     "bigFive": {
       "openness": {

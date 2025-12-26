@@ -7,6 +7,8 @@ export interface AnalysisCandidate {
   name: string
   email?: string
   phone?: string
+  total_experience_years?: number
+  last_position?: string
   verdict: 'recommended' | 'maybe' | 'rejected'
   match_score: number
   summary: string
@@ -27,6 +29,7 @@ export interface AnalysisCandidate {
   pros?: string[]
   cons?: string[]
   invite_token?: string
+  fileName?: string
   hard_skills?: string[]
   soft_skills?: string[]
   gaps?: string[]
@@ -45,6 +48,7 @@ export interface AnalysisResult {
   content_markdown: string | null
   content_html: string | null
   analysis_data: AnalysisData | null
+  file_paths: string[] | null
 }
 
 // Типы для сравнения кандидатов

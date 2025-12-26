@@ -39,5 +39,6 @@ async function generateInterviewPlan(payload: GenerateInterviewPlanPayload): Pro
 export function useGenerateInterviewPlan() {
   return useMutation({
     mutationFn: generateInterviewPlan,
+    retry: 0, // Отключаем ретраи для AI операций, чтобы избежать двойных списаний при таймаутах
   })
 }

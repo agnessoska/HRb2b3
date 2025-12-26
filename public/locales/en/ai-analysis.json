@@ -67,6 +67,8 @@
         "interviewQuestions": "Interview Questions"
       },
       "invite": "Invite",
+      "viewResume": "View Resume",
+      "fileNotFound": "Resume file not found",
       "selectVacancy": "Select Vacancy",
       "inviteSuccess": "Candidate Added",
       "inviteCreated": "Invitation Created",
@@ -86,7 +88,15 @@
       "title": "Analysis History",
       "candidatesCount": "Candidates: {{count}}",
       "empty": "Analysis history is empty"
-    }
+    },
+    "noCandidatesFound": "No candidates found",
+    "resetFilters": "Reset all filters",
+    "noCandidatesFoundDesc": "Try adjusting your search query, minimum match score, or filters.",
+    "topChoice": "Top Choice",
+    "executiveSummary": "Executive Summary",
+    "detailedSkillsUnavailable": "Detailed skills mapping unavailable for this record.",
+    "resumeVerified": "Resume Verified",
+    "insightEngine": "Insight Engine v4"
   },
   "generateDocument": {
     "processingTitle": "Generating Document",

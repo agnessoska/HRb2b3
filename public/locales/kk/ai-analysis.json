@@ -67,6 +67,8 @@
         "interviewQuestions": "Сұхбатқа ұсынылған сұрақтар"
       },
       "invite": "Шақыру",
+      "viewResume": "Түйіндемені көру",
+      "fileNotFound": "Түйіндеме файлы табылмады",
       "selectVacancy": "Вакансияны таңдау",
       "inviteSuccess": "Кандидат қосылды",
       "inviteCreated": "Шақыру жасалды",
@@ -86,7 +88,15 @@
       "title": "Талдаулар тарихы",
       "candidatesCount": "Кандидаттар: {{count}}",
       "empty": "Талдаулар тарихы бос"
-    }
+    },
+    "noCandidatesFound": "Кандидаттар табылмады",
+    "resetFilters": "Барлық сүзгілерді қайта орнату",
+    "noCandidatesFoundDesc": "Іздеу сұрауын, ең төменгі ұпайды немесе сүзгілерді өзгертіп көріңіз.",
+    "topChoice": "Үздік таңдау",
+    "executiveSummary": "Қысқаша шолу",
+    "detailedSkillsUnavailable": "Бұл жазба үшін дағдыларды егжей-тегжейлі салыстыру мүмкін емес.",
+    "resumeVerified": "Түйіндеме тексерілді",
+    "insightEngine": "Талдау жүйесі v4"
   },
   "generateFullAnalysis": {
     "trigger": "Толық талдау жасау",

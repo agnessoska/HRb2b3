@@ -2,7 +2,7 @@ import { Link, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { getTestById } from '@/features/testing-system/api/getTestById'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { getTestResultsByCandidate } from '@/features/testing-system/api/getTestResultsByCandidate'
 import { useAuthStore, type AuthState } from '@/app/store/auth'
 import { BigFiveResults } from '@/features/testing-system/ui/results/BigFiveResults'
@@ -12,14 +12,12 @@ import { EQResults } from '@/features/testing-system/ui/results/EQResults'
 import { SoftSkillsResults } from '@/features/testing-system/ui/results/SoftSkillsResults'
 import { MotivationResults } from '@/features/testing-system/ui/results/MotivationResults'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Download, RefreshCw } from 'lucide-react'
+import { ArrowLeft, RefreshCw } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { format, addMonths, isAfter } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { useTranslation } from 'react-i18next'
-import html2canvas from 'html2canvas'
-import jsPDF from 'jspdf'
-import { toast } from 'sonner'
+
 const TestResultsPage = () => {
   const { t } = useTranslation('tests')
   const { testId } = useParams<{ testId: string }>()
@@ -46,31 +44,6 @@ const TestResultsPage = () => {
   })
 
   const currentResult = results?.find((r) => r.test_id === testId)
-
-  const handleDownloadPDF = async () => {
-    const element = document.getElementById('test-results')
-    if (!element) return
-
-    try {
-      toast.info(t('results.generatingPDF'))
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        logging: false
-      })
-      const imgData = canvas.toDataURL('image/png')
-      const pdf = new jsPDF('p', 'mm', 'a4')
-      const pdfWidth = pdf.internal.pageSize.getWidth()
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width
-      
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight)
-      pdf.save(`${test?.name_ru || 'test_result'}.pdf`)
-      toast.success(t('results.pdfDownloaded'))
-    } catch (error) {
-      console.error('PDF generation error:', error)
-      toast.error(t('results.pdfError'))
-    }
-  }
 
   const canRetake = currentResult?.completed_at &&
     isAfter(new Date(), addMonths(new Date(currentResult.completed_at), 1))
@@ -125,21 +98,20 @@ const TestResultsPage = () => {
   }
 
   return (
-    <div className="container mx-auto py-10 space-y-8">
+    <div className="container mx-auto py-10 space-y-8 max-w-5xl">
       <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <Button asChild variant="outline" className="self-start">
-            <Link to="/candidate/dashboard">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              {t('results.backToTests')}
+          <Button asChild variant="ghost" className="self-start pl-0 hover:bg-transparent hover:text-primary group">
+            <Link to="/candidate/dashboard" className="flex items-center gap-2">
+              <div className="p-2 rounded-full bg-secondary group-hover:bg-primary/10 transition-colors">
+                <ArrowLeft className="h-4 w-4" />
+              </div>
+              <span className="text-lg font-medium">{t('results.backToTests')}</span>
             </Link>
           </Button>
+          
           <div className="flex items-center gap-2 self-start md:self-center">
-            <Button variant="outline" onClick={handleDownloadPDF}>
-              <Download className="mr-2 h-4 w-4" />
-              {t('results.downloadPDF')}
-            </Button>
             {canRetake && (
-              <Button variant="secondary" asChild>
+              <Button variant="secondary" asChild className="rounded-full">
                  <Link to={`/candidate/test/${testId}`}>
                     <RefreshCw className="mr-2 h-4 w-4" />
                     {t('results.retakeTest')}
@@ -149,22 +121,21 @@ const TestResultsPage = () => {
           </div>
         </header>
 
-        <main id="test-results" className="space-y-6 bg-background p-4 rounded-lg">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-3xl font-bold">{test.name_ru}</CardTitle>
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                {currentResult?.completed_at && (
-                  <span>
-                    {t('results.testTakenOn')}: {format(new Date(currentResult.completed_at), 'd MMMM yyyy', { locale: ru })}
-                  </span>
-                )}
-                <Badge variant="secondary" className="bg-green-100 text-green-800">
-                  {t('results.currentStatus')}
-                </Badge>
-              </div>
-            </CardHeader>
-          </Card>
+        <main id="test-results" className="space-y-8">
+          <div className="flex flex-col gap-2 overflow-hidden">
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="text-3xl md:text-4xl font-bold tracking-tight break-words">{test.name_ru}</h1>
+              <Badge variant="secondary" className="bg-green-500/10 text-green-600 hover:bg-green-500/20 border-green-200 px-3 py-1 text-sm whitespace-nowrap">
+                {t('results.currentStatus')}
+              </Badge>
+            </div>
+            
+            {currentResult?.completed_at && (
+              <p className="text-muted-foreground">
+                {t('results.testTakenOn')}: {format(new Date(currentResult.completed_at), 'd MMMM yyyy', { locale: ru })}
+              </p>
+            )}
+          </div>
 
           {renderTestResult()}
         </main>

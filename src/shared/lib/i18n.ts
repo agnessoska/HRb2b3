@@ -30,12 +30,13 @@ i18n
       'payments',
       'team',
       'landing',
+      'test-interpretations',
     ],
     defaultNS: 'common',
     backend: {
       // Path where translation files are located
       // Added version query param to bust cache
-      loadPath: '/locales/{{lng}}/{{ns}}.json?v=20251222-landing',
+      loadPath: '/locales/{{lng}}/{{ns}}.json?v=20251225-test-results',
     },
   })
 

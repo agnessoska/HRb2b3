@@ -102,5 +102,7 @@
   "downloadSuccess": "Файл сәтті жүктелді",
   "view": "Қарау",
   "createdAt": "Жасалды",
-  "copied": "Көшірілді"
+  "copied": "Көшірілді",
+  "search": "Іздеу",
+  "filters": "Сүзгілер"
 }

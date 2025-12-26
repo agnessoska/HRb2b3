@@ -1,13 +1,6 @@
-import { useTranslation } from 'react-i18next'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Download, ArrowLeft, User, ThumbsUp, ThumbsDown, MinusCircle, CheckCircle2, XCircle, AlertTriangle, Brain, MessageCircle, Heart, UserPlus, Copy } from 'lucide-react'
-import { AIBorder } from '@/shared/ui/AIBorder'
-import { AIStreamingText } from '@/shared/ui/AIStreamingText'
+import { ArrowLeft, ThumbsUp, ThumbsDown, MinusCircle, CheckCircle2, AlertTriangle, Brain, MessageCircle, Heart, UserPlus, Copy, Filter, SortAsc, SortDesc, Search, Check, ChevronDown, Sparkles, FileText, FileType2, X, Briefcase, Calendar } from 'lucide-react'
 import { Progress } from '@/components/ui/progress'
-import { pdf } from '@react-pdf/renderer'
-import { ResumeAnalysisDocument } from './pdf/ResumeAnalysisDocument'
+import { supabase } from '@/shared/lib/supabase'
 import type { AnalysisCandidate, AnalysisData, AnalysisResult } from '../types'
 import { useVacanciesByIds } from '@/features/vacancy-management/api/getVacancies'
 import { useCreateCandidateFromAnalysis } from '../api/createCandidateFromAnalysis'
@@ -16,7 +9,11 @@ import { useGetResumeAnalysisById } from '../api/getResumeAnalysisById'
 import { useUpdateAnalysisInvite } from '../api/updateAnalysisInvite'
 import { useHrProfile } from '@/shared/hooks/useHrProfile'
 import { toast } from 'sonner'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,7 +30,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { cn } from '@/lib/utils'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 
 interface ResumeAnalysisResultProps {
   result: AnalysisResult
@@ -45,6 +43,12 @@ export const ResumeAnalysisResult = ({ result: initialResult, onBack }: ResumeAn
   const { data: hrProfile } = useHrProfile()
   const [inviteDialogData, setInviteDialogData] = useState<{ id?: string, link: string } | null>(null)
   
+  // Filters and Sorting State
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedVerdicts, setSelectedVerdicts] = useState<string[]>(['recommended', 'maybe', 'rejected'])
+  const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc')
+  const [expandedCards, setExpandedCards] = useState<string[]>([])
+  
   // Subscribe to analysis updates (to get new invite tokens)
   const { data: result } = useGetResumeAnalysisById(initialResult.id, initialResult)
   
@@ -52,6 +56,21 @@ export const ResumeAnalysisResult = ({ result: initialResult, onBack }: ResumeAn
   const { data: vacancies = [] } = useVacanciesByIds(result?.vacancy_ids || [])
   
   const analysisData = (result?.analysis_data || null) as AnalysisData | null
+
+  // Filtered and Sorted Candidates
+  const filteredCandidates = useMemo(() => {
+    if (!analysisData?.candidates) return []
+    
+    return analysisData.candidates
+      .filter(candidate => {
+        const matchesSearch = candidate.name.toLowerCase().includes(searchQuery.toLowerCase())
+        const matchesVerdict = selectedVerdicts.includes(candidate.verdict)
+        return matchesSearch && matchesVerdict
+      })
+      .sort((a, b) => {
+        return sortOrder === 'desc' ? b.match_score - a.match_score : a.match_score - b.match_score
+      })
+  }, [analysisData, searchQuery, selectedVerdicts, sortOrder])
 
   // Check status for all tokens
   const tokens = analysisData?.candidates
@@ -104,43 +123,33 @@ export const ResumeAnalysisResult = ({ result: initialResult, onBack }: ResumeAn
     }
   }
 
-  const handleDownloadPDF = async () => {
-    if (!analysisData) return
+  const handleViewResume = async (fileName?: string) => {
+    if (!fileName || !result?.file_paths) {
+      toast.error(t('ai-analysis:resumeAnalysis.result.fileNotFound'))
+      return
+    }
+
+    // Find the full path in file_paths that contains this fileName
+    const fullPath = result.file_paths.find(path => path.includes(fileName))
+    
+    if (!fullPath) {
+      toast.error(t('ai-analysis:resumeAnalysis.result.fileNotFound'))
+      return
+    }
 
     try {
-      const translations = {
-        matchScore: t('ai-analysis:resumeAnalysis.result.matchScore'),
-        matches: t('ai-analysis:resumeAnalysis.result.matches'),
-        hardSkills: t('ai-analysis:resumeAnalysis.result.sections.hardSkills'),
-        softSkills: t('ai-analysis:resumeAnalysis.result.sections.softSkills'),
-        gaps: t('ai-analysis:resumeAnalysis.result.sections.gaps'),
-        redFlags: t('ai-analysis:resumeAnalysis.result.sections.redFlags'),
-        culturalFit: t('ai-analysis:resumeAnalysis.result.sections.culturalFit'),
-        interviewQuestions: t('ai-analysis:resumeAnalysis.result.sections.interviewQuestions'),
-        verdicts: {
-          recommended: t('ai-analysis:resumeAnalysis.result.verdicts.recommended'),
-          maybe: t('ai-analysis:resumeAnalysis.result.verdicts.maybe'),
-          rejected: t('ai-analysis:resumeAnalysis.result.verdicts.rejected'),
-        }
-      }
+      const { data, error } = await supabase.storage
+        .from('resumes')
+        .createSignedUrl(fullPath, 3600) // 1 hour
 
-      const blob = await pdf(
-        <ResumeAnalysisDocument
-          data={analysisData}
-          title={t('resumeAnalysis.result.title')}
-          translations={translations}
-        />
-      ).toBlob()
-      
-      const url = URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = `resume-analysis-${new Date().toISOString().split('T')[0]}.pdf`
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
+      if (error) throw error
+
+      if (data?.signedUrl) {
+        window.open(data.signedUrl, '_blank')
+      }
     } catch (error) {
-      console.error('Failed to generate PDF', error)
+      console.error('Error generating signed URL:', error)
+      toast.error(t('common:error'))
     }
   }
 
@@ -148,7 +157,7 @@ export const ResumeAnalysisResult = ({ result: initialResult, onBack }: ResumeAn
     switch (verdict) {
       case 'recommended': return 'bg-success/10 text-success border-success/20'
       case 'maybe': return 'bg-warning/10 text-warning border-warning/20'
-      case 'rejected': return 'bg-destructive/10 text-destructive border-destructive/20'
+      case 'rejected': return 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20'
       default: return 'bg-muted text-muted-foreground'
     }
   }
@@ -162,376 +171,529 @@ export const ResumeAnalysisResult = ({ result: initialResult, onBack }: ResumeAn
     }
   }
 
-  if (!analysisData?.candidates) {
-    // Fallback to HTML content if no JSON data
-    return (
-      <div className="space-y-6">
-        <AIBorder>
-          <Card className="border-none shadow-none">
-            <CardHeader>
-              <div className="flex justify-between items-center">
-                <div>
-                  <CardTitle>
-                    <AIStreamingText text={t('resumeAnalysis.result.title')} isStreaming={false} />
-                  </CardTitle>
-                </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" onClick={onBack}>
-                    <ArrowLeft className="w-4 h-4 mr-2" />
-                    {t('common:back')}
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div
-                className="prose dark:prose-invert max-w-none"
-                dangerouslySetInnerHTML={{ __html: result?.content_html || '' }}
-              />
-            </CardContent>
-          </Card>
-        </AIBorder>
-      </div>
-    )
-  }
+  if (!analysisData?.candidates) return null
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in duration-500 pb-12">
+      {/* Page Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={onBack} className="rounded-full">
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" onClick={onBack} className="rounded-full hover:bg-primary/10 hover:text-primary transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-600">
-            {t('resumeAnalysis.result.title')}
-          </h2>
+          <div>
+            <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-600">
+              {t('resumeAnalysis.result.title')}
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              {t('ai-analysis:resumeAnalysis.history.candidatesCount', { count: filteredCandidates.length })}
+            </p>
+          </div>
         </div>
-        <Button onClick={handleDownloadPDF} variant="outline" className="gap-2">
-          <Download className="w-4 h-4" />
-          {t('ai-analysis:resumeAnalysis.result.downloadPDF')}
-        </Button>
       </div>
 
-      <div className="bg-background p-4 sm:p-8 rounded-xl">
-        <div className="space-y-8">
-          {analysisData.candidates?.map((candidate, index) => (
-            <Card key={index} className="candidate-card overflow-hidden border-border/50 shadow-sm break-inside-avoid">
-              <div className="p-6 space-y-6">
-                {/* Header */}
-                <div className="flex flex-col md:flex-row justify-between gap-4">
-                  <div className="flex items-start gap-4">
-                    <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                      <User className="h-6 w-6" />
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold">{candidate.name}</h3>
-                      <div className="flex items-center gap-2 mt-2">
-                        <Badge variant="outline" className={getVerdictColor(candidate.verdict)}>
-                          <span className="flex items-center gap-1">
-                            {getVerdictIcon(candidate.verdict)}
-                            <span className="capitalize">{t(`ai-analysis:resumeAnalysis.result.verdicts.${candidate.verdict}`)}</span>
-                          </span>
-                        </Badge>
+      {/* Filters & Search Toolbar */}
+      <Card className="border-none shadow-md bg-card/60 backdrop-blur-md overflow-hidden rounded-3xl">
+        <CardContent className="p-4 sm:p-6 space-y-6">
+          {/* Top Row: Search & Sorting */}
+          <div className="flex items-center gap-3">
+            <div className="relative flex-1">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/60" />
+              <Input 
+                placeholder={t('common:search')} 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-11 h-12 bg-background/40 border-border/40 focus:ring-primary/20 text-base rounded-2xl transition-all"
+              />
+            </div>
+            <Button 
+              variant="outline" 
+              size="icon" 
+              onClick={() => setSortOrder(prev => prev === 'desc' ? 'asc' : 'desc')}
+              className="border-border/40 bg-background/40 h-12 w-12 rounded-2xl hover:bg-primary/5 hover:text-primary transition-all shrink-0"
+            >
+              {sortOrder === 'desc' ? <SortDesc className="w-5 h-5" /> : <SortAsc className="w-5 h-5" />}
+            </Button>
+          </div>
+
+          {/* Inline Filters Row */}
+          <div className="flex flex-col lg:flex-row lg:items-center gap-6 pt-6 border-t border-border/10">
+            {/* Verdict Filter */}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 shrink-0">
+              <span className="text-[10px] font-black text-muted-foreground/80 uppercase tracking-[0.2em] whitespace-nowrap">
+                {t('ai-analysis:resumeAnalysis.result.verdicts.recommended')}:
+              </span>
+              <div className="flex flex-wrap gap-2">
+                {['recommended', 'maybe', 'rejected'].map(v => {
+                  const isSelected = selectedVerdicts.includes(v)
+                  return (
+                    <Badge 
+                      key={v} 
+                      variant="outline"
+                      className={cn(
+                        "cursor-pointer px-3.5 py-2 rounded-xl border transition-all duration-200 select-none",
+                        isSelected 
+                          ? "bg-background shadow-sm border-border/80 text-foreground"
+                          : "bg-transparent text-muted-foreground/50 border-border/30 hover:border-border/60 hover:text-muted-foreground"
+                      )}
+                      onClick={() => {
+                        setSelectedVerdicts(prev => 
+                          isSelected ? prev.filter(item => item !== v) : [...prev, v]
+                        )
+                      }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <div className={cn(
+                          "w-2 h-2 rounded-full",
+                          v === 'recommended' ? "bg-success shadow-[0_0_8px_rgba(34,197,94,0.4)]" :
+                          v === 'maybe' ? "bg-warning shadow-[0_0_8px_rgba(234,179,8,0.4)]" :
+                          "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.4)]",
+                          !isSelected && "opacity-30 grayscale-[50%]"
+                        )} />
+                        <span className="font-bold text-[11px] uppercase tracking-wider">
+                          {t(`ai-analysis:resumeAnalysis.result.verdicts.${v}`)}
+                        </span>
                       </div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-4 min-w-[200px]">
-                    <div className="flex-1 text-right">
-                      <div className="text-sm font-medium text-muted-foreground mb-1">{t('ai-analysis:resumeAnalysis.result.matchScore')}</div>
-                      <div className="text-2xl font-bold text-primary">{candidate.match_score}%</div>
-                    </div>
-                    <div className="h-14 w-14 relative flex items-center justify-center">
-                      <svg className="transform -rotate-90 w-full h-full">
-                        <circle
-                          cx="28"
-                          cy="28"
-                          r="24"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                          fill="transparent"
-                          className="text-muted/20"
-                        />
-                        <circle
-                          cx="28"
-                          cy="28"
-                          r="24"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                          fill="transparent"
-                          strokeDasharray={2 * Math.PI * 24}
-                          strokeDashoffset={2 * Math.PI * 24 * (1 - candidate.match_score / 100)}
-                          className="text-primary transition-all duration-1000 ease-out"
-                        />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
+                    </Badge>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-                {/* Summary */}
-                <div className="bg-muted/30 p-4 rounded-xl">
-                  <p className="text-sm leading-relaxed text-muted-foreground">
-                    {candidate.summary}
-                  </p>
-                </div>
-
-                {/* Vacancy Matches */}
-                <div className="space-y-3">
-                  <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">{t('ai-analysis:resumeAnalysis.result.matches')}</h4>
-                  <div className="grid gap-3">
-                    {candidate.vacancy_matches?.map((match, i) => (
-                      <div key={i} className="bg-card border rounded-lg p-3">
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="font-medium">{match.vacancy_title}</span>
-                          <span className="font-bold text-primary">{match.score}%</span>
+      {/* Results List */}
+      <div className="space-y-4">
+        {filteredCandidates.length > 0 ? (
+          <Accordion 
+            type="multiple" 
+            value={expandedCards} 
+            onValueChange={setExpandedCards}
+            className="space-y-4"
+          >
+            {filteredCandidates.map((candidate, index) => (
+              <AccordionItem 
+                key={index} 
+                value={`item-${index}`}
+                className="border-none"
+              >
+                <Card className="group overflow-hidden border-border/40 shadow-sm bg-card/40 backdrop-blur-sm hover:shadow-md hover:border-primary/20 transition-all duration-300 rounded-2xl">
+                  <AccordionTrigger className="hover:no-underline p-0 [&>svg]:hidden">
+                    <div className="flex flex-col sm:flex-row items-center justify-between w-full p-6 gap-4 text-left">
+                      <div className="flex items-center gap-5 w-full sm:w-auto">
+                        <div className="space-y-1.5 flex-1">
+                          <div className="flex flex-col gap-0.5">
+                            <h3 className="text-xl font-bold tracking-tight">{candidate.name}</h3>
+                            {candidate.vacancy_matches && candidate.vacancy_matches.length > 0 && (
+                              <div className="flex flex-wrap gap-1.5 mt-1">
+                                {candidate.vacancy_matches.map((m, i) => (
+                                  <Badge key={i} variant="outline" className="bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary-foreground border-primary/20 text-[11px] font-semibold py-0.5 px-2.5 hover:bg-primary/10 pointer-events-none transition-colors">
+                                    {m.vacancy_title}
+                                  </Badge>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <Badge variant="outline" className={cn("px-3 py-0.5 border shadow-sm pointer-events-none hover:bg-transparent", getVerdictColor(candidate.verdict))}>
+                              <span className="flex items-center gap-1.5 font-semibold uppercase text-[10px] tracking-wider">
+                                {getVerdictIcon(candidate.verdict)}
+                                {t(`ai-analysis:resumeAnalysis.result.verdicts.${candidate.verdict}`)}
+                              </span>
+                            </Badge>
+                            {candidate.match_score >= 80 && (
+                              <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/20 gap-1.5 pointer-events-none hover:bg-amber-500/10">
+                                <Sparkles className="w-3 h-3" />
+                                {t('ai-analysis:resumeAnalysis.topChoice')}
+                              </Badge>
+                            )}
+                            {(candidate.total_experience_years !== undefined || candidate.last_position) && (
+                              <div className="flex items-center gap-3 ml-1 text-muted-foreground">
+                                {candidate.total_experience_years !== undefined && (
+                                  <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-muted/50 text-[11px] font-medium border border-border/50">
+                                    <Calendar className="w-3 h-3 text-primary/60" />
+                                    <span>{candidate.total_experience_years} {t('common:years', 'л.')}</span>
+                                  </div>
+                                )}
+                                {candidate.last_position && (
+                                  <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-muted/50 text-[11px] font-medium border border-border/50 max-w-[200px]">
+                                    <Briefcase className="w-3 h-3 text-primary/60" />
+                                    <span className="truncate">{candidate.last_position}</span>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
                         </div>
-                        <Progress value={match.score} className="h-2 mb-2" />
-                        <p className="text-xs text-muted-foreground">{match.reason}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Advanced Skills Analysis (New Structure) */}
-                {candidate.skills ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Hard Skills & Pros */}
-                    <div className="space-y-6">
-                      <div>
-                        <h4 className="font-semibold text-sm text-success mb-3 flex items-center gap-2">
-                          <CheckCircle2 className="w-4 h-4" />
-                          {t('resumeAnalysis.result.sections.hardSkills')}
-                        </h4>
-                        <ul className="space-y-2">
-                          {[...(candidate.pros || []), ...(candidate.skills?.hard_skills_match || [])].map((item, i) => (
-                            <li key={i} className="text-sm flex items-baseline gap-2">
-                              <span className="w-1.5 h-1.5 rounded-full bg-success/50 translate-y-[-2px] shrink-0" />
-                              <span>{item}</span>
-                            </li>
-                          ))}
-                        </ul>
                       </div>
                       
-                      {/* Soft Skills */}
-                      {(candidate.skills.soft_skills?.length ?? 0) > 0 && (
-                        <div>
-                          <h4 className="font-semibold text-sm text-purple-500 mb-3 flex items-center gap-2">
-                            <Brain className="w-4 h-4" />
-                            {t('resumeAnalysis.result.sections.softSkills')}
-                          </h4>
-                          <div className="flex flex-wrap gap-2">
-                            {candidate.skills?.soft_skills?.map((skill, i) => (
-                              <Badge key={i} variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
-                                {skill}
-                              </Badge>
-                            ))}
+                      <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end pr-2">
+                        <div className="flex items-center gap-5 bg-muted/30 border border-border/40 px-5 py-3 rounded-[1.25rem] shadow-sm transition-all duration-300">
+                          <div className="flex flex-col items-end justify-center">
+                            <span className="text-[9px] font-bold text-muted-foreground/90 uppercase tracking-[0.2em] mb-1">
+                              {t('ai-analysis:resumeAnalysis.result.matchScore')}
+                            </span>
+                            <div className={cn(
+                              "text-3xl font-bold tabular-nums tracking-tighter leading-none",
+                              candidate.match_score >= 80 ? "text-success" :
+                              candidate.match_score >= 50 ? "text-warning" :
+                              "text-red-500"
+                            )}>
+                              {candidate.match_score}<span className="text-sm font-bold opacity-60 ml-0.5">%</span>
+                            </div>
+                          </div>
+                          
+                          <div className="h-12 w-12 relative flex items-center justify-center">
+                            <svg className="transform -rotate-90 w-full h-full">
+                              <circle
+                                cx="24"
+                                cy="24"
+                                r="20"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                                fill="transparent"
+                                className="text-muted/25"
+                              />
+                              <circle
+                                cx="24"
+                                cy="24"
+                                r="20"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                                fill="transparent"
+                                strokeDasharray={2 * Math.PI * 20}
+                                strokeDashoffset={2 * Math.PI * 20 * (1 - candidate.match_score / 100)}
+                                strokeLinecap="round"
+                                className={cn(
+                                  "transition-all duration-1000 ease-out",
+                                  candidate.match_score >= 80 ? "text-success" :
+                                  candidate.match_score >= 50 ? "text-warning" :
+                                  "text-red-500"
+                                )}
+                              />
+                            </svg>
+                          </div>
+                        </div>
+                        
+                        <div className="bg-muted/30 rounded-full p-2 group-data-[state=open]:rotate-180 transition-transform shrink-0 border border-border/50">
+                          <ChevronDown className="w-5 h-5 text-muted-foreground/40" />
+                        </div>
+                      </div>
+                    </div>
+                  </AccordionTrigger>
+                  
+                  <AccordionContent className="border-t border-border/20 pt-0">
+                    <div className="p-6 sm:p-8 space-y-10 animate-in slide-in-from-top-2 duration-300">
+                      {/* Executive Summary Row - Full Width */}
+                      <div className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-transparent to-purple-500/5 rounded-3xl p-6 border border-primary/10 shadow-sm group/summary">
+                        <div className="absolute top-0 right-0 p-6 text-primary/10 group-hover/summary:text-primary/20 transition-colors">
+                          <Sparkles className="w-8 h-8" />
+                        </div>
+                        <h4 className="text-[9px] font-black text-primary uppercase tracking-[0.2em] flex items-center gap-2 mb-4 opacity-80">
+                          <FileText className="w-3.5 h-3.5" />
+                          {t('ai-analysis:resumeAnalysis.executiveSummary')}
+                        </h4>
+                        <p className="text-base sm:text-lg leading-relaxed text-foreground/90 italic font-medium relative z-10">
+                          "{candidate.summary}"
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+                        {/* Column 1: Vacancy Matches & Cultural Fit */}
+                        <div className="space-y-10">
+                          <div className="space-y-6">
+                            <h4 className="text-xs font-black text-primary uppercase tracking-[0.2em] flex items-center gap-2.5 mb-4 opacity-90 transition-opacity hover:opacity-100">
+                              <CheckCircle2 className="w-4 h-4" />
+                              {t('ai-analysis:resumeAnalysis.result.matches')}
+                            </h4>
+                            <div className="space-y-4">
+                              {candidate.vacancy_matches?.map((match, i) => (
+                                <div key={i} className="group/match bg-background/40 border border-border/40 rounded-2xl p-5 transition-all hover:bg-background/60 hover:shadow-sm">
+                                  <div className="flex justify-between items-center mb-3">
+                                    <span className="font-bold text-base truncate pr-2">{match.vacancy_title}</span>
+                                    <span className="font-black text-primary tabular-nums bg-primary/10 px-2.5 py-0.5 rounded-full text-[10px] border border-primary/10">{match.score}%</span>
+                                  </div>
+                                  <Progress value={match.score} className="h-1.5 mb-4 bg-muted/30" />
+                                  <p className="text-sm text-muted-foreground/90 leading-relaxed">{match.reason}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          {candidate.cultural_fit && (
+                            <div className="bg-blue-50/50 dark:bg-blue-500/10 p-6 rounded-[2rem] border border-blue-200/50 dark:border-blue-800/50 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                              <h4 className="text-xs font-black text-blue-700 dark:text-blue-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2.5">
+                                <Heart className="w-4 h-4" />
+                                {t('resumeAnalysis.result.sections.culturalFit')}
+                              </h4>
+                              <p className="text-base text-blue-900/80 dark:text-blue-200/70 leading-relaxed font-medium">
+                                {candidate.cultural_fit}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Column 2: Strengths (Hard & Soft Skills) */}
+                        <div className="space-y-10">
+                          {candidate.skills ? (
+                            <>
+                              <div className="space-y-6">
+                                <h4 className="text-xs font-black text-success uppercase tracking-[0.2em] flex items-center gap-2.5">
+                                  <ThumbsUp className="w-4 h-4" />
+                                  {t('resumeAnalysis.result.sections.hardSkills')}
+                                </h4>
+                                <div className="flex flex-wrap gap-2">
+                                  {[...(candidate.pros || []), ...(candidate.skills?.hard_skills_match || [])].map((item, i) => (
+                                    <Badge key={i} variant="secondary" className="bg-success/10 text-success dark:text-emerald-400 border-success/10 text-[11px] font-semibold py-1.5 px-3 rounded-lg pointer-events-none">
+                                      {item}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+
+                              {(candidate.skills.soft_skills?.length ?? 0) > 0 && (
+                                <div className="space-y-6">
+                                  <h4 className="text-xs font-black text-indigo-500 uppercase tracking-[0.2em] flex items-center gap-2.5">
+                                    <Brain className="w-4 h-4" />
+                                    {t('resumeAnalysis.result.sections.softSkills')}
+                                  </h4>
+                                  <div className="flex flex-wrap gap-2">
+                                    {candidate.skills?.soft_skills?.map((skill, i) => (
+                                      <Badge key={i} variant="outline" className="bg-indigo-500/5 text-indigo-600 dark:text-indigo-300 border-indigo-200/50 text-[11px] font-semibold py-1.5 px-3 rounded-lg pointer-events-none">
+                                        {skill}
+                                      </Badge>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </>
+                          ) : (
+                            <div className="flex items-center justify-center h-48 text-muted-foreground text-sm opacity-50 border-2 border-dashed rounded-[2rem]">
+                              {t('ai-analysis:resumeAnalysis.detailedSkillsUnavailable')}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Column 3: Gaps & Red Flags */}
+                        <div className="space-y-10">
+                          {candidate.skills && (
+                            <>
+                              <div className="space-y-6">
+                                <h4 className="text-xs font-black text-destructive uppercase tracking-[0.2em] flex items-center gap-2.5">
+                                  <ThumbsDown className="w-4 h-4" />
+                                  {t('resumeAnalysis.result.sections.gaps')}
+                                </h4>
+                                <div className="flex flex-wrap gap-2">
+                                  {[...(candidate.cons || []), ...(candidate.skills?.missing_skills || [])].map((item, i) => (
+                                    <Badge key={i} variant="outline" className="bg-destructive/5 text-destructive dark:text-red-400 border-destructive/20 text-[11px] font-semibold py-1.5 px-3 rounded-lg pointer-events-none">
+                                      {item}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+
+                              {(candidate.red_flags?.length ?? 0) > 0 && (
+                                <div className="space-y-6">
+                                  <div className="bg-destructive/10 dark:bg-red-500/10 border border-destructive/20 dark:border-red-500/20 rounded-[1.5rem] p-6 space-y-4">
+                                    <h4 className="text-xs font-black text-destructive dark:text-red-400 uppercase tracking-[0.2em] flex items-center gap-2.5">
+                                      <AlertTriangle className="w-4 h-4" />
+                                      {t('resumeAnalysis.result.sections.redFlags')}
+                                    </h4>
+                                    <ul className="space-y-3">
+                                      {candidate.red_flags?.map((flag, i) => (
+                                        <li key={i} className="text-sm text-destructive dark:text-red-400/90 leading-tight flex items-start gap-3">
+                                          <span className="shrink-0 text-destructive dark:text-red-500 mt-0.5">•</span>
+                                          {flag}
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                </div>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Interview Questions Row - Full Width */}
+                      {candidate.interview_questions && candidate.interview_questions.length > 0 && (
+                        <div className="border-t border-border/10 pt-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                          <div className="bg-amber-50/50 dark:bg-amber-500/10 p-8 rounded-[2.5rem] border border-amber-200/50 dark:border-amber-800/50">
+                            <h4 className="text-xs font-black text-amber-700 dark:text-amber-400 uppercase tracking-[0.2em] mb-8 flex items-center gap-2.5">
+                              <MessageCircle className="w-4 h-4" />
+                              {t('resumeAnalysis.result.sections.interviewQuestions')}
+                            </h4>
+                            <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                              {candidate.interview_questions?.map((q, i) => (
+                                <li key={i} className="bg-background/40 rounded-2xl p-6 text-sm text-amber-900/80 dark:text-amber-200/70 leading-relaxed flex gap-4 border border-amber-200/20 shadow-sm transition-all hover:bg-background/60 hover:shadow-md">
+                                  <span className="font-black text-amber-500/40 shrink-0 text-xl leading-none">{i + 1}</span>
+                                  <span>{q}</span>
+                                </li>
+                              ))}
+                            </ul>
                           </div>
                         </div>
                       )}
-                    </div>
 
-                    {/* Missing Skills & Cons */}
-                    <div className="space-y-6">
-                      <div>
-                        <h4 className="font-semibold text-sm text-destructive mb-3 flex items-center gap-2">
-                          <XCircle className="w-4 h-4" />
-                          {t('resumeAnalysis.result.sections.gaps')}
-                        </h4>
-                        <ul className="space-y-2">
-                          {[...(candidate.cons || []), ...(candidate.skills?.missing_skills || [])].map((item, i) => (
-                            <li key={i} className="text-sm flex items-baseline gap-2">
-                              <span className="w-1.5 h-1.5 rounded-full bg-destructive/50 translate-y-[-2px] shrink-0" />
-                              <span>{item}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-
-                      {/* Red Flags */}
-                      {(candidate.red_flags?.length ?? 0) > 0 && (
-                        <div className="bg-destructive/5 border border-destructive/20 rounded-xl p-4">
-                          <h4 className="font-semibold text-sm text-destructive mb-3 flex items-center gap-2">
-                            <AlertTriangle className="w-4 h-4" />
-                            {t('resumeAnalysis.result.sections.redFlags')}
-                          </h4>
-                          <ul className="space-y-2">
-                            {candidate.red_flags?.map((flag, i) => (
-                              <li key={i} className="text-sm text-destructive/90 flex items-baseline gap-2">
-                                <span className="w-1.5 h-1.5 rounded-full bg-destructive translate-y-[-2px] shrink-0" />
-                                <span>{flag}</span>
-                              </li>
-                            ))}
-                          </ul>
+                      {/* Actions Footer */}
+                      <div className="pt-6 mt-6 border-t border-border/30 flex flex-col sm:flex-row justify-between items-center gap-4">
+                        <div className="flex items-center gap-4 text-[10px] text-muted-foreground font-bold uppercase tracking-wider opacity-60">
+                          <div className="flex items-center gap-1.5">
+                            <FileType2 className="w-3.5 h-3.5" />
+                            {t('ai-analysis:resumeAnalysis.resumeVerified')}
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <Brain className="w-3.5 h-3.5" />
+                            {t('ai-analysis:resumeAnalysis.insightEngine')}
+                          </div>
                         </div>
-                      )}
-                    </div>
-                  </div>
-                ) : (
-                  // Fallback for old data structure
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <h4 className="font-semibold text-sm text-success mb-3 flex items-center gap-2">
-                        <CheckCircle2 className="w-4 h-4" />
-                        Pros
-                      </h4>
-                      <ul className="space-y-2">
-                        {candidate.pros?.map((pro, i) => (
-                          <li key={i} className="text-sm flex items-start gap-2">
-                            <span className="w-1.5 h-1.5 rounded-full bg-success/50 mt-1.5 shrink-0" />
-                            {pro}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-sm text-destructive mb-3 flex items-center gap-2">
-                        <XCircle className="w-4 h-4" />
-                        Cons
-                      </h4>
-                      <ul className="space-y-2">
-                        {candidate.cons?.map((con, i) => (
-                          <li key={i} className="text-sm flex items-start gap-2">
-                            <span className="w-1.5 h-1.5 rounded-full bg-destructive/50 mt-1.5 shrink-0" />
-                            {con}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                )}
-
-                {/* Cultural Fit & Interview Questions */}
-                {(candidate.cultural_fit || (candidate.interview_questions?.length ?? 0) > 0) && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-border/50">
-                    {candidate.cultural_fit && (
-                      <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100">
-                        <h4 className="font-semibold text-sm text-blue-700 mb-2 flex items-center gap-2">
-                          <Heart className="w-4 h-4" />
-                          {t('resumeAnalysis.result.sections.culturalFit')}
-                        </h4>
-                        <p className="text-sm text-blue-900/80 leading-relaxed">
-                          {candidate.cultural_fit}
-                        </p>
-                      </div>
-                    )}
-                    
-                    {candidate.interview_questions && candidate.interview_questions.length > 0 && (
-                      <div className="bg-amber-50/50 p-4 rounded-xl border border-amber-100">
-                        <h4 className="font-semibold text-sm text-amber-700 mb-3 flex items-center gap-2">
-                          <MessageCircle className="w-4 h-4" />
-                          {t('resumeAnalysis.result.sections.interviewQuestions')}
-                        </h4>
-                        <ul className="space-y-3">
-                          {candidate.interview_questions?.map((q, i) => (
-                            <li key={i} className="text-sm text-amber-900/80 flex gap-2">
-                              <span className="font-bold text-amber-500/50">{i + 1}.</span>
-                              {q}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Actions Footer */}
-                <div className="pt-4 mt-4 border-t border-border/50 flex justify-end gap-3">
-                  {(() => {
-                    const token = candidate.invite_token
-                    const status = token ? tokensStatus?.find(s => s.token === token) : null
-                    
-                    if (status?.is_used) {
-                      return (
-                        <Button disabled variant="secondary" className="gap-2 bg-success/10 text-success hover:bg-success/20">
-                          <User className="w-4 h-4" />
-                          {t('ai-analysis:resumeAnalysis.result.status.registered')}
-                        </Button>
-                      )
-                    }
-
-                    if (token) {
-                      return (
-                        <Button
-                          variant="outline"
-                          className="gap-2"
-                          onClick={() => handleShowLink(token)}
-                        >
-                          <Copy className="w-4 h-4" />
-                          {t('ai-analysis:resumeAnalysis.result.status.copyLink')}
-                        </Button>
-                      )
-                    }
-
-                    return vacancies.length > 1 ? (
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button className="gap-2" disabled={isCreating}>
-                            <UserPlus className="w-4 h-4" />
-                            {t('ai-analysis:resumeAnalysis.result.invite')}
+                        
+                        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+                          <Button
+                            variant="outline"
+                            className="flex-1 sm:flex-none gap-2 border-border/40 hover:bg-muted/50 h-11 text-base"
+                            onClick={() => handleViewResume(candidate.fileName)}
+                          >
+                            <FileText className="w-4 h-4" />
+                            {t('ai-analysis:resumeAnalysis.result.viewResume')}
                           </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-56">
-                          <DropdownMenuLabel>{t('ai-analysis:resumeAnalysis.result.selectVacancy')}</DropdownMenuLabel>
-                          <DropdownMenuSeparator />
-                          {vacancies.map((vacancy) => {
-                            const match = candidate.vacancy_matches?.find(m => m.vacancy_title === vacancy.title)
-                            return (
-                              <DropdownMenuItem
-                                key={vacancy.id}
-                                onClick={() => handleInvite(candidate, vacancy.id, index)}
-                                className="flex justify-between items-center"
+                          {(() => {
+                            const token = candidate.invite_token
+                            const status = token ? tokensStatus?.find(s => s.token === token) : null
+                            
+                            if (status?.is_used) {
+                              return (
+                                <Button disabled variant="secondary" className="w-full sm:w-auto gap-2 bg-success/10 text-success border-success/10 h-11 text-base">
+                                  <Check className="w-4 h-4" />
+                                  {t('ai-analysis:resumeAnalysis.result.status.registered')}
+                                </Button>
+                              )
+                            }
+
+                            if (token) {
+                              return (
+                                <Button
+                                  variant="outline"
+                                  className="w-full sm:w-auto gap-2 border-primary/20 hover:border-primary/50 hover:bg-primary/5 text-primary h-11 text-base"
+                                  onClick={() => handleShowLink(token)}
+                                >
+                                  <Copy className="w-4 h-4" />
+                                  {t('ai-analysis:resumeAnalysis.result.status.copyLink')}
+                                </Button>
+                              )
+                            }
+
+                            return vacancies.length > 1 ? (
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button className="w-full sm:w-auto gap-2 bg-gradient-to-r from-primary to-purple-600 hover:scale-[1.02] transition-transform h-11 text-base" disabled={isCreating}>
+                                    <UserPlus className="w-4 h-4" />
+                                    {t('ai-analysis:resumeAnalysis.result.invite')}
+                                    <ChevronDown className="w-4 h-4 ml-1 opacity-50" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-72 rounded-2xl shadow-2xl border-border/50 p-2">
+                                  <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground p-3 opacity-60">
+                                    {t('ai-analysis:resumeAnalysis.result.selectVacancy')}
+                                  </DropdownMenuLabel>
+                                  <DropdownMenuSeparator className="mx-2 my-1" />
+                                  <div className="space-y-1">
+                                    {vacancies.map((vacancy) => {
+                                      const match = candidate.vacancy_matches?.find(m => m.vacancy_title === vacancy.title)
+                                      return (
+                                        <DropdownMenuItem
+                                          key={vacancy.id}
+                                          onClick={() => handleInvite(candidate, vacancy.id, index)}
+                                          className="py-3 px-4 flex flex-col items-start gap-1 cursor-pointer rounded-xl transition-colors focus:bg-primary/10 hover:bg-transparent"
+                                        >
+                                          <div className="flex justify-between w-full items-center">
+                                            <span className="font-bold text-sm truncate pr-2">{vacancy.title}</span>
+                                            {match && <span className="text-[10px] font-black bg-primary/10 text-primary px-2 py-0.5 rounded-full border border-primary/10">{match.score}%</span>}
+                                          </div>
+                                          <div className="text-[10px] font-medium text-muted-foreground line-clamp-1 opacity-60 uppercase tracking-wider">
+                                            {vacancy.employment_type} • {vacancy.location || 'Remote'}
+                                          </div>
+                                        </DropdownMenuItem>
+                                      )
+                                    })}
+                                  </div>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            ) : (
+                              <Button
+                                className="w-full sm:w-auto gap-2 bg-gradient-to-r from-primary to-purple-600 hover:scale-[1.02] transition-transform h-11 text-base"
+                                disabled={isCreating}
+                                onClick={() => vacancies[0] && handleInvite(candidate, vacancies[0].id, index)}
                               >
-                                <span className="truncate">{vacancy.title}</span>
-                                {match && <span className="text-xs text-muted-foreground ml-2">{match.score}%</span>}
-                              </DropdownMenuItem>
+                                <UserPlus className="w-4 h-4" />
+                                {t('ai-analysis:resumeAnalysis.result.invite')}
+                              </Button>
                             )
-                          })}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    ) : (
-                      <Button
-                        className="gap-2"
-                        disabled={isCreating}
-                        onClick={() => vacancies[0] && handleInvite(candidate, vacancies[0].id, index)}
-                      >
-                        <UserPlus className="w-4 h-4" />
-                        {t('ai-analysis:resumeAnalysis.result.invite')}
-                      </Button>
-                    )
-                  })()}
-                </div>
-              </div>
-            </Card>
-          ))}
-        </div>
+                          })()}
+                        </div>
+                      </div>
+                    </div>
+                  </AccordionContent>
+                </Card>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-24 bg-background/20 rounded-[2.5rem] border-2 border-dashed border-border/30 text-center animate-in fade-in zoom-in-95 duration-500">
+            <div className="h-24 w-24 rounded-full bg-muted/20 flex items-center justify-center mb-8 text-muted-foreground/20">
+              <Filter className="h-12 w-12" />
+            </div>
+            <h3 className="text-2xl font-bold mb-3">{t('ai-analysis:resumeAnalysis.noCandidatesFound')}</h3>
+            <p className="text-muted-foreground max-w-sm px-6 text-base leading-relaxed">
+              {t('ai-analysis:resumeAnalysis.noCandidatesFoundDesc')}
+            </p>
+            <Button 
+              variant="outline" 
+              className="mt-10 gap-2 h-12 px-8 rounded-xl border-primary/20 hover:border-primary/50 text-primary bg-background/50 text-base font-semibold"
+              onClick={() => {
+                setSearchQuery('')
+                setSelectedVerdicts(['recommended', 'maybe', 'rejected'])
+              }}
+            >
+              <X className="w-4 h-4" />
+              {t('ai-analysis:resumeAnalysis.resetFilters')}
+            </Button>
+          </div>
+        )}
       </div>
 
+      {/* Invite Dialog */}
       <Dialog open={!!inviteDialogData} onOpenChange={(open) => !open && setInviteDialogData(null)}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md border-none shadow-2xl bg-card/95 backdrop-blur-xl rounded-[2rem] p-8">
           <DialogHeader>
-            <DialogTitle>{t('ai-analysis:resumeAnalysis.result.inviteCreated')}</DialogTitle>
-            <DialogDescription>
+            <div className="mx-auto h-16 w-16 rounded-2xl bg-success/10 flex items-center justify-center text-success mb-4 shadow-inner">
+              <CheckCircle2 className="w-8 h-8" />
+            </div>
+            <DialogTitle className="text-center text-3xl font-black tracking-tighter">
+              {t('ai-analysis:resumeAnalysis.result.inviteCreated')}
+            </DialogTitle>
+            <DialogDescription className="text-center px-4 text-base font-medium text-muted-foreground mt-2">
               {t('ai-analysis:resumeAnalysis.result.inviteCreatedDesc')}
             </DialogDescription>
           </DialogHeader>
-          <div className="flex items-center space-x-2">
-            <div className="grid flex-1 gap-2">
-              <Label htmlFor="link" className="sr-only">
-                Link
-              </Label>
-              <Input
-                id="link"
-                defaultValue={inviteDialogData?.link}
-                readOnly
-              />
+          <div className="p-1 bg-gradient-to-br from-primary/20 to-purple-500/20 rounded-2xl my-6">
+            <div className="flex items-center gap-2 p-2 bg-background/80 backdrop-blur rounded-xl border border-white/10 shadow-lg">
+              <div className="grid flex-1 gap-2">
+                <Input
+                  id="link"
+                  defaultValue={inviteDialogData?.link}
+                  readOnly
+                  className="bg-transparent border-none focus-visible:ring-0 text-sm h-12 font-medium overflow-x-auto"
+                />
+              </div>
+              <Button size="icon" className="h-12 w-12 rounded-xl shadow-xl shadow-primary/25 bg-gradient-to-r from-primary to-purple-600 transition-transform active:scale-95" onClick={handleCopyLink}>
+                <Copy className="h-5 w-5" />
+              </Button>
             </div>
-            <Button size="sm" className="px-3" onClick={handleCopyLink}>
-              <span className="sr-only">Copy</span>
-              <Copy className="h-4 w-4" />
-            </Button>
           </div>
-          <div className="flex justify-end">
-            <Button type="button" variant="secondary" onClick={() => setInviteDialogData(null)}>
+          <div className="pt-2">
+            <Button type="button" variant="ghost" className="w-full h-14 rounded-2xl text-base font-bold text-muted-foreground hover:bg-muted/50 transition-colors" onClick={() => setInviteDialogData(null)}>
               {t('common:close')}
             </Button>
           </div>

@@ -100,7 +100,11 @@ export const ResumeAnalysis = () => {
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: { 'application/pdf': ['.pdf'] },
+    accept: { 
+      'application/pdf': ['.pdf'],
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
+      'application/msword': ['.doc']
+    },
     maxSize: 5 * 1024 * 1024, // 5MB
   })
 
@@ -265,7 +269,7 @@ export const ResumeAnalysis = () => {
         progress={isUploading ? uploadProgress : undefined}
         simulationMode="slow"
       />
-      <div className="lg:col-span-2 space-y-8">
+      <div className="lg:col-span-2 order-1">
         <GlassCard className="overflow-hidden border-none shadow-lg bg-gradient-to-br from-card to-card/50">
           <div className="p-4 sm:p-8 bg-gradient-to-r from-primary/10 via-purple-500/5 to-background border-b">
             <div className="flex items-center gap-3 sm:gap-4">
@@ -434,7 +438,7 @@ export const ResumeAnalysis = () => {
                     ) : (
                       <>
                         <p className="font-medium text-lg mb-2">{t('resumeAnalysis.uploadResumes.dragAndDrop')}</p>
-                        <p className="text-sm text-muted-foreground max-w-xs">{t('resumeAnalysis.uploadResumes.fileRequirements')}</p>
+                        <p className="text-sm text-muted-foreground max-w-xs">{t('resumeAnalysis.uploadResumes.fileRequirements', 'PDF, DOC, DOCX файлы, до 5MB каждый, максимум 20 файлов.')}</p>
                       </>
                     )}
                   </div>
@@ -476,11 +480,9 @@ export const ResumeAnalysis = () => {
             </div>
           </CardContent>
         </GlassCard>
-
-        <ResumeAnalysisHistory onViewAnalysis={setResultAndNavigate} />
       </div>
 
-      <div className="space-y-6 lg:sticky lg:top-4">
+      <div className="order-2 lg:sticky lg:top-4 space-y-6">
         <Card className="border-none shadow-lg bg-card/50 backdrop-blur-sm overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
           <CardHeader>
@@ -524,6 +526,10 @@ export const ResumeAnalysis = () => {
             </Button>
           </CardContent>
         </Card>
+      </div>
+
+      <div className="lg:col-span-2 order-3">
+        <ResumeAnalysisHistory onViewAnalysis={setResultAndNavigate} />
       </div>
     </div>
   )

@@ -138,7 +138,7 @@ const TestPassingPage = () => {
 
       toast.success(t('submitted'));
       await queryClient.invalidateQueries({ queryKey: ['tests', user?.id] });
-      navigate(`/candidate/test/${testId}/results`);
+      navigate(`/candidate/test/${testId}/results`, { replace: true });
     } catch (error) {
       console.error('Error submitting test:', error);
       localStorage.setItem(`test_${testId}_backup`, JSON.stringify(answers));

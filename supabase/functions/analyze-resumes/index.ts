@@ -8,6 +8,8 @@ import { Anthropic } from 'https://esm.sh/@anthropic-ai/sdk@0.20.1'
 import { marked } from 'https://esm.sh/marked@12.0.2'
 // @ts-expect-error deno-types
 import { extractText } from 'https://esm.sh/unpdf@0.11.0'
+// @ts-expect-error deno-types
+import * as mammoth from 'https://esm.sh/mammoth@1.6.0'
 
 // --- SHARED LOGIC ---
 
@@ -261,8 +263,20 @@ serve(async (req: Request) => {
         
         const arrayBuffer = await data.arrayBuffer()
         const uint8Array = new Uint8Array(arrayBuffer)
-        const { text } = await extractText(uint8Array)
-        const filename = filePath.split('/').pop()
+        const filename = filePath.split('/').pop() || ''
+        const extension = filename.split('.').pop()?.toLowerCase()
+        
+        let text = ''
+        if (extension === 'pdf') {
+          const result = await extractText(uint8Array)
+          text = result.text
+        } else if (extension === 'docx' || extension === 'doc') {
+          // mammoth expects a buffer or arrayBuffer
+          const result = await mammoth.extractRawText({ arrayBuffer })
+          text = result.value
+        } else {
+          throw new Error(`Unsupported file extension: ${extension}`)
+        }
         
         return `--- RESUME: ${filename} ---\n${text}\n---`
       })

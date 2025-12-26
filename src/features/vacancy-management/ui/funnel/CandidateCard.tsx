@@ -13,7 +13,8 @@ import {
   Trophy,
   X,
   Sparkles,
-  Users
+  Users,
+  AlertTriangle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
@@ -93,12 +94,21 @@ export const CandidateCard = ({
 
     // 2. All tests completed (for evaluated)
     if (application.status === 'evaluated') {
-      badges.push(
-        <Badge key="completed" variant="default" className="gap-1 bg-emerald-600">
-          <CheckCircle className="h-3 w-3" />
-          6/6 {t('tests:tests')}
-        </Badge>
-      );
+      if (testsCompleted === 6) {
+        badges.push(
+          <Badge key="completed" variant="default" className="gap-1 bg-emerald-600">
+            <CheckCircle className="h-3 w-3" />
+            6/6 {t('tests:tests')}
+          </Badge>
+        );
+      } else {
+        badges.push(
+          <Badge key="incomplete" variant="destructive" className="gap-1 animate-pulse">
+            <AlertTriangle className="h-3 w-3" />
+            {testsCompleted}/6 {t('tests:tests')}
+          </Badge>
+        );
+      }
     }
 
     // 3. Interview recommendation (for interview status AFTER completion)
@@ -187,18 +197,29 @@ export const CandidateCard = ({
 
     // EVALUATED: Interview invitation only
     if (application.status === 'evaluated') {
+      const isComplete = testsCompleted === 6;
       actions.push(
         <Button
           key="interview"
-          variant="default"
+          variant={isComplete ? "default" : "secondary"}
           size="sm"
           className="w-full gap-2"
-          onClick={() => onInviteToInterview?.(application.id)}
+          onClick={() => isComplete && onInviteToInterview?.(application.id)}
+          disabled={!isComplete}
+          title={!isComplete ? t('tests:testsRequired') : undefined}
         >
           <Calendar className="h-4 w-4" />
           {t('actions.inviteToInterview')}
         </Button>
       );
+      
+      if (!isComplete) {
+        actions.push(
+          <p key="warning-text" className="text-[10px] text-destructive text-center italic">
+            {t('tests:allTestsRequired')}
+          </p>
+        );
+      }
     }
 
     // INTERVIEW: Conduct or View

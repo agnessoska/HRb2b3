@@ -313,9 +313,18 @@ export const VacancyFunnel = ({ vacancyId }: VacancyFunnelProps) => {
           onClick: () => setViewingInterviewId(result.id)
         }
       });
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error generating interview:', error);
-      toast.error(t('ai-analysis:errors.interviewGenerationFailed'));
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes('all 6 tests')) {
+        toast.error(t('tests:testsRequired'), {
+          description: t('tests:completeAllTestsDesc')
+        });
+      } else {
+        toast.error(t('ai-analysis:errors.interviewGenerationFailed'), {
+          description: errorMessage
+        });
+      }
     } finally {
       setIsGeneratingInterview(false);
     }
@@ -598,6 +607,7 @@ export const VacancyFunnel = ({ vacancyId }: VacancyFunnelProps) => {
         isPending={isGeneratingInterview}
         title={t('ai-analysis:generateInterview.title')}
         description={t('ai-analysis:generateInterview.description')}
+        simulationMode="slow"
       />
 
       {/* Interview Workspace Overlay */}
@@ -657,10 +667,10 @@ export const VacancyFunnel = ({ vacancyId }: VacancyFunnelProps) => {
             </DialogHeader>
             <ComparisonResultView
               data={viewingComparison.ranking}
-              candidateNames={candidatesAvailableForComparison.reduce((acc, app) => {
+              candidateNames={applications?.reduce((acc, app) => {
                 acc[app.candidate.id] = app.candidate.full_name || 'Unknown';
                 return acc;
-              }, {} as Record<string, string>)}
+              }, {} as Record<string, string>) || {}}
               onBack={() => setViewingComparisonId(null)}
             />
           </DialogContent>
