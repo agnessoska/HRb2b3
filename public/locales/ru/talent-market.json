@@ -79,7 +79,17 @@
       "match": "Совпадение",
       "matchesCount": "Совпадает {{count}}",
       "dichotomiesBreakdown": "Детализация по дихотомиям"
-    }
+    },
+    "dataNotAvailable": "Данные расчета недоступны",
+    "dataNotAvailableDesc": "Для этого теста еще не сформированы данные совместимости или профиль вакансии не содержит эталонных значений.",
+    "matchedSkills": "Совпадающие навыки",
+    "missingSkills": "Чего не хватает",
+    "additionalSkills": "Дополнительные компетенции",
+    "candidateSkills": "Навыки кандидата",
+    "noMatchedSkills": "Прямых совпадений по требованиям вакансии не найдено",
+    "allRequirementsMet": "Кандидат обладает всеми требуемыми навыками",
+    "noVacancyRequirementsTitle": "Требования не заданы",
+    "noVacancyRequirementsDesc": "В выбранной вакансии не указаны требуемые навыки, поэтому автоматическое сопоставление невозможно."
   },
   "skillsSelect": {
     "placeholder": "Добавить навык",

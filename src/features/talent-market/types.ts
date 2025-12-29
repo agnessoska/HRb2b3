@@ -10,10 +10,11 @@ export type ScoredCandidate = {
   professional_compatibility: number;
   personal_compatibility: number;
   overall_compatibility: number;
-  compatibility_details: Json;
+  compatibility_details: Json | null;
   skills: Json;
   category: Json;
   avatar_url?: string | null;
+  vacancy_id?: string | null;
 };
 
 // A candidate in the talent market can be from the scoring RPC (with candidate_id)

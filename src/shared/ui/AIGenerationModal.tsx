@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Progress } from '@/components/ui/progress'
-import { BrainCircuit, Sparkles, Loader2 } from 'lucide-react'
+import { BrainCircuit, Sparkles, Loader2, CheckCircle } from 'lucide-react'
 import { AIBorder } from './AIBorder'
 
 interface AIGenerationModalProps {
@@ -15,6 +15,7 @@ interface AIGenerationModalProps {
   loadingSteps?: string[]
   progress?: number
   simulationMode?: 'default' | 'slow'
+  finalTokens?: number
 }
 
 export const AIGenerationModal = ({
@@ -25,7 +26,8 @@ export const AIGenerationModal = ({
   description,
   loadingSteps,
   progress: externalProgress,
-  simulationMode = 'default'
+  simulationMode = 'default',
+  finalTokens
 }: AIGenerationModalProps) => {
   const { t } = useTranslation('common')
   const [progress, setProgress] = useState(0)
@@ -160,10 +162,26 @@ export const AIGenerationModal = ({
               
               <Progress value={displayProgress} className="h-2" indicatorClassName="bg-gradient-to-r from-primary to-purple-600" />
               
-              <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground bg-muted/50 py-2 px-3 rounded-full w-fit mx-auto">
-                <Loader2 className="w-3 h-3 animate-spin" />
-                <span>{t('aiModal.doNotClose', 'Пожалуйста, не закрывайте окно')}</span>
-              </div>
+              {isOpen && !isPending && finalTokens ? (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20"
+                >
+                  <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-bold">
+                    <CheckCircle className="w-5 h-5" />
+                    <span>{t('aiModal.completed', 'Генерация завершена!')}</span>
+                  </div>
+                  <div className="text-sm font-medium text-emerald-700/70 dark:text-emerald-300/70">
+                    {t('payments:tokenUsage.actuallySpent', 'Фактически списано')}: {finalTokens.toLocaleString()} 🪙
+                  </div>
+                </motion.div>
+              ) : (
+                <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground bg-muted/50 py-2 px-3 rounded-full w-fit mx-auto">
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                  <span>{t('aiModal.doNotClose', 'Пожалуйста, не закрывайте окно')}</span>
+                </div>
+              )}
             </div>
           </div>
         </AIBorder>

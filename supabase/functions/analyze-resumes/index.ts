@@ -380,9 +380,10 @@ serve(async (req: Request) => {
     console.log(`[${OPERATION_TYPE}] Function finished successfully.`);
     
     // Return structured data even if not saved, so client can merge
-    return new Response(JSON.stringify({ 
-        success: true, 
+    return new Response(JSON.stringify({
+        success: true,
         result: savedResult,
+        total_tokens: inputTokens + outputTokens,
         data: { // Add explicit data object for client consumption
             content_markdown: aiResponse,
             content_html: htmlContent,

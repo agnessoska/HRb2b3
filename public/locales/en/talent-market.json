@@ -74,7 +74,17 @@
     "doesNotMatch": "Does not match",
     "outOf4Letters": "out of 4 letters",
     "idealType": "Ideal type",
-    "candidateType": "Candidate type"
+    "candidateType": "Candidate type",
+    "dataNotAvailable": "Scoring data not available",
+    "dataNotAvailableDesc": "Compatibility data for this test hasn't been generated yet, or the vacancy profile doesn't contain reference values.",
+    "matchedSkills": "Matched Skills",
+    "missingSkills": "Missing Skills",
+    "additionalSkills": "Additional Competencies",
+    "candidateSkills": "Candidate Skills",
+    "noMatchedSkills": "No direct matches found for vacancy requirements",
+    "allRequirementsMet": "The candidate possesses all required skills",
+    "noVacancyRequirementsTitle": "Requirements not set",
+    "noVacancyRequirementsDesc": "The selected vacancy does not have any required skills specified, so automatic matching is not possible."
   },
   "skillsSelect": {
     "placeholder": "Add Skill",

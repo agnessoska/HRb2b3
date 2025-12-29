@@ -54,64 +54,61 @@ function VacancyCard({ vacancy, onEdit, onArchive }: VacancyCardProps) {
   const statusStyles = getStatusStyles(vacancy.status || 'active')
   const currencySymbol = currencyMap[vacancy.currency || 'USD'] || '$'
 
+  const totalCandidates = vacancy.funnel_counts ?
+    Object.values(vacancy.funnel_counts as Record<string, number>).reduce((a, b) => a + b, 0) : 0
+
   return (
-    <Card className="group relative overflow-hidden border-transparent shadow-lg shadow-primary/5 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 bg-card rounded-2xl">
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-      
-      <CardHeader className="pb-4 pt-6">
-        <div className="flex items-start justify-between">
-          <div className="flex gap-4 flex-1 min-w-0">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary group-hover:scale-110 transition-transform duration-300">
-              <Briefcase className="h-6 w-6" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between mb-2">
-                <div
-                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border transition-colors ${statusStyles}`}
-                >
-                  {t(`statuses.${vacancy.status}` as keyof typeof t)}
-                </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 -mr-2 text-muted-foreground hover:text-foreground">
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="rounded-xl">
-                    <DropdownMenuItem onClick={() => onEdit(vacancy)} className="rounded-lg cursor-pointer">
-                      <Edit className="mr-2 h-4 w-4" />
-                      <span>{t('actions.edit')}</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => onArchive(vacancy)}
-                      className="text-destructive focus:text-destructive rounded-lg cursor-pointer"
-                    >
-                      <Archive className="mr-2 h-4 w-4" />
-                      <span>{t('actions.archive')}</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+    <Card className="group relative overflow-hidden border-border/40 shadow-sm hover:shadow-md transition-all duration-300 bg-card rounded-2xl flex flex-col h-full">
+      <CardHeader className="pb-3 pt-5 px-5">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-white">
+            <Briefcase className="h-5 w-5" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between gap-2 mb-1">
+              <div
+                className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border transition-colors ${statusStyles}`}
+              >
+                {t(`statuses.${vacancy.status}` as keyof typeof t)}
               </div>
-              <CardTitle className="text-xl font-bold truncate leading-tight">{vacancy.title}</CardTitle>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 -mr-1 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-full">
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="rounded-xl min-w-[160px]">
+                  <DropdownMenuItem onClick={() => onEdit(vacancy)} className="rounded-lg cursor-pointer">
+                    <Edit className="mr-2 h-4 w-4" />
+                    <span>{t('actions.edit')}</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => onArchive(vacancy)}
+                    className="text-destructive focus:text-destructive rounded-lg cursor-pointer"
+                  >
+                    <Archive className="mr-2 h-4 w-4" />
+                    <span>{t('actions.archive')}</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
+            <CardTitle className="text-lg font-bold truncate tracking-tight text-foreground/90">{vacancy.title}</CardTitle>
           </div>
         </div>
       </CardHeader>
       
-      <CardContent className="pb-6">
-        <div className="flex flex-wrap gap-y-2 gap-x-4 text-sm text-muted-foreground">
+      <CardContent className="pb-4 px-5 flex-1">
+        <div className="flex flex-wrap gap-2 text-sm">
           {vacancy.location && (
-            <div className="flex items-center gap-1.5 bg-secondary/50 px-2 py-1 rounded-md">
-              <MapPin className="h-3.5 w-3.5 text-primary" />
-              <span className="font-medium">{vacancy.location}</span>
+            <div className="flex items-center gap-1 bg-muted/40 text-muted-foreground px-2 py-1 rounded-lg border border-border/30">
+              <MapPin className="h-3 w-3" />
+              <span className="text-xs font-medium">{vacancy.location}</span>
             </div>
           )}
           {(vacancy.salary_min || vacancy.salary_max) && (
-            <div className="flex items-center gap-1.5 bg-secondary/50 px-2 py-1 rounded-md">
-              <div className="flex h-3.5 w-3.5 items-center justify-center text-primary font-bold text-xs">
-                {currencySymbol}
-              </div>
-              <span className="font-medium">
+            <div className="flex items-center gap-1 bg-muted/40 text-muted-foreground px-2 py-1 rounded-lg border border-border/30">
+              <span className="text-xs font-bold text-primary/70">{currencySymbol}</span>
+              <span className="text-xs font-semibold">
                 {vacancy.salary_min && vacancy.salary_max
                   ? `${vacancy.salary_min} - ${vacancy.salary_max}`
                   : vacancy.salary_min
@@ -122,29 +119,34 @@ function VacancyCard({ vacancy, onEdit, onArchive }: VacancyCardProps) {
           )}
         </div>
         
-        <div className="mt-6 flex items-center justify-between p-3 rounded-xl bg-secondary/30 border border-secondary/50">
-          <div className="flex items-center gap-2">
-            <div className="bg-background p-1.5 rounded-lg shadow-sm">
-              <Users className="h-4 w-4 text-primary" />
+        <div className="mt-5 p-4 rounded-xl bg-muted/20 border border-border/50 group/funnel relative overflow-hidden transition-all hover:bg-muted/30">
+          <div className="flex items-center justify-between relative z-10">
+            <div className="flex items-center gap-3">
+              <div className="bg-background/80 p-2 rounded-lg shadow-sm border border-border/20">
+                <Users className="h-4 w-4 text-primary/80" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">{t('card.candidates')}</span>
+                <span className="text-lg font-extrabold leading-none mt-0.5 tracking-tight">{totalCandidates}</span>
+              </div>
             </div>
-            <div className="flex flex-col">
-              <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">{t('card.candidates')}</span>
-              <span className="text-sm font-bold">
-                {vacancy.funnel_counts ?
-                  Object.values(vacancy.funnel_counts as Record<string, number>).reduce((a, b) => a + b, 0) : 0
-                }
-              </span>
-            </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="text-xs h-9 rounded-lg gap-2 bg-background border-border/60 hover:border-primary hover:text-primary hover:shadow-sm transition-all" 
+              onClick={() => navigate(`/hr/vacancy/${vacancy.id}/funnel`)}
+            >
+              {t('card.view_funnel')}
+              <Eye className="h-3.5 w-3.5" />
+            </Button>
           </div>
-          <Button variant="ghost" size="sm" className="text-xs h-8 gap-1 hover:bg-background hover:text-primary" onClick={() => navigate(`/hr/vacancy/${vacancy.id}/funnel`)}>
-            {t('card.view_funnel')} <Eye className="h-3 w-3" />
-          </Button>
         </div>
       </CardContent>
       
-      <CardFooter className="flex gap-3 px-6 pb-6 pt-0">
+      <CardFooter className="px-5 pb-5 pt-0">
         <Button
-          className="flex-1 rounded-xl font-semibold shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all"
+          variant="default"
+          className="w-full h-11 rounded-xl font-bold bg-primary hover:bg-primary/90 shadow-md shadow-primary/10 hover:shadow-lg hover:shadow-primary/20 transition-all duration-300"
           onClick={() => navigate(`/hr/vacancy/${vacancy.id}/profile`)}
         >
           {t('actions.manage')}

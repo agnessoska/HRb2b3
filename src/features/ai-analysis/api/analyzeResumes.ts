@@ -20,13 +20,16 @@ export interface AnalyzeResumesResponse {
     created_at: string
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     analysis_data: any
+    total_tokens?: number
   }
   data?: {
     content_html: string | null
     content_markdown: string | null
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     analysis_data: any
+    total_tokens?: number
   }
+  total_tokens?: number
 }
 
 const analyzeResumes = async (payload: AnalyzeResumesPayload): Promise<AnalyzeResumesResponse> => {

@@ -74,7 +74,17 @@
     "doesNotMatch": "Сәйкес келмейді",
     "outOf4Letters": "4 әріптен",
     "idealType": "Идеалды түр",
-    "candidateType": "Үміткер түрі"
+    "candidateType": "Үміткер түрі",
+    "dataNotAvailable": "Есептеу деректері қолжетімсіз",
+    "dataNotAvailableDesc": "Бұл тест үшін сәйкестік деректері әлі қалыптаспаған немесе бос жұмыс орнының профилінде эталондық мәндер жоқ.",
+    "matchedSkills": "Сәйкес келетін дағдылар",
+    "missingSkills": "Жетіспейтін дағдылар",
+    "additionalSkills": "Қосымша құзыреттер",
+    "candidateSkills": "Үміткердің дағдылары",
+    "noMatchedSkills": "Бос жұмыс орнының талаптары бойынша тікелей сәйкестік табылмады",
+    "allRequirementsMet": "Үміткерде барлық қажетті дағдылар бар",
+    "noVacancyRequirementsTitle": "Талаптар көрсетілмеген",
+    "noVacancyRequirementsDesc": "Таңдалған бос жұмыс орнында қажетті дағдылар көрсетілмеген, сондықтан автоматты салыстыру мүмкін емес."
   },
   "skillsSelect": {
     "placeholder": "Дағдыны қосу",

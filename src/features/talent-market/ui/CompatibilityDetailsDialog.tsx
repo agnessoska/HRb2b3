@@ -6,11 +6,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Check, X } from "lucide-react";
+import { Check, X, AlertCircle } from "lucide-react";
 import type { TalentMarketCandidate, ScoredCandidate } from "../types";
 import { Badge } from "@/components/ui/badge";
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
+import { useQuery } from "@tanstack/react-query";
+import { getVacancySkills } from "@/features/vacancy-management/api/getVacancySkills";
 
 // #region Comparison Components
 interface ScaleComparison {
@@ -19,36 +21,81 @@ interface ScaleComparison {
   match: number;
 }
 
+interface CompatibilityDetails {
+  bigFive?: Record<string, ScaleComparison>;
+  mbti?: { ideal: string; candidate: string; match: number };
+  disc?: Record<string, ScaleComparison>;
+  eq?: Record<string, ScaleComparison>;
+  softSkills?: Record<string, ScaleComparison>;
+  motivation?: Record<string, ScaleComparison>;
+}
+
 const getMatchColor = (match: number) => {
   if (match >= 80) return 'text-emerald-500';
   if (match >= 60) return 'text-amber-500';
   return 'text-blue-500';
 };
 
+const DataNotAvailable = ({ t }: { t: TFunction<"talent-market"> }) => (
+  <div className="flex flex-col items-center justify-center p-12 text-center space-y-4 bg-muted/30 rounded-xl border border-dashed">
+    <div className="p-3 bg-muted rounded-full">
+      <X className="h-6 w-6 text-muted-foreground" />
+    </div>
+    <div className="space-y-1">
+      <p className="font-medium">{t('detailsDialog.dataNotAvailable')}</p>
+      <p className="text-sm text-muted-foreground">{t('detailsDialog.dataNotAvailableDesc')}</p>
+    </div>
+  </div>
+);
+
 const ComparisonCard = ({ name, description, match, ideal, candidate, t }: { name: string, description: string, match: number, ideal: number, candidate: number, t: TFunction<"talent-market"> }) => (
   <Card className="p-4">
     <div className="space-y-3">
       <div className="flex items-start justify-between">
-        <div>
-          <h4 className="font-semibold">{name}</h4>
-          <p className="text-sm text-muted-foreground">{description}</p>
+        <div className="flex-1 min-w-0 pr-4">
+          <h4 className="font-semibold truncate">{name}</h4>
+          <p className="text-sm text-muted-foreground line-clamp-1">{description}</p>
         </div>
-        <div className={cn("text-2xl font-bold", getMatchColor(match))}>
+        <div className={cn("text-2xl font-bold shrink-0", getMatchColor(match))}>
           {Math.round(match)}%
         </div>
       </div>
-      <div className="space-y-2">
-        <div className="flex justify-between text-sm">
-          <span className="text-muted-foreground">{t('detailsDialog.ideal')}</span>
-          <span className="font-medium">{ideal}%</span>
+      <div className="space-y-6 pt-4">
+        <div className="relative h-10 bg-secondary/50 rounded-full border shadow-inner">
+          {/* Candidate bar */}
+          <div
+            className="absolute top-0 bottom-0 left-0 bg-primary rounded-full flex items-center justify-end pr-3 transition-all duration-700 ease-out z-0"
+            style={{ width: `${candidate}%` }}
+          >
+            {candidate > 15 && <span className="text-white text-[10px] font-black">{candidate}%</span>}
+          </div>
+          
+          {/* Ideal indicator line - moved to z-20 to be above everything */}
+          <div
+            className="absolute top-0 bottom-0 w-1.5 bg-orange-500 z-20 shadow-[0_0_8px_rgba(249,115,22,0.6)] rounded-full"
+            style={{ left: `calc(${ideal}% - 3px)` }}
+          >
+            <div
+              className={cn(
+                "absolute -top-8 left-1/2 -translate-x-1/2 text-[10px] font-black uppercase tracking-tighter text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full border-2 border-orange-500 shadow-md whitespace-nowrap z-30",
+                ideal < 15 && "translate-x-0 -left-1",
+                ideal > 85 && "translate-x-[-100%] -left-1"
+              )}
+            >
+              {t('detailsDialog.ideal')} {ideal}%
+            </div>
+          </div>
         </div>
-        <div className="relative h-8 bg-secondary rounded-full">
-          <div className="absolute top-0 bottom-0 w-1 bg-primary/30" style={{ left: `${ideal}%` }}><div className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs whitespace-nowrap">{t('detailsDialog.ideal')}</div></div>
-          <div className="absolute top-0 bottom-0 left-0 bg-primary rounded-full flex items-center justify-end pr-2" style={{ width: `${candidate}%` }}><span className="text-white text-sm font-medium">{candidate}%</span></div>
-        </div>
-        <div className="flex justify-between text-sm">
-          <span className="text-muted-foreground">{t('detailsDialog.candidate')}</span>
-          <span className="font-medium">{candidate}%</span>
+        
+        <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-widest px-1">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-sm bg-orange-500" />
+            <span className="text-orange-600">{t('detailsDialog.ideal')}: {ideal}%</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-sm bg-primary" />
+            <span className="text-primary">{t('detailsDialog.candidate')}: {candidate}%</span>
+          </div>
         </div>
       </div>
       <div className="text-sm mt-2">
@@ -60,7 +107,8 @@ const ComparisonCard = ({ name, description, match, ideal, candidate, t }: { nam
   </Card>
 );
 
-const BigFiveComparison = ({ details, t, tTests }: { details: Record<string, ScaleComparison>, t: TFunction<"talent-market">, tTests: TFunction<"tests"> }) => {
+const BigFiveComparison = ({ details, t, tTests }: { details?: Record<string, ScaleComparison>, t: TFunction<"talent-market">, tTests: TFunction<"tests"> }) => {
+  if (!details) return <DataNotAvailable t={t} />;
   const scales = [
     { key: 'openness', name: tTests('psychometric.bigFive.openness.name'), description: tTests('psychometric.bigFive.openness.description') },
     { key: 'conscientiousness', name: tTests('psychometric.bigFive.conscientiousness.name'), description: tTests('psychometric.bigFive.conscientiousness.description') },
@@ -71,7 +119,8 @@ const BigFiveComparison = ({ details, t, tTests }: { details: Record<string, Sca
   return <div className="space-y-4">{scales.map(s => details[s.key] ? <ComparisonCard key={s.key} name={s.name} description={s.description} {...details[s.key]} t={t} /> : null)}</div>;
 };
 
-const MBTIComparison = ({ details, t, tTests }: { details: { ideal: string; candidate: string; match: number }, t: TFunction<"talent-market">, tTests: TFunction<"tests"> }) => {
+const MBTIComparison = ({ details, t, tTests }: { details?: { ideal: string; candidate: string; match: number }, t: TFunction<"talent-market">, tTests: TFunction<"tests"> }) => {
+  if (!details || !details.ideal || !details.candidate) return <DataNotAvailable t={t} />;
   const idealLetters = details.ideal.split('');
   const candidateLetters = details.candidate.split('');
   const dichotomies = [
@@ -100,7 +149,8 @@ const MBTIComparison = ({ details, t, tTests }: { details: { ideal: string; cand
   );
 };
 
-const DISCComparison = ({ details, t, tTests }: { details: Record<string, ScaleComparison>, t: TFunction<"talent-market">, tTests: TFunction<"tests"> }) => {
+const DISCComparison = ({ details, t, tTests }: { details?: Record<string, ScaleComparison>, t: TFunction<"talent-market">, tTests: TFunction<"tests"> }) => {
+  if (!details) return <DataNotAvailable t={t} />;
   const scales = [
     { key: 'D', name: tTests('psychometric.disc.D.name'), description: tTests('psychometric.disc.D.description') },
     { key: 'I', name: tTests('psychometric.disc.I.name'), description: tTests('psychometric.disc.I.description') },
@@ -109,7 +159,8 @@ const DISCComparison = ({ details, t, tTests }: { details: Record<string, ScaleC
   ];
   return <div className="space-y-4">{scales.map(s => details[s.key] ? <ComparisonCard key={s.key} name={s.name} description={s.description} {...details[s.key]} t={t} /> : null)}</div>;
 };
-const EQComparison = ({ details, t, tTests }: { details: Record<string, ScaleComparison>, t: TFunction<"talent-market">, tTests: TFunction<"tests"> }) => {
+const EQComparison = ({ details, t, tTests }: { details?: Record<string, ScaleComparison>, t: TFunction<"talent-market">, tTests: TFunction<"tests"> }) => {
+  if (!details) return <DataNotAvailable t={t} />;
   const scales = [
     { key: 'self_awareness', name: tTests('psychometric.eq.selfAwareness.name'), description: tTests('psychometric.eq.selfAwareness.description') },
     { key: 'self_management', name: tTests('psychometric.eq.selfManagement.name'), description: tTests('psychometric.eq.selfManagement.description') },
@@ -118,7 +169,8 @@ const EQComparison = ({ details, t, tTests }: { details: Record<string, ScaleCom
   ];
   return <div className="space-y-4">{scales.map(s => details[s.key] ? <ComparisonCard key={s.key} name={s.name} description={s.description} {...details[s.key]} t={t} /> : null)}</div>;
 };
-const SoftSkillsComparison = ({ details, t, tTests }: { details: Record<string, ScaleComparison>, t: TFunction<"talent-market">, tTests: TFunction<"tests"> }) => {
+const SoftSkillsComparison = ({ details, t, tTests }: { details?: Record<string, ScaleComparison>, t: TFunction<"talent-market">, tTests: TFunction<"tests"> }) => {
+  if (!details) return <DataNotAvailable t={t} />;
   const scales = [
     { key: 'communication', name: tTests('psychometric.softSkills.communication.name'), description: tTests('psychometric.softSkills.communication.description') },
     { key: 'teamwork', name: tTests('psychometric.softSkills.teamwork.name'), description: tTests('psychometric.softSkills.teamwork.description') },
@@ -128,7 +180,8 @@ const SoftSkillsComparison = ({ details, t, tTests }: { details: Record<string, 
   ];
   return <div className="space-y-4">{scales.map(s => details[s.key] ? <ComparisonCard key={s.key} name={s.name} description={s.description} {...details[s.key]} t={t} /> : null)}</div>;
 };
-const MotivationComparison = ({ details, t, tTests }: { details: Record<string, ScaleComparison>, t: TFunction<"talent-market">, tTests: TFunction<"tests"> }) => {
+const MotivationComparison = ({ details, t, tTests }: { details?: Record<string, ScaleComparison>, t: TFunction<"talent-market">, tTests: TFunction<"tests"> }) => {
+  if (!details) return <DataNotAvailable t={t} />;
   const scales = [
     { key: 'achievement', name: tTests('psychometric.motivation.achievement.name'), description: tTests('psychometric.motivation.achievement.description') },
     { key: 'power', name: tTests('psychometric.motivation.power.name'), description: tTests('psychometric.motivation.power.description') },
@@ -141,18 +194,136 @@ const MotivationComparison = ({ details, t, tTests }: { details: Record<string, 
 };
 // #endregion
 
+const ProfessionalComparison = ({
+  candidateSkills,
+  vacancySkills,
+  t
+}: {
+  candidateSkills: { name: string; canonical_name: string }[],
+  vacancySkills: { canonical_skill: string; is_required: boolean; name?: string }[],
+  t: TFunction<"talent-market">
+}) => {
+  const matched = vacancySkills.filter(vs =>
+    candidateSkills.some(cs => cs.canonical_name === vs.canonical_skill)
+  );
+  
+  const missing = vacancySkills.filter(vs =>
+    !candidateSkills.some(cs => cs.canonical_name === vs.canonical_skill)
+  );
+
+  const additional = candidateSkills.filter(cs =>
+    !vacancySkills.some(vs => vs.canonical_skill === cs.canonical_name)
+  );
+
+  if (vacancySkills.length === 0) {
+    return (
+      <div className="space-y-8">
+        <div className="p-6 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-4">
+          <AlertCircle className="h-6 w-6 text-amber-600 shrink-0" />
+          <div className="space-y-1">
+            <p className="font-bold text-amber-900">{t('detailsDialog.noVacancyRequirementsTitle')}</p>
+            <p className="text-sm text-amber-800">{t('detailsDialog.noVacancyRequirementsDesc')}</p>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <h4 className="font-bold text-slate-600">
+            {t('detailsDialog.candidateSkills')}
+          </h4>
+          <div className="flex flex-wrap gap-2">
+            {candidateSkills.map(s => (
+              <Badge key={s.canonical_name} variant="secondary" className="py-1 px-3 rounded-lg text-sm">
+                {s.name}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-8">
+      {/* Совпадения */}
+      {matched.length > 0 ? (
+        <div className="space-y-4">
+          <h4 className="font-bold text-emerald-600 flex items-center gap-2">
+            <div className="p-1 bg-emerald-100 rounded-full"><Check className="h-4 w-4" /></div>
+            {t('detailsDialog.matchedSkills')}
+          </h4>
+          <div className="flex flex-wrap gap-2">
+            {matched.map(s => (
+              <Badge key={s.canonical_skill} variant="success" className="py-1.5 px-3 rounded-lg text-sm">
+                {s.name} {s.is_required && <span className="ml-1 text-[10px] opacity-70">(*)</span>}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <h4 className="font-bold text-slate-400 flex items-center gap-2">
+            <div className="p-1 bg-slate-100 rounded-full"><X className="h-4 w-4" /></div>
+            {t('detailsDialog.matchedSkills')}
+          </h4>
+          <p className="text-sm text-muted-foreground italic px-1">{t('detailsDialog.noMatchedSkills')}</p>
+        </div>
+      )}
+
+      {/* Не хватает */}
+      {missing.length > 0 ? (
+        <div className="space-y-4">
+          <h4 className="font-bold text-rose-600 flex items-center gap-2">
+            <div className="p-1 bg-rose-100 rounded-full"><X className="h-4 w-4" /></div>
+            {t('detailsDialog.missingSkills')}
+          </h4>
+          <div className="flex flex-wrap gap-2">
+            {missing.map(s => (
+              <Badge key={s.canonical_skill} variant="destructive" className="py-1.5 px-3 rounded-lg text-sm bg-rose-50 text-rose-700 border-rose-200">
+                {s.name} {s.is_required && <span className="ml-1 text-[10px] opacity-70">(*)</span>}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {/* Дополнительно */}
+      <div className="space-y-4 pt-4 border-t border-dashed">
+        <h4 className="font-bold text-slate-600">
+          {t('detailsDialog.additionalSkills')}
+        </h4>
+        <div className="flex flex-wrap gap-2 opacity-80">
+          {additional.map(s => (
+            <Badge key={s.canonical_name} variant="secondary" className="py-1 px-3 rounded-lg text-sm">
+              {s.name}
+            </Badge>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 interface CompatibilityDetailsDialogProps {
   candidate: TalentMarketCandidate;
+  vacancyId?: string | null;
   isOpen: boolean;
   onClose: () => void;
 }
 
-export const CompatibilityDetailsDialog = ({ candidate, isOpen, onClose }: CompatibilityDetailsDialogProps) => {
-  const { t } = useTranslation('talent-market');
+export const CompatibilityDetailsDialog = ({ candidate, vacancyId, isOpen, onClose }: CompatibilityDetailsDialogProps) => {
+  const { t, i18n } = useTranslation('talent-market');
   const { t: tTests } = useTranslation('tests');
   const [activeTab, setActiveTab] = useState('bigFive');
+  const [mode, setMode] = useState<'personal' | 'professional'>('personal');
 
-  if (!('professional_compatibility' in candidate)) return null;
+  const { data: vacancySkills } = useQuery({
+    queryKey: ['vacancy-skills', vacancyId, i18n.language],
+    queryFn: () => vacancyId ? getVacancySkills(vacancyId, i18n.language as 'ru' | 'en' | 'kk') : Promise.resolve([]),
+    enabled: !!vacancyId && isOpen && mode === 'professional',
+    staleTime: 0, // Принудительно запрашиваем свежие данные при открытии
+  });
+
+  if (!candidate || !('professional_compatibility' in candidate)) return null;
   const scoredCandidate = candidate as ScoredCandidate;
 
   const tests = [
@@ -166,22 +337,60 @@ export const CompatibilityDetailsDialog = ({ candidate, isOpen, onClose }: Compa
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-        <DialogHeader>
-          <DialogTitle>{t('detailsDialog.title', { name: scoredCandidate.full_name })}</DialogTitle>
-          <DialogDescription>{t('detailsDialog.description')}</DialogDescription>
-        </DialogHeader>
+      <DialogContent className="max-w-4xl h-[90vh] md:h-auto md:max-h-[85vh] flex flex-col p-0 gap-0 overflow-hidden rounded-2xl">
+        <div className="p-6 overflow-y-auto custom-scrollbar flex-1 min-h-0">
+          <DialogHeader className="mb-6">
+            <DialogTitle>{t('detailsDialog.title', { name: scoredCandidate.full_name })}</DialogTitle>
+            <DialogDescription>{t('detailsDialog.description')}</DialogDescription>
+          </DialogHeader>
 
-        <div className="grid grid-cols-3 gap-4 py-4 border-b">
-          <Card className="p-4 text-center"><p className="text-sm text-muted-foreground mb-1">{t('detailsDialog.professional')}</p><p className="text-2xl font-bold">{scoredCandidate.professional_compatibility}%</p><p className="text-xs text-muted-foreground mt-1">{t('detailsDialog.professionalWeight')}</p></Card>
-          <Card className="p-4 text-center"><p className="text-sm text-muted-foreground mb-1">{t('detailsDialog.personal')}</p><p className="text-2xl font-bold">{scoredCandidate.personal_compatibility}%</p><p className="text-xs text-muted-foreground mt-1">{t('detailsDialog.personalWeight')}</p></Card>
-          <Card className="p-4 text-center bg-primary/5"><p className="text-sm text-muted-foreground mb-1">{t('detailsDialog.overall')}</p><p className="text-3xl font-bold text-primary">{scoredCandidate.overall_compatibility}%</p></Card>
-        </div>
-
-        <div className="flex-1 overflow-hidden flex flex-col">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4 border-b mb-6">
+            <Card
+              className={cn(
+                "p-4 text-center cursor-pointer transition-all border-2",
+                mode === 'professional' ? "border-primary bg-primary/5 ring-4 ring-primary/10 scale-[1.02]" : "hover:border-primary/50"
+              )}
+              onClick={() => setMode('professional')}
+            >
+              <p className="text-sm text-muted-foreground mb-1">{t('detailsDialog.professional')}</p>
+              <p className="text-2xl font-bold">{scoredCandidate.professional_compatibility}%</p>
+              <p className="text-xs text-muted-foreground mt-1">{t('detailsDialog.professionalWeight')}</p>
+            </Card>
+  
+            <Card
+              className={cn(
+                "p-4 text-center cursor-pointer transition-all border-2",
+                mode === 'personal' ? "border-primary bg-primary/5 ring-4 ring-primary/10 scale-[1.02]" : "hover:border-primary/50"
+              )}
+              onClick={() => setMode('personal')}
+            >
+              <p className="text-sm text-muted-foreground mb-1">{t('detailsDialog.personal')}</p>
+              <p className="text-2xl font-bold">{scoredCandidate.personal_compatibility}%</p>
+              <p className="text-xs text-muted-foreground mt-1">{t('detailsDialog.personalWeight')}</p>
+            </Card>
+  
+            <Card className="p-4 text-center bg-primary/5 border-2 border-transparent">
+              <p className="text-sm text-muted-foreground mb-1">{t('detailsDialog.overall')}</p>
+              <p className="text-3xl font-bold text-primary">{scoredCandidate.overall_compatibility}%</p>
+            </Card>
+          </div>
+  
+          <div className="py-4 min-h-[400px]">
+            {mode === 'professional' ? (
+              <ProfessionalComparison
+                candidateSkills={scoredCandidate.skills as { name: string; canonical_name: string }[]}
+                vacancySkills={vacancySkills || []}
+                t={t}
+              />
+            ) : (
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="hidden md:grid w-full grid-cols-6">
-              {tests.map((test) => (<TabsTrigger key={test.id} value={test.id} className="text-xs">{test.name}<span className="ml-1 text-[10px] text-muted-foreground">({test.weight}%)</span></TabsTrigger>))}
+              {tests.map((test) => (
+                <TabsTrigger key={test.id} value={test.id} className="text-xs px-1">
+                  {test.name}
+                  <span className="ml-1 text-[10px] text-muted-foreground">({test.weight}%)</span>
+                </TabsTrigger>
+              ))}
             </TabsList>
             <div className="md:hidden mb-4">
               <Select value={activeTab} onValueChange={setActiveTab}>
@@ -190,18 +399,56 @@ export const CompatibilityDetailsDialog = ({ candidate, isOpen, onClose }: Compa
               </Select>
             </div>
 
-            <div className="flex-1 overflow-auto p-1">
-              <TabsContent value="bigFive"><BigFiveComparison details={(scoredCandidate.compatibility_details as unknown as { bigFive: Record<string, ScaleComparison> }).bigFive} t={t} tTests={tTests} /></TabsContent>
-              <TabsContent value="mbti"><MBTIComparison details={(scoredCandidate.compatibility_details as unknown as { mbti: { ideal: string; candidate: string; match: number } }).mbti} t={t} tTests={tTests} /></TabsContent>
-              <TabsContent value="disc"><DISCComparison details={(scoredCandidate.compatibility_details as unknown as { disc: Record<string, ScaleComparison> }).disc} t={t} tTests={tTests} /></TabsContent>
-              <TabsContent value="eq"><EQComparison details={(scoredCandidate.compatibility_details as unknown as { eq: Record<string, ScaleComparison> }).eq} t={t} tTests={tTests} /></TabsContent>
-              <TabsContent value="softSkills"><SoftSkillsComparison details={(scoredCandidate.compatibility_details as unknown as { softSkills: Record<string, ScaleComparison> }).softSkills} t={t} tTests={tTests} /></TabsContent>
-              <TabsContent value="motivation"><MotivationComparison details={(scoredCandidate.compatibility_details as unknown as { motivation: Record<string, ScaleComparison> }).motivation} t={t} tTests={tTests} /></TabsContent>
+            <div className="mt-4">
+              <TabsContent value="bigFive">
+                <BigFiveComparison
+                  details={(scoredCandidate.compatibility_details as unknown as CompatibilityDetails)?.bigFive}
+                  t={t}
+                  tTests={tTests}
+                />
+              </TabsContent>
+              <TabsContent value="mbti">
+                <MBTIComparison
+                  details={(scoredCandidate.compatibility_details as unknown as CompatibilityDetails)?.mbti}
+                  t={t}
+                  tTests={tTests}
+                />
+              </TabsContent>
+              <TabsContent value="disc">
+                <DISCComparison
+                  details={(scoredCandidate.compatibility_details as unknown as CompatibilityDetails)?.disc}
+                  t={t}
+                  tTests={tTests}
+                />
+              </TabsContent>
+              <TabsContent value="eq">
+                <EQComparison
+                  details={(scoredCandidate.compatibility_details as unknown as CompatibilityDetails)?.eq}
+                  t={t}
+                  tTests={tTests}
+                />
+              </TabsContent>
+              <TabsContent value="softSkills">
+                <SoftSkillsComparison
+                  details={(scoredCandidate.compatibility_details as unknown as CompatibilityDetails)?.softSkills}
+                  t={t}
+                  tTests={tTests}
+                />
+              </TabsContent>
+              <TabsContent value="motivation">
+                <MotivationComparison
+                  details={(scoredCandidate.compatibility_details as unknown as CompatibilityDetails)?.motivation}
+                  t={t}
+                  tTests={tTests}
+                />
+              </TabsContent>
             </div>
           </Tabs>
+          )}
+          </div>
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="p-6 bg-muted/20 border-t">
           <Button variant="outline" onClick={onClose}>{t('detailsDialog.close')}</Button>
         </DialogFooter>
       </DialogContent>

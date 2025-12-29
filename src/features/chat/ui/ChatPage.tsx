@@ -83,10 +83,11 @@ export const ChatPage = ({ userType }: ChatPageProps) => {
         candidate_id: '',
         unread_count_hr: userType === 'hr' ? room.unread_count : 0,
         unread_count_candidate: userType === 'candidate' ? room.unread_count : 0,
-        hr_specialist: userType === 'candidate' ? { full_name: room.other_user_name, id: room.other_user_id } : {},
+        hr_specialist: userType === 'candidate' ? { full_name: room.other_user_name, id: room.other_user_id, avatar_url: room.other_user_avatar_url } : {},
         candidate: userType === 'hr' ? {
           full_name: room.other_user_name,
           id: room.other_user_id,
+          avatar_url: room.other_user_avatar_url,
           category: room.other_user_category ? { name_ru: room.other_user_category, name_en: room.other_user_category, name_kk: room.other_user_category } : null
         } : {}
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -96,24 +97,56 @@ export const ChatPage = ({ userType }: ChatPageProps) => {
   });
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || !profileId) return;
+
     const channel = supabase
-      .channel('chat-rooms-update')
+      .channel(`chat-rooms-sync-${profileId}`)
       .on(
         'postgres_changes',
         {
-          event: 'UPDATE',
+          event: '*',
           schema: 'public',
           table: 'chat_rooms',
-          filter:
-            userType === 'hr'
-              ? `hr_specialist_id=eq.${profileId}`
-              : `candidate_id=eq.${profileId}`,
         },
-        () => {
-          queryClient.invalidateQueries({
-            queryKey: ['chat-rooms', userType, profileId],
-          });
+        (payload) => {
+          const newRow = payload.new as Record<string, unknown>;
+          const oldRow = payload.old as Record<string, unknown>;
+          
+          // Проверяем, относится ли изменение к текущему пользователю
+          const isRelevant = 
+            (newRow && (newRow.hr_specialist_id === profileId || newRow.candidate_id === profileId)) ||
+            (oldRow && (oldRow.hr_specialist_id === profileId || oldRow.candidate_id === profileId));
+
+          if (isRelevant) {
+            queryClient.invalidateQueries({
+              queryKey: ['chat-rooms', userType, profileId],
+            });
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'chat_messages',
+        },
+        async (payload) => {
+          const newMessage = payload.new as Record<string, unknown>;
+          
+          // Проверяем принадлежность сообщения пользователю через комнату чата
+          const { data: room } = await supabase
+            .from('chat_rooms')
+            .select('id')
+            .eq('id', newMessage.chat_room_id as string)
+            .or(`hr_specialist_id.eq.${profileId},candidate_id.eq.${profileId}`)
+            .single();
+
+          if (room) {
+            queryClient.invalidateQueries({
+              queryKey: ['chat-rooms', userType, profileId],
+            });
+          }
         }
       )
       .subscribe();

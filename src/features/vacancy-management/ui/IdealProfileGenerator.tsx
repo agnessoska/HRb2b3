@@ -15,14 +15,14 @@ import {
   Heart,
   Lightbulb,
   TrendingUp,
-  Coins,
-  ArrowRight,
-  Info
+  ArrowRight
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { AIGenerationModal } from '@/shared/ui/AIGenerationModal'
 import { GlassCard } from '@/shared/ui/GlassCard'
 import { AIBorder } from '@/shared/ui/AIBorder'
+import { TokenCostBanner } from '@/shared/ui/TokenCostBanner'
+import { useTokenCalculation } from '@/shared/hooks/useTokenCalculation'
 
 interface IdealProfileGeneratorProps {
   vacancy: Database['public']['Tables']['vacancies']['Row']
@@ -33,8 +33,9 @@ export function IdealProfileGenerator({ vacancy }: IdealProfileGeneratorProps) {
   const queryClient = useQueryClient()
   const { data: hrProfile } = useHrProfile()
   const { language } = useSettingsStore()
+  const { calculation } = useTokenCalculation('ideal_profile_generation', vacancy.description + (vacancy.requirements || ''))
 
-  const { mutate, isPending } = useMutation({
+  const generateIdealProfileMutation = useMutation({
     mutationFn: generateIdealProfile,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vacancy', vacancy.id] })
@@ -43,6 +44,7 @@ export function IdealProfileGenerator({ vacancy }: IdealProfileGeneratorProps) {
       console.error('Failed to generate ideal profile:', error)
     },
   })
+  const { mutate, isPending } = generateIdealProfileMutation
 
   const handleGenerate = () => {
     if (!hrProfile || !vacancy) return
@@ -87,6 +89,8 @@ export function IdealProfileGenerator({ vacancy }: IdealProfileGeneratorProps) {
     },
   ]
 
+  const benefits = t('idealProfile.generator.whyNeed.benefits', { returnObjects: true }) as string[]
+
   return (
     <>
       <AIGenerationModal
@@ -95,6 +99,7 @@ export function IdealProfileGenerator({ vacancy }: IdealProfileGeneratorProps) {
         isPending={isPending}
         title={t('idealProfile.generator.processingTitle')}
         description={t('idealProfile.generator.processingDescription')}
+        finalTokens={generateIdealProfileMutation.data?.total_tokens}
       />
 
       <div className="space-y-8">
@@ -121,7 +126,7 @@ export function IdealProfileGenerator({ vacancy }: IdealProfileGeneratorProps) {
               {t('idealProfile.generator.whyNeed.title')}
             </h3>
             <div className="grid md:grid-cols-2 gap-3">
-              {(t('idealProfile.generator.whyNeed.benefits', { returnObjects: true }) as string[]).map((benefit, idx) => (
+              {Array.isArray(benefits) && benefits.map((benefit, idx) => (
                 <div 
                   key={idx}
                   className="flex items-start gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted/80 transition-colors"
@@ -190,31 +195,15 @@ export function IdealProfileGenerator({ vacancy }: IdealProfileGeneratorProps) {
         <AIBorder>
           <div className="p-6 space-y-6">
             {/* Информация о токенах */}
-            <div className="flex items-start gap-4 p-4 rounded-lg bg-muted/30">
-              <div className="p-2 rounded-lg bg-amber-500/10">
-                <Coins className="h-5 w-5 text-amber-500" />
-              </div>
-              <div className="flex-1">
-                <h4 className="font-semibold mb-1 flex items-center gap-2">
-                  {t('idealProfile.generator.tokenCost.title')}
-                  <span className="text-lg font-bold text-amber-600 dark:text-amber-400">
-                    {t('idealProfile.generator.tokenCost.estimate')}
-                  </span>
-                </h4>
-                <p className="text-sm text-muted-foreground mb-1">
-                  <Info className="h-3.5 w-3.5 inline mr-1" />
-                  {t('idealProfile.generator.tokenCost.note')}
-                </p>
-                <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
-                  ✓ {t('idealProfile.generator.tokenCost.oneTime')}
-                </p>
-              </div>
-            </div>
+            <TokenCostBanner
+              operationType="ideal_profile_generation"
+              inputString={vacancy.description + (vacancy.requirements || '')}
+            />
 
             {/* CTA кнопка */}
-            <Button 
-              onClick={handleGenerate} 
-              disabled={isPending}
+            <Button
+              onClick={handleGenerate}
+              disabled={isPending || !calculation?.hasEnough}
               size="lg"
               className="w-full h-14 text-base gap-3 shadow-lg hover:shadow-xl transition-all"
             >

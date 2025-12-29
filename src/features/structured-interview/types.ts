@@ -75,8 +75,9 @@ export interface SessionData {
 
 // Extended type with parsed JSON
 export interface InterviewSessionWithData extends Omit<InterviewSession, 'interview_plan' | 'session_data'> {
-  interview_plan: InterviewPlan
-  session_data: SessionData
+  interview_plan: InterviewPlan;
+  session_data: SessionData;
+  total_tokens?: number;
 }
 
 // Helper to generate item key
@@ -91,6 +92,7 @@ export function isItemCompleted(sessionData: SessionData, itemKey: string): bool
 
 // Helper to get progress percentage
 export function getProgressPercentage(sessionData: SessionData, totalItems: number): number {
+  if (totalItems === 0) return 0;
   return Math.round((sessionData.completed_items.length / totalItems) * 100)
 }
 

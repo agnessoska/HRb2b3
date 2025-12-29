@@ -20,7 +20,16 @@
   "profileCompleteness": {
     "title": "Заполненность профиля",
     "completeButton": "Заполнить профиль",
-    "description": "Заполните профиль, чтобы HR могли вас найти."
+    "description": "Заполните профиль, чтобы HR могли вас найти.",
+    "fields": {
+      "full_name": "ФИО",
+      "phone": "Телефон",
+      "category": "Категория",
+      "skills": "Навыки",
+      "experience": "Опыт работы",
+      "about": "О себе",
+      "education": "Образование"
+    }
   },
   "profileVisibility": {
     "title": "Статус профиля",

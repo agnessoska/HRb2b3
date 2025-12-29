@@ -17,6 +17,10 @@ import type { CandidateProfile } from '@/features/candidate-management/api/getCa
 import { ListContainer, ListItem } from '@/shared/ui/ListTransition';
 import type { TDashboardApplication, TDashboardMessage, TDashboardProfile } from '@/features/candidate-management/types';
 import { TestList } from '@/features/candidate-management/ui/TestList';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { formatDistanceToNow } from 'date-fns';
+import { ru, enUS, kk } from 'date-fns/locale';
+import i18n from '@/shared/lib/i18n';
 
 
 const CandidateDashboardPage = () => {
@@ -90,37 +94,58 @@ const ProfileCompletenessWidget = ({
   if (isLoading) return <Skeleton className="h-32 w-full" />;
   if (!profile) return null;
 
-  let score = 0;
-  if (profile.full_name) score += 10;
-  if (profile.phone) score += 10;
-  if (profile.category_id) score += 20;
-  if (profile.candidate_skills && profile.candidate_skills.length > 0) score += 20;
-  if (profile.experience) score += 20;
-  if (profile.about) score += 10;
-  if (profile.education) score += 10;
+  const fields = [
+    { key: 'full_name', value: profile.full_name, weight: 10 },
+    { key: 'phone', value: profile.phone, weight: 10 },
+    { key: 'category', value: profile.category_id, weight: 20 },
+    { key: 'skills', value: profile.candidate_skills && profile.candidate_skills.length > 0, weight: 20 },
+    { key: 'experience', value: profile.experience, weight: 20 },
+    { key: 'about', value: profile.about, weight: 10 },
+    { key: 'education', value: profile.education, weight: 10 },
+  ];
+
+  const score = fields.reduce((acc, field) => (field.value ? acc + field.weight : acc), 0);
+  const missingFields = fields.filter(f => !f.value);
 
   if (score >= 100) return null;
 
   return (
-    <Card className="border-orange-500/50 bg-orange-500/5">
-      <CardHeader>
-        <CardTitle className="text-orange-700 dark:text-orange-400">{t('profileCompleteness.title')}</CardTitle>
+    <Card className="border-orange-500/50 bg-orange-500/5 overflow-hidden">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-orange-700 dark:text-orange-400 flex justify-between items-center text-lg">
+          {t('profileCompleteness.title')}
+          <span className="text-2xl font-bold">{score}%</span>
+        </CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <div className="flex justify-between text-sm">
-             <span>{score}%</span>
+      <CardContent className="space-y-4">
+        <Progress value={score} className="h-2 bg-orange-200" indicatorClassName="bg-orange-500" />
+        
+        {missingFields.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-xs font-medium text-orange-800/70 dark:text-orange-300/70 uppercase tracking-wider">
+              {t('profileCompleteness.description')}
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {missingFields.map(field => (
+                <Badge 
+                  key={field.key} 
+                  variant="outline" 
+                  className="bg-white/50 dark:bg-black/20 border-orange-200 text-orange-700 dark:text-orange-300 hover:bg-orange-100 transition-colors cursor-default py-0.5 text-[10px]"
+                >
+                  + {t(`profileCompleteness.fields.${field.key}`)}
+                </Badge>
+              ))}
+            </div>
           </div>
-          <Progress value={score} className="h-2 bg-orange-200" indicatorClassName="bg-orange-500" />
-          <p className="text-sm text-muted-foreground">{t('profileCompleteness.description')}</p>
-          <Button asChild className="w-full" variant="outline">
-            <Link to="/candidate/profile">{t('profileCompleteness.completeButton')}</Link>
-          </Button>
-        </div>
+        )}
+
+        <Button asChild className="w-full bg-orange-500 hover:bg-orange-600 text-white border-none shadow-lg shadow-orange-500/20" variant="outline">
+          <Link to="/candidate/profile">{t('profileCompleteness.completeButton')}</Link>
+        </Button>
       </CardContent>
     </Card>
-  )
-}
+  );
+};
 
 const TestingProgressWidget = ({
   profile,
@@ -248,30 +273,69 @@ const RecentMessagesWidget = ({
   isLoading: boolean;
 }) => {
   const { t } = useTranslation('dashboard');
+  const currentLocale = i18n.language === 'kk' ? kk : i18n.language === 'en' ? enUS : ru;
+
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>{t('recentMessages.title')}</CardTitle>
-        <Button variant="ghost" size="sm" asChild>
+    <Card className="overflow-hidden border-none shadow-md bg-gradient-to-br from-card to-muted/20">
+      <CardHeader className="flex flex-row items-center justify-between border-b bg-muted/10 pb-4 px-6">
+        <CardTitle className="text-xl font-bold flex items-center gap-2">
+          {t('recentMessages.title')}
+          {messages && messages.length > 0 && (
+            <Badge variant="secondary" className="rounded-full px-2 h-5 text-[10px]">
+              {messages.length}
+            </Badge>
+          )}
+        </CardTitle>
+        <Button variant="ghost" size="sm" asChild className="hover:bg-primary/10 hover:text-primary transition-colors">
           <Link to="/candidate/chat">{t('recentMessages.button')}</Link>
         </Button>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-0">
         {isLoading ? (
-          <Skeleton className="h-32 w-full" />
+          <div className="p-6 space-y-4">
+            <Skeleton className="h-16 w-full rounded-xl" />
+            <Skeleton className="h-16 w-full rounded-xl" />
+          </div>
         ) : !messages || messages.length === 0 ? (
-          <p className="text-muted-foreground">{t('recentMessages.empty')}</p>
+          <div className="p-10 text-center space-y-2">
+            <p className="text-muted-foreground font-medium">{t('recentMessages.empty')}</p>
+          </div>
         ) : (
-          <ListContainer className="space-y-3">
-            {messages.map(msg => (
-              <ListItem key={msg.id} className="text-sm">
-                <span className="font-semibold">
-                  {msg.sender_type === 'hr'
-                    ? msg.hr_specialist_name || t('hrSpecialist')
-                    : t('you')}
-                  :
-                </span>{' '}
-                <span className="text-muted-foreground truncate">{msg.message_text}</span>
+          <ListContainer>
+            {messages.slice(0, 3).map((msg, index) => (
+              <ListItem 
+                key={msg.id} 
+                className={`group transition-all hover:bg-muted/30 ${index !== Math.min(messages.length, 3) - 1 ? 'border-b' : ''}`}
+              >
+                <Link to="/candidate/chat" className="flex items-start gap-4 p-4 w-full">
+                  <Avatar className="h-10 w-10 border-2 border-background shadow-sm shrink-0">
+                    <AvatarImage src={undefined} />
+                    <AvatarFallback className={msg.sender_type === 'hr' ? "bg-primary/10 text-primary font-bold" : "bg-orange-100 text-orange-600 font-bold"}>
+                      {msg.sender_type === 'hr' 
+                        ? (msg.hr_specialist_name?.[0] || 'H') 
+                        : (t('you')[0])}
+                    </AvatarFallback>
+                  </Avatar>
+                  
+                  <div className="flex-grow min-w-0 space-y-1">
+                    <div className="flex justify-between items-center gap-2">
+                      <span className="font-bold text-sm truncate group-hover:text-primary transition-colors">
+                        {msg.sender_type === 'hr'
+                          ? msg.hr_specialist_name || t('hrSpecialist')
+                          : t('you')}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground whitespace-nowrap shrink-0">
+                        {msg.created_at ? formatDistanceToNow(new Date(msg.created_at), { 
+                          addSuffix: true, 
+                          locale: currentLocale 
+                        }) : ''}
+                      </span>
+                    </div>
+                    <p className="text-sm text-muted-foreground line-clamp-2 break-words leading-relaxed">
+                      {msg.message_text}
+                    </p>
+                  </div>
+                </Link>
               </ListItem>
             ))}
           </ListContainer>

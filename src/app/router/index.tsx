@@ -23,6 +23,7 @@ import PaymentCancelPage from '@/pages/hr/payment/cancel'
 import BillingPage from '@/pages/hr/billing'
 import TeamPage from '@/pages/hr/team'
 import HRProfilePage from '@/pages/hr/profile'
+import AIAssistantPage from '@/pages/hr/ai-assistant'
 import PublicDocumentPage from '@/pages/public/document'
 import PrivacyPolicyPage from '@/pages/public/privacy'
 import TermsPage from '@/pages/public/terms'
@@ -189,6 +190,14 @@ export const router = createBrowserRouter([
         element: (
           <PageTransition>
             <HRProfilePage />
+          </PageTransition>
+        ),
+      },
+      {
+        path: 'hr/ai-assistant',
+        element: (
+          <PageTransition>
+            <AIAssistantPage />
           </PageTransition>
         ),
       },

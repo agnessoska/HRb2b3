@@ -20,7 +20,16 @@
   "profileCompleteness": {
     "title": "Profile Completeness",
     "completeButton": "Complete Profile",
-    "description": "Complete your profile so HRs can find you."
+    "description": "Complete your profile so HRs can find you.",
+    "fields": {
+      "full_name": "Full Name",
+      "phone": "Phone",
+      "category": "Category",
+      "skills": "Skills",
+      "experience": "Experience",
+      "about": "About Me",
+      "education": "Education"
+    }
   },
   "profileVisibility": {
     "title": "Profile Status",

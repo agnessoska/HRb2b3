@@ -32,10 +32,11 @@ import {
   Sparkles,
   Target,
   TrendingUp,
-  Coins,
   Info,
   Languages
 } from 'lucide-react'
+import { TokenCostBanner } from '@/shared/ui/TokenCostBanner'
+import { useTokenCalculation } from '@/shared/hooks/useTokenCalculation'
 
 interface Candidate {
   id: string
@@ -63,7 +64,9 @@ export const CompareCandidatesDialog = ({
   const [resultLanguage, setResultLanguage] = useState<'ru' | 'en' | 'kk'>('ru')
   const { data: hrProfile } = useHrProfile()
   const { data: organization } = useOrganization()
-  const { mutate: compare, isPending } = useCompareCandidates()
+  const compareMutation = useCompareCandidates()
+  const { mutate: compare, isPending } = compareMutation
+  const { calculation } = useTokenCalculation('candidate_comparison', undefined, selectedCandidates.length || 2)
 
   const handleSelectCandidate = (candidateId: string, testsCompleted: number) => {
     if (testsCompleted < 6) {
@@ -123,11 +126,16 @@ export const CompareCandidatesDialog = ({
   return (
     <>
       <AIGenerationModal
-        isOpen={isPending}
-        onOpenChange={() => {}}
+        isOpen={isPending || (!!compareMutation.data && !isOpen)}
+        onOpenChange={(open) => {
+          if (!open && !isPending) {
+            onOpenChange(false);
+          }
+        }}
         isPending={isPending}
         title={t('compareCandidates.processingTitle')}
         description={t('compareCandidates.processingDescription')}
+        finalTokens={compareMutation.data?.total_tokens}
       />
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-[600px] max-h-[90vh] flex flex-col">
@@ -166,12 +174,10 @@ export const CompareCandidatesDialog = ({
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 p-2 rounded-lg bg-amber-500/10 text-xs">
-                <Coins className="h-4 w-4 text-amber-600 flex-shrink-0" />
-                <span className="text-amber-700 dark:text-amber-300">
-                  {t('compareCandidates.tokenCost')}
-                </span>
-              </div>
+              <TokenCostBanner
+                operationType="candidate_comparison"
+                multiplier={selectedCandidates.length || 2}
+              />
             </div>
           </GlassCard>
 
@@ -285,9 +291,9 @@ export const CompareCandidatesDialog = ({
           >
             {t('common:cancel')}
           </Button>
-          <Button 
-            onClick={handleSubmit} 
-            disabled={!isValidSelection || isPending}
+          <Button
+            onClick={handleSubmit}
+            disabled={!isValidSelection || isPending || !calculation?.hasEnough}
             className="gap-2"
           >
             {isPending ? (

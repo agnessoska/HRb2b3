@@ -1,0 +1,55 @@
+{
+  "assistantName": "HR AI Assistant",
+  "history": "Request History",
+  "noHistory": "History is empty",
+  "newChatTitle": "New Chat",
+  "untitled": "Untitled",
+  "chatDeleted": "Conversation deleted",
+  "welcomeTitle": "How can I help you?",
+  "welcomeDesc": "I am your intelligent assistant. I know everything about your vacancies, candidates, and company culture.",
+  "inputPlaceholder": "Ask me anything...",
+  "disclaimer": "AI can make mistakes. Check important info.",
+  "tokenWarning": "Using the assistant consumes organization tokens",
+  "capabilities": {
+    "title": "My Capabilities",
+    "vacancies": "Vacancy Analysis",
+    "vacanciesDesc": "I see all requirements and details of your open positions",
+    "candidates": "Candidate Base",
+    "candidatesDesc": "Access to profiles, skills, and all test results",
+    "interviews": "Interview Analysis",
+    "interviewsDesc": "I study your notes and protocols of conducted meetings",
+    "multimodal": "Multimodality",
+    "multimodalDesc": "I support document, PDF, and image uploads",
+    "culture": "Culture Code",
+    "cultureDesc": "I know your company's DNA and select people who fit your values"
+  },
+  "suggestions": {
+    "global": {
+      "q1": "How many active vacancies do we have now?",
+      "q2": "Which of the recent candidates is most promising?",
+      "q3": "Analyze the hiring funnel",
+      "q4": "Give advice on improving the HR brand"
+    },
+    "vacancy": {
+      "q1": "Analyze the requirements of this vacancy",
+      "q2": "Which of the current candidates fits best?",
+      "q3": "Suggest questions for a technical interview",
+      "q4": "How to speed up hiring for this position?"
+    },
+    "candidate": {
+      "q1": "Analyze the test results of this candidate",
+      "q2": "What risks do you see in this candidate?",
+      "q3": "Write interview questions based on their psychometrics",
+      "q4": "Compare them with the vacancy requirements"
+    }
+  },
+  "titleUpdated": "Title updated",
+  "fileUploaded": "File uploaded successfully",
+  "totalUsage": "Total usage",
+  "errors": {
+    "loadConversations": "Failed to load chat history",
+    "loadMessages": "Failed to load messages",
+    "createConversation": "Failed to create new chat",
+    "deleteConversation": "Failed to delete conversation"
+  }
+}

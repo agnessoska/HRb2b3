@@ -42,7 +42,8 @@ export const useTalentMarket = (filters: MarketFilters) => {
           category:professional_categories(id, name_ru),
           tests_completed,
           tests_last_updated_at,
-          skills:candidate_skills(canonical_skill)
+          skills:candidate_skills(canonical_skill),
+          avatar_url
         `)
         .eq('is_public', true)
         .range(offset, offset + PAGE_LIMIT - 1);
@@ -79,6 +80,7 @@ export const useTalentMarket = (filters: MarketFilters) => {
         compatibility_details: null,
         skills: c.skills,
         category: c.category,
+        avatar_url: c.avatar_url,
       })) as TalentMarketCandidate[];
     },
     initialPageParam: 0,
@@ -89,5 +91,6 @@ export const useTalentMarket = (filters: MarketFilters) => {
       return allPages.length;
     },
     enabled: !!user,
+    staleTime: 0, // Всегда запрашивать свежие данные, чтобы видеть актуальную совместимость
   });
 };

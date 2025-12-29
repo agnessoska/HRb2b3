@@ -98,7 +98,8 @@ export function CreateVacancyDialog({ vacancyToEdit, isOpen: controlledIsOpen, o
       if (isOpen && vacancyToEdit) {
         setIsLoadingSkills(true)
         try {
-          const skills = await getVacancySkills(vacancyToEdit.id)
+          const skillsData = await getVacancySkills(vacancyToEdit.id)
+          const skills = skillsData.map(s => s.canonical_skill)
           form.reset({
             title: vacancyToEdit.title || '',
             description: vacancyToEdit.description || '',

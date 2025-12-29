@@ -24,7 +24,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 export default function CandidateProfilePage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { t } = useTranslation(['candidates', 'common', 'ai-analysis'])
+  const { t, i18n } = useTranslation(['candidates', 'common', 'ai-analysis'])
   const { data: organization } = useOrganization()
   const { data: hrProfile } = useHrProfile()
   const queryClient = useQueryClient()
@@ -220,6 +220,7 @@ export default function CandidateProfilePage() {
               )}
               {t('common:sendMessage')}
             </Button>
+
           </div>
 
           {/* Tabs for History */}

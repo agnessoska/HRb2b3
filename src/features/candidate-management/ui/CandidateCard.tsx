@@ -9,9 +9,10 @@ import {
 import type { CandidateWithVacancies } from '@/shared/types/extended'
 import { Button } from '@/components/ui/button'
 import { useTranslation } from 'react-i18next'
-import { User, ArrowRight, CheckCircle2, Clock, AlertCircle } from 'lucide-react'
+import { ArrowRight, CheckCircle2, Clock, AlertCircle } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { AssignToVacancyDialog } from './AssignToVacancyDialog'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 interface CandidateCardProps {
   candidate: CandidateWithVacancies
@@ -70,14 +71,38 @@ export function CandidateCard({ candidate }: CandidateCardProps) {
   const StatusIcon = testStatus.icon
   const progressPercentage = (testsCompleted / 6) * 100
 
+  // Получаем инициалы для fallback
+  const initials = candidate.full_name
+    ?.split(' ')
+    .map(n => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2) || '?'
+
+  // Формируем корректный URL аватарки
+  const avatarUrl = candidate.avatar_url ? (
+    candidate.avatar_url.startsWith('http') 
+      ? candidate.avatar_url 
+      : `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/avatars/${candidate.avatar_url}`
+  ) : null
+
   return (
     <Card className="group overflow-hidden">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
-              <User className="h-5 w-5" />
-            </div>
+            <Avatar className="h-10 w-10 border border-border/50">
+              {avatarUrl && (
+                <AvatarImage 
+                  src={avatarUrl} 
+                  alt={candidate.full_name || ''} 
+                  className="object-cover"
+                />
+              )}
+              <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
+                {initials}
+              </AvatarFallback>
+            </Avatar>
             <div>
               <CardTitle className="text-lg">{candidate.full_name}</CardTitle>
               <p className="text-sm text-muted-foreground">{categoryName}</p>

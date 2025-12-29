@@ -373,10 +373,11 @@ ${testResultsText || '  Тесты не пройдены'}
     console.log(`[${OPERATION_TYPE}] Step 11 successful.`);
 
     console.log(`[${OPERATION_TYPE}] Function finished successfully.`);
-    return new Response(JSON.stringify({ 
-      success: true, 
+    return new Response(JSON.stringify({
+      success: true,
       result: savedResult,
-      data: comparisonData
+      data: comparisonData,
+      total_tokens: inputTokens + outputTokens
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,

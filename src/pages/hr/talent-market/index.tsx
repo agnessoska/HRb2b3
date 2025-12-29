@@ -84,12 +84,13 @@ const TalentMarketPage = () => {
 
         {candidates && candidates.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {candidates.map((candidate: TalentMarketCandidate) => (
+            {candidates.map((candidate: TalentMarketCandidate, index: number) => (
                 <TalentCard
-                  key={candidate.candidate_id}
+                  key={candidate.candidate_id || candidate.id || index}
                   candidate={candidate}
                   isAcquired={acquiredCandidates?.includes(candidate.candidate_id || '') || false}
                   onAcquire={() => setCandidateToAcquire(candidate)}
+                  vacancyId={filters.vacancyId}
                 />
               ))}
           </div>

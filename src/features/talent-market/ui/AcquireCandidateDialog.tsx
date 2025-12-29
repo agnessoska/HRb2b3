@@ -5,16 +5,14 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/shared/lib/supabase";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, Loader2, TrendingUp } from "lucide-react";
+import { Loader2, TrendingUp } from "lucide-react";
 import { useAuthStore } from "@/app/store/auth";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { cn } from "@/lib/utils";
-import { useOrganization } from "@/shared/hooks/useOrganization";
+import { TokenCostBanner } from "@/shared/ui/TokenCostBanner";
 import { useHrProfile } from "@/shared/hooks/useHrProfile";
+import { useTokenCalculation } from "@/shared/hooks/useTokenCalculation";
 import type { TalentMarketCandidate } from "../types";
 
 interface AcquireCandidateDialogProps {
@@ -36,8 +34,7 @@ export const AcquireCandidateDialog = ({
   const [selectedVacancyId, setSelectedVacancyId] = useState(vacancyId || '');
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuthStore();
-  const { data: organization } = useOrganization();
-  const tokenBalance = organization?.token_balance || 0;
+  const { calculation } = useTokenCalculation('acquire_candidate_from_market');
   const { data: hrProfile, isLoading: isHrProfileLoading } = useHrProfile();
 
   const { data: vacancies } = useQuery({
@@ -52,8 +49,8 @@ export const AcquireCandidateDialog = ({
     }
   });
 
-  const COST_TOKENS = 1000;
-  const hasEnoughTokens = tokenBalance >= COST_TOKENS;
+  const COST_TOKENS = calculation?.expectedCost || 1000;
+  const hasEnoughTokens = !!calculation?.hasEnough;
 
   const handleAcquire = async () => {
     if (!selectedVacancyId) {
@@ -138,48 +135,7 @@ export const AcquireCandidateDialog = ({
             </Select>
           </div>
           
-          <Card className="p-4">
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">{t('acquireDialog.cost')}:</span>
-                <span className="font-medium">{COST_TOKENS.toLocaleString()} {t('acquireDialog.tokens')}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">{t('acquireDialog.balance')}:</span>
-                <span className={cn("font-medium", hasEnoughTokens ? "text-emerald-600" : "text-destructive")}>
-                  {tokenBalance.toLocaleString()} {t('acquireDialog.tokens')}
-                </span>
-              </div>
-              <Separator />
-              <div className="flex justify-between">
-                <span className="text-sm font-medium">{t('acquireDialog.after')}:</span>
-                <span className="font-bold">
-                  {(tokenBalance - COST_TOKENS).toLocaleString()} {t('acquireDialog.tokens')}
-                </span>
-              </div>
-            </div>
-          </Card>
-          
-          {!hasEnoughTokens && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>{t('acquireDialog.noTokensTitle')}</AlertTitle>
-              <AlertDescription>
-                {t('acquireDialog.noTokensDescription')}
-                <Button
-                  variant="link"
-                  size="sm"
-                  className="p-0 h-auto ml-2"
-                  onClick={() => {
-                    onClose();
-                    window.location.href = '/hr/buy-tokens';
-                  }}
-                >
-                  {t('acquireDialog.buyTokens')} →
-                </Button>
-              </AlertDescription>
-            </Alert>
-          )}
+          <TokenCostBanner operationType="acquire_candidate_from_market" />
           
           <div className="text-sm text-muted-foreground space-y-1">
             <p className="font-medium text-foreground">{t('acquireDialog.whatHappens')}:</p>

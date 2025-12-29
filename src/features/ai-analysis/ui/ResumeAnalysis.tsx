@@ -9,13 +9,13 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { FileSearch, UploadCloud, FileText, X, ChevronsUpDown, Check, Loader2, Briefcase, Sparkles, Languages, FileType2 } from 'lucide-react'
 import { useGetVacancies } from '@/features/vacancy-management/api/getVacancies'
 import { useSettingsStore } from '@/app/store/settings'
 import { useHrProfile } from '@/shared/hooks/useHrProfile'
 import { useOrganization } from '@/shared/hooks/useOrganization'
 import { useAnalyzeResumes, type AnalyzeResumesResponse } from '../api/analyzeResumes'
+import { useTokenCalculation } from '@/shared/hooks/useTokenCalculation'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { supabase } from '@/shared/lib/supabase'
@@ -24,6 +24,7 @@ import { GlassCard } from '@/shared/ui/GlassCard'
 import { ResumeAnalysisHistory } from './ResumeAnalysisHistory'
 import { ResumeAnalysisResult } from './ResumeAnalysisResult'
 import type { AnalysisResult, AnalysisData, AnalysisCandidate } from '../types'
+import { TokenCostBanner } from '@/shared/ui/TokenCostBanner'
 const CHUNK_SIZE = 5;
 const ANALYSIS_STORAGE_KEY = 'resume_analysis_current_result';
 
@@ -70,10 +71,12 @@ export const ResumeAnalysis = () => {
   const [isUploading, setIsUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [uploadStatus, setUploadStatus] = useState('')
+  const [accumulatedTokens, setAccumulatedTokens] = useState(0)
 
   const { data: vacanciesData, isLoading: isLoadingVacancies } = useGetVacancies()
   const { data: hrProfile } = useHrProfile()
   const { data: organization } = useOrganization()
+  const { calculation } = useTokenCalculation('resume_analysis', undefined, files.length || 1)
 
   const analyzeResumesMutation = useAnalyzeResumes({
     onSuccess: (data: AnalyzeResumesResponse) => {
@@ -150,6 +153,7 @@ export const ResumeAnalysis = () => {
 
     setIsUploading(true)
     setUploadProgress(0)
+    setAccumulatedTokens(0)
 
     try {
       // Use chunking logic regardless of file count for consistency, but if small enough just one chunk
@@ -200,6 +204,10 @@ export const ResumeAnalysis = () => {
                 allCandidates = [...allCandidates, ...data.analysis_data.candidates];
                 combinedMarkdown += (data.content_markdown || '') + '\n\n---\n\n';
                 combinedHtml += (data.content_html || '') + '<hr/>';
+                // Accumulate tokens for multi-chunk
+                if (result.total_tokens) {
+                  setAccumulatedTokens(prev => prev + (result.total_tokens || 0));
+                }
             }
         }
       }
@@ -268,6 +276,7 @@ export const ResumeAnalysis = () => {
         description={isUploading ? uploadStatus : t('resumeAnalysis.processingDescription', 'ИИ анализирует резюме и сопоставляет их с вакансиями...')}
         progress={isUploading ? uploadProgress : undefined}
         simulationMode="slow"
+        finalTokens={accumulatedTokens || analyzeResumesMutation.data?.result?.total_tokens || analyzeResumesMutation.data?.total_tokens}
       />
       <div className="lg:col-span-2 order-1">
         <GlassCard className="overflow-hidden border-none shadow-lg bg-gradient-to-br from-card to-card/50">
@@ -492,19 +501,10 @@ export const ResumeAnalysis = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6 relative">
-            <Alert className="bg-primary/5 border-primary/10 text-primary-foreground">
-              <div className="flex gap-3">
-                <div className="p-2 bg-background/50 rounded-lg h-fit text-primary">
-                  <FileSearch className="h-4 w-4" />
-                </div>
-                <div>
-                  <AlertTitle className="text-foreground font-medium mb-1">{t('resumeAnalysis.summary.cost.title')}</AlertTitle>
-                  <AlertDescription className="text-muted-foreground text-xs leading-relaxed">
-                    {t('resumeAnalysis.summary.cost.description')}
-                  </AlertDescription>
-                </div>
-              </div>
-            </Alert>
+            <TokenCostBanner
+              operationType="resume_analysis"
+              multiplier={files.length || 1}
+            />
 
             <Button
               onClick={handleAnalyze}
@@ -514,7 +514,8 @@ export const ResumeAnalysis = () => {
                 files.length === 0 ||
                 selectedVacancies.length === 0 ||
                 isUploading ||
-                analyzeResumesMutation.isPending
+                analyzeResumesMutation.isPending ||
+                !calculation?.hasEnough
               }
             >
               {isUploading || analyzeResumesMutation.isPending ? (

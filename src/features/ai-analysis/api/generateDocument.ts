@@ -17,7 +17,7 @@ export interface GenerateDocumentParams {
   language: 'ru' | 'kk' | 'en'
 }
 
-export const generateDocument = async (params: GenerateDocumentParams): Promise<GeneratedDocumentResult> => {
+export const generateDocument = async (params: GenerateDocumentParams): Promise<GeneratedDocumentResult & { total_tokens?: number }> => {
   const { data, error } = await supabase.functions.invoke('generate-document', {
     body: params,
   })
@@ -30,7 +30,10 @@ export const generateDocument = async (params: GenerateDocumentParams): Promise<
     throw new Error('Invalid response from server')
   }
 
-  return data.data as GeneratedDocumentResult
+  return {
+    ...(data.data as GeneratedDocumentResult),
+    total_tokens: data.total_tokens
+  }
 }
 
 export const useGenerateDocument = () => {

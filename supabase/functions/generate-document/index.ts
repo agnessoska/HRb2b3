@@ -311,7 +311,11 @@ serve(async (req: Request) => {
     console.log(`[${operation_type}] Step 10 successful.`);
 
     console.log(`[${operation_type}] Function finished successfully.`);
-    return new Response(JSON.stringify({ success: true, data: savedDocument }), {
+    return new Response(JSON.stringify({
+      success: true,
+      data: savedDocument,
+      total_tokens: inputTokens + outputTokens
+    }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     })

@@ -14,10 +14,11 @@ interface GenerateInterviewPlanPayload {
 interface GenerateInterviewPlanResponse {
   success: boolean
   data: InterviewSessionWithData
+  total_tokens?: number
   error?: string
 }
 
-async function generateInterviewPlan(payload: GenerateInterviewPlanPayload): Promise<InterviewSessionWithData> {
+async function generateInterviewPlan(payload: GenerateInterviewPlanPayload): Promise<InterviewSessionWithData & { total_tokens?: number }> {
   const { data, error } = await supabase.functions.invoke<GenerateInterviewPlanResponse>(
     'generate-structured-interview',
     {
@@ -33,9 +34,11 @@ async function generateInterviewPlan(payload: GenerateInterviewPlanPayload): Pro
     throw new Error(data?.error || 'Failed to generate interview plan')
   }
 
-  return data.data as InterviewSessionWithData
+  return {
+    ...data.data,
+    total_tokens: data.total_tokens
+  }
 }
-
 export function useGenerateInterviewPlan() {
   return useMutation({
     mutationFn: generateInterviewPlan,

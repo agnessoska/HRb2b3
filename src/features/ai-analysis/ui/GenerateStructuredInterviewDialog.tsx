@@ -22,6 +22,8 @@ import { useQuery } from '@tanstack/react-query'
 import { useGenerateInterviewPlan } from '@/features/structured-interview/api'
 import { useHrProfile } from '@/shared/hooks/useHrProfile'
 import { useOrganization } from '@/shared/hooks/useOrganization'
+import { TokenCostBanner } from '@/shared/ui/TokenCostBanner'
+import { useTokenCalculation } from '@/shared/hooks/useTokenCalculation'
 
 interface GenerateStructuredInterviewDialogProps {
   isOpen?: boolean
@@ -74,9 +76,11 @@ export function GenerateStructuredInterviewDialog({
     enabled: open && !!vacancyId,
   })
 
-  const { mutate: generateInterview, isPending } = useGenerateInterviewPlan()
+  const generateInterviewMutation = useGenerateInterviewPlan()
+  const { mutate: generateInterview, isPending } = generateInterviewMutation
   const { data: hrProfile } = useHrProfile()
   const { data: organization } = useOrganization()
+  const { calculation } = useTokenCalculation('structured_interview', additionalInfo)
 
   const handleGenerate = () => {
     if (!candidateId || !vacancyId) {
@@ -119,11 +123,16 @@ export function GenerateStructuredInterviewDialog({
   return (
     <>
       <AIGenerationModal
-        isOpen={isPending}
-        onOpenChange={() => {}}
+        isOpen={isPending || (!!generateInterviewMutation.data && !open)}
+        onOpenChange={(isOpen) => {
+          if (!isOpen && !isPending) {
+            setOpen(false);
+          }
+        }}
         isPending={isPending}
         title={t('generateInterview.processingTitle', 'Генерация плана интервью')}
         description={t('generateInterview.processingDescription', 'ИИ анализирует результаты тестов и составляет вопросы...')}
+        finalTokens={generateInterviewMutation.data?.total_tokens}
       />
       <Dialog open={open} onOpenChange={setOpen}>
         {children ? (
@@ -209,20 +218,16 @@ export function GenerateStructuredInterviewDialog({
               />
             </div>
 
-            {/* Cost Info */}
-            <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg border">
-              <Sparkles className="h-4 w-4 text-primary shrink-0" />
-              <p className="text-xs text-muted-foreground">
-                {t('generateDocument.costEstimate', 'Примерная стоимость')}: <span className="font-semibold text-foreground">~2,000-3,000 {t('common:tokens')}</span>
-              </p>
-            </div>
+            <TokenCostBanner
+              operationType="structured_interview"
+              inputString={additionalInfo}
+            />
           </div>
-
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpen(false)} disabled={isPending}>
               {t('common:cancel')}
             </Button>
-            <Button onClick={handleGenerate} disabled={isPending} className="gap-2">
+            <Button onClick={handleGenerate} disabled={isPending || !calculation?.hasEnough} className="gap-2">
               {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {t('generateInterview.confirm')}
             </Button>

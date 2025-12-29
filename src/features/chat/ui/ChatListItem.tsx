@@ -58,15 +58,9 @@ export const ChatListItem = ({
             "w-9 h-9 border-2 border-background shadow-sm transition-transform",
             isActive ? "scale-105 ring-2 ring-primary/20" : ""
           )}>
-            {/*
-              TODO: Add avatar_url to ChatRoom types (needs updating get_my_chat_rooms RPC or join logic)
-              For now we rely on the fact that otherPerson might not have avatar_url yet in the ChatRoom type
-              We can add it if we update the RPC. For now let's assume it might be there or fallback.
-            */}
-            {/* @ts-expect-error: avatar_url might be missing in type but present in data if we update RPC */}
-            <AvatarImage src={otherPerson.avatar_url} />
+            <AvatarImage src={otherPerson.avatar_url || undefined} />
             <AvatarFallback className={cn(
-              isActive ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+              isActive ? "bg-primary text-primary-foreground font-bold" : "bg-muted text-muted-foreground font-bold"
             )}>
               {initials}
             </AvatarFallback>

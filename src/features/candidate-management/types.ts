@@ -42,6 +42,7 @@ export type TDashboardMessage = {
   message_text: string;
   sender_type: 'hr' | 'candidate';
   hr_specialist_name: string | null;
+  created_at: string;
 };
 
 export type TDashboardData = {

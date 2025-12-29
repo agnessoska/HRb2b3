@@ -20,7 +20,16 @@
   "profileCompleteness": {
     "title": "Профильдің толтырылуы",
     "completeButton": "Профильді толтыру",
-    "description": "HR мамандары сізді таба алуы үшін профильді толтырыңыз."
+    "description": "HR мамандары сізді таба алуы үшін профильді толтырыңыз.",
+    "fields": {
+      "full_name": "Аты-жөні",
+      "phone": "Телефон",
+      "category": "Санат",
+      "skills": "Дағдылар",
+      "experience": "Жұмыс тәжірибесі",
+      "about": "Өзім туралы",
+      "education": "Білім"
+    }
   },
   "profileVisibility": {
     "title": "Профиль мәртебесі",

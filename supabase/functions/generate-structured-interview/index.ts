@@ -398,10 +398,11 @@ serve(async (req: Request) => {
 
     console.log(`[${OPERATION_TYPE}] Success`)
     return new Response(
-      JSON.stringify({ 
-        success: true, 
-        data: savedSession 
-      }), 
+      JSON.stringify({
+        success: true,
+        data: savedSession,
+        total_tokens: inputTokens + outputTokens
+      }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,

@@ -17,9 +17,10 @@ interface TalentCardProps {
   candidate: TalentMarketCandidate;
   isAcquired: boolean;
   onAcquire: () => void;
+  vacancyId?: string | null;
 }
 
-export const TalentCard = ({ candidate, isAcquired, onAcquire }: TalentCardProps) => {
+export const TalentCard = ({ candidate, isAcquired, onAcquire, vacancyId }: TalentCardProps) => {
   const { t, i18n } = useTranslation('talent-market');
   const lang = i18n.language as 'ru' | 'kk' | 'en';
   const [showDetails, setShowDetails] = useState(false);
@@ -51,9 +52,9 @@ export const TalentCard = ({ candidate, isAcquired, onAcquire }: TalentCardProps
         <CardHeader>
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3 flex-1 min-w-0">
-              <Avatar className="h-10 w-10">
-                <AvatarImage src={candidate.avatar_url || undefined} />
-                <AvatarFallback>{initials}</AvatarFallback>
+              <Avatar className="h-10 w-10 border shadow-sm">
+                <AvatarImage src={candidate.avatar_url || undefined} className="object-cover" />
+                <AvatarFallback className="bg-primary/10 text-primary font-bold">{initials}</AvatarFallback>
               </Avatar>
               <div className="min-w-0">
                 <CardTitle className="text-lg truncate">{candidate.full_name}</CardTitle>
@@ -71,14 +72,14 @@ export const TalentCard = ({ candidate, isAcquired, onAcquire }: TalentCardProps
             <div>
               <p className="text-sm font-medium mb-2">{t('card.skills')}:</p>
               <div className="flex flex-wrap gap-1">
-                {(candidate.skills as { canonical_skill: string }[]).slice(0, 5).map((skill) => (
-                  <Badge key={skill.canonical_skill} variant="secondary" className="text-xs">
-                    {skill.canonical_skill}
+                {(candidate.skills as { name: string; canonical_name: string }[]).slice(0, 5).map((skill, index) => (
+                  <Badge key={skill.canonical_name || index} variant="secondary" className="text-xs">
+                    {skill.name}
                   </Badge>
                 ))}
-                {candidate.skills.length > 5 && (
+                {(candidate.skills as unknown[]).length > 5 && (
                   <Badge variant="outline" className="text-xs">
-                    +{(candidate.skills as { canonical_skill: string }[]).length - 5}
+                    +{(candidate.skills as unknown[]).length - 5}
                   </Badge>
                 )}
               </div>
@@ -145,6 +146,7 @@ export const TalentCard = ({ candidate, isAcquired, onAcquire }: TalentCardProps
       {showDetails && (
         <CompatibilityDetailsDialog
           candidate={candidate}
+          vacancyId={vacancyId || candidate.vacancy_id}
           isOpen={showDetails}
           onClose={() => setShowDetails(false)}
         />

@@ -22,6 +22,8 @@ import {
 } from '@/features/ai-analysis/api/generateDocument'
 import { AIGenerationModal } from '@/shared/ui/AIGenerationModal'
 import { GlassCard } from '@/shared/ui/GlassCard'
+import { TokenCostBanner } from '@/shared/ui/TokenCostBanner'
+import { useTokenCalculation } from '@/shared/hooks/useTokenCalculation'
 
 interface GenerateDocumentDialogProps {
   isOpen: boolean
@@ -56,11 +58,13 @@ export const GenerateDocumentDialog = ({
   const { t } = useTranslation(['ai-analysis', 'common'])
   const { data: hrProfile } = useHrProfile()
   const { data: organization } = useOrganization()
-  const { mutate: generateDocument, isPending } = useGenerateDocument()
+  const generateDocumentMutation = useGenerateDocument()
+  const { mutate: generateDocument, isPending } = generateDocumentMutation
   
   const [documentType, setDocumentType] = useState<DocumentType>('interview_invitation')
   const [additionalInfo, setAdditionalInfo] = useState('')
   const [language, setLanguage] = useState<'ru' | 'en' | 'kk'>('ru')
+  const { calculation } = useTokenCalculation(documentType, additionalInfo)
 
   const handleGenerate = () => {
     if (!candidateId || !hrProfile || !organization) {
@@ -93,11 +97,16 @@ export const GenerateDocumentDialog = ({
   return (
     <>
       <AIGenerationModal
-        isOpen={isPending}
-        onOpenChange={() => {}}
+        isOpen={isPending || (!!generateDocumentMutation.data && !isOpen)}
+        onOpenChange={(open) => {
+          if (!open && !isPending) {
+            onOpenChange(false);
+          }
+        }}
         isPending={isPending}
         title={t('generateDocument.processingTitle', 'Генерация документа')}
         description={t('generateDocument.processingDescription', 'ИИ составляет документ на основе профиля кандидата и вакансии...')}
+        finalTokens={generateDocumentMutation.data?.total_tokens}
       />
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
@@ -198,12 +207,7 @@ export const GenerateDocumentDialog = ({
             </div>
 
             {/* Cost Info */}
-            <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg border">
-              <Sparkles className="h-4 w-4 text-primary shrink-0" />
-              <p className="text-xs text-muted-foreground">
-                {t('generateDocument.costEstimate', 'Примерная стоимость')}: <span className="font-semibold text-foreground">~1,000-2,000 {t('common:tokens')}</span>
-              </p>
-            </div>
+            <TokenCostBanner operationType={documentType} inputString={additionalInfo} />
           </div>
 
           {/* Footer */}
@@ -215,9 +219,9 @@ export const GenerateDocumentDialog = ({
             >
               {t('common:cancel')}
             </Button>
-            <Button 
-              onClick={handleGenerate} 
-              disabled={isPending}
+            <Button
+              onClick={handleGenerate}
+              disabled={isPending || !calculation?.hasEnough}
               className="gap-2"
             >
               <DocumentIcon className="h-4 w-4" />

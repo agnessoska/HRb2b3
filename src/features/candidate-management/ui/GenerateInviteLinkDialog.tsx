@@ -16,6 +16,8 @@ import { useTranslation } from 'react-i18next'
 import { generateInviteToken } from '../api/generateInviteToken'
 import { Copy, Link2, Loader2, CheckCircle2, UserPlus, AlertCircle } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { TokenCostBanner } from '@/shared/ui/TokenCostBanner'
+import { useTokenCalculation } from '@/shared/hooks/useTokenCalculation'
 
 interface GenerateTokenResponse {
   success: boolean
@@ -36,6 +38,7 @@ export function GenerateInviteLinkDialog() {
   const [generatedLink, setGeneratedLink] = useState('')
   const [copied, setCopied] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const { calculation } = useTokenCalculation('create_invitation_token')
 
   const mutation = useMutation<GenerateTokenResponse, Error, void>({
     mutationFn: generateInviteToken,
@@ -176,20 +179,25 @@ export function GenerateInviteLinkDialog() {
             )}
           </div>
         ) : (
-          <div className="rounded-lg border-2 border-dashed p-6 text-center">
-            <UserPlus className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground mb-2">
-              {t('invite_dialog.initial_prompt')}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {t('invite_dialog.costPerLink')}
-            </p>
+          <div className="space-y-6">
+            <div className="rounded-lg border-2 border-dashed p-6 text-center">
+              <UserPlus className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground">
+                {t('invite_dialog.initial_prompt')}
+              </p>
+            </div>
+            
+            <TokenCostBanner operationType="create_invitation_token" />
           </div>
         )}
 
         <DialogFooter className="gap-2 sm:gap-0">
           {!generatedLink && (
-            <Button onClick={handleGenerate} disabled={mutation.isPending} className="gap-2">
+            <Button
+              onClick={handleGenerate}
+              disabled={mutation.isPending || (calculation !== null && !calculation.hasEnough)}
+              className="gap-2"
+            >
               {mutation.isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />

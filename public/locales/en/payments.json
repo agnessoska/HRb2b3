@@ -17,5 +17,17 @@
     "success": "Success",
     "failed": "Failed",
     "cancelled": "Cancelled"
+  },
+  "tokenUsage": {
+    "aiEstimate": "AI Analysis (Estimate)",
+    "fixedCost": "Fixed Cost",
+    "max": "Maximum",
+    "currentBalance": "Current Balance",
+    "remaining": "Remaining",
+    "insufficientTokens": "Insufficient Tokens",
+    "needMore": "You need {{count}} 🪙 more to complete this operation",
+    "buyTokens": "Buy Tokens",
+    "actuallySpent": "Actually Spent",
+    "estimatedBalance": "Estimated Balance"
   }
 }

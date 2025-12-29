@@ -41,7 +41,6 @@ export function CandidateProfileForm({ initialData, onUpdate }: CandidateProfile
   const { t } = useTranslation(['candidates', 'common'])
   const { user } = useAuth()
   const [loading, setLoading] = useState(false)
-  const [avatarFile, setAvatarFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
 
   const form = useForm<ProfileFormValues>({
@@ -71,12 +70,28 @@ export function CandidateProfileForm({ initialData, onUpdate }: CandidateProfile
     })
   }, [initialData, form])
 
-  const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
-    if (file) {
-      setAvatarFile(file)
-      const url = URL.createObjectURL(file)
-      setPreviewUrl(url)
+    if (file && user) {
+      const loadingToast = toast.loading(t('profile.uploadingAvatar', 'Загрузка аватара...'))
+      try {
+        setLoading(true)
+        const avatarUrl = await uploadAvatar(file, user.id)
+        
+        await updateCandidateProfile(initialData.id, {
+          ...form.getValues(),
+          avatar_url: avatarUrl,
+        })
+        
+        toast.success(t('profile.avatarUpdated', 'Аватар успешно обновлен'), { id: loadingToast })
+        setPreviewUrl(avatarUrl)
+        onUpdate?.()
+      } catch (error) {
+        console.error('Failed to update avatar:', error)
+        toast.error(t('profile.avatarUpdateError', 'Ошибка при обновлении аватара'), { id: loadingToast })
+      } finally {
+        setLoading(false)
+      }
     }
   }
 
@@ -85,18 +100,6 @@ export function CandidateProfileForm({ initialData, onUpdate }: CandidateProfile
   async function onSubmit(data: ProfileFormValues) {
     setLoading(true)
     try {
-      let avatarUrl = initialData.avatar_url
-
-      if (avatarFile && user) {
-        try {
-          avatarUrl = await uploadAvatar(avatarFile, user.id)
-        } catch (error) {
-          console.error('Failed to upload avatar:', error)
-          toast.error('Failed to upload avatar')
-          // Continue saving profile even if avatar fails
-        }
-      }
-
       await updateCandidateProfile(initialData.id, {
         full_name: data.full_name,
         phone: data.phone || null,
@@ -106,7 +109,7 @@ export function CandidateProfileForm({ initialData, onUpdate }: CandidateProfile
         about: data.about || null,
         is_public: data.is_public,
         skills: data.skills,
-        avatar_url: avatarUrl,
+        avatar_url: initialData.avatar_url,
       })
       toast.success(t('profile.updateSuccess', 'Профиль успешно обновлен'))
       onUpdate?.()
@@ -119,13 +122,23 @@ export function CandidateProfileForm({ initialData, onUpdate }: CandidateProfile
     }
   }
 
+  const isSaveDisabled = loading || !form.formState.isDirty
+
+  // Экспортируем состояние формы вовне для верхней кнопки
+  useEffect(() => {
+    const event = new CustomEvent('profile-form-state', { 
+      detail: { isDirty: form.formState.isDirty, loading } 
+    });
+    window.dispatchEvent(event);
+  }, [form.formState.isDirty, loading]);
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6" id="candidate-profile-form">
         <div className="flex items-center space-x-6">
-          <Avatar className="h-24 w-24">
-            <AvatarImage src={avatarSrc} />
-            <AvatarFallback>{initialData.full_name?.substring(0, 2).toUpperCase() || 'CN'}</AvatarFallback>
+          <Avatar className="h-24 w-24 border-2 border-border/50">
+            <AvatarImage src={avatarSrc} className="object-cover" />
+            <AvatarFallback className="text-xl font-bold">{initialData.full_name?.substring(0, 2).toUpperCase() || 'CN'}</AvatarFallback>
           </Avatar>
           <div className="space-y-2">
             <Label>{t('profile.avatar', 'Avatar')}</Label>
@@ -143,10 +156,10 @@ export function CandidateProfileForm({ initialData, onUpdate }: CandidateProfile
                 variant="outline"
                 size="sm"
                 onClick={() => document.getElementById('candidate-avatar-upload')?.click()}
+                disabled={loading}
               >
                 {t('uploadAvatarBtn', { ns: 'common', defaultValue: 'Upload Photo' })}
               </Button>
-              {avatarFile && <span className="text-sm text-muted-foreground truncate max-w-[150px]">{avatarFile.name}</span>}
             </div>
           </div>
         </div>
@@ -289,7 +302,7 @@ export function CandidateProfileForm({ initialData, onUpdate }: CandidateProfile
         />
 
         <div className="flex justify-end">
-          <Button type="submit" disabled={loading || !form.formState.isDirty} size="lg">
+          <Button type="submit" disabled={isSaveDisabled} size="lg">
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {t('save', { ns: 'common' })}
           </Button>

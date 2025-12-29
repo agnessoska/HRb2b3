@@ -6,6 +6,7 @@ import { LanguageSwitcher } from '../LanguageSwitcher';
 import { UserMenu } from '../UserMenu';
 import { useOrganization } from '@/shared/hooks/useOrganization';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 import { useAuthStore } from '@/app/store/auth';
 import { cn } from '@/lib/utils';
 import {
@@ -19,6 +20,7 @@ import { Menu, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/shared/lib/supabase';
 import { TokenBalance } from '../TokenBalance';
+import { useUnreadMessagesCount } from '@/features/chat/hooks/useUnreadMessagesCount';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -31,6 +33,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
   const location = useLocation();
   const role = user?.user_metadata?.role;
   const [isOpen, setIsOpen] = React.useState(false);
+  const { count: unreadCount } = useUnreadMessagesCount();
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -40,6 +43,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
     { href: '/hr/dashboard', label: t('nav.dashboard', 'Дашборд') },
     { href: '/hr/talent-market', label: t('nav.talentMarket', 'Рынок талантов') },
     { href: '/hr/chat', label: t('nav.chat', 'Чат') },
+    { href: '/hr/ai-assistant', label: t('nav.aiAssistant', 'AI Ассистент') },
     { href: '/hr/billing', label: t('nav.billing', 'Биллинг') },
     { href: '/hr/team', label: t('nav.team', 'Команда') },
   ];
@@ -90,13 +94,18 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                       to={link.href}
                       onClick={() => setIsOpen(false)}
                       className={cn(
-                        "flex items-center px-4 py-3 text-sm font-medium rounded-md transition-colors",
+                        "flex items-center justify-between px-4 py-3 text-sm font-medium rounded-md transition-colors",
                         location.pathname.startsWith(link.href)
                           ? "bg-accent text-accent-foreground"
                           : "hover:bg-accent hover:text-accent-foreground"
                       )}
                     >
-                      {link.label}
+                      <span>{link.label}</span>
+                      {link.href.includes('chat') && unreadCount > 0 && (
+                        <Badge variant="destructive" className="ml-2 rounded-full h-5 min-w-[1.25rem] flex items-center justify-center px-1 animate-pulse">
+                          {unreadCount}
+                        </Badge>
+                      )}
                     </Link>
                   ))}
                 </nav>
@@ -160,11 +169,16 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                 key={link.href}
                 to={link.href}
                 className={cn(
-                  "transition-colors hover:text-foreground/80",
-                  location.pathname.startsWith(link.href) ? "text-foreground" : "text-foreground/60"
+                  "transition-colors hover:text-foreground/80 flex items-center gap-1.5",
+                  location.pathname.startsWith(link.href) ? "text-foreground font-bold" : "text-foreground/60"
                 )}
               >
                 {link.label}
+                {link.href.includes('chat') && unreadCount > 0 && (
+                  <Badge variant="destructive" className="rounded-full h-4 min-w-[1rem] flex items-center justify-center px-1 text-[9px] animate-pulse border-none">
+                    {unreadCount}
+                  </Badge>
+                )}
               </Link>
             ))}
           </nav>
