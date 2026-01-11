@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { useTranslation } from 'react-i18next';
 import { useDebouncedValue } from '@/shared/hooks/useDebouncedValue';
 import { useOrganization } from '@/shared/hooks/useOrganization';
+import { HelpCircle } from '@/shared/ui/HelpCircle';
 import { useHrProfile } from '@/shared/hooks/useHrProfile';
 import {
   searchCandidatesNotInFunnel,
@@ -75,13 +76,23 @@ export const AddCandidateDialog = ({
   const candidates = data?.pages.flat() || [];
 
   const addMutation = useMutation({
-    mutationFn: (candidateId: string) => {
+    mutationFn: ({ candidateId, testsCompleted }: { candidateId: string; testsCompleted: number }) => {
       if (!hrProfile || !organization) throw new Error('Missing profile');
+
+      // Определяем начальный статус на основе пройденных тестов
+      let initialStatus = 'invited';
+      if (testsCompleted === 6) {
+        initialStatus = 'evaluated';
+      } else if (testsCompleted > 0) {
+        initialStatus = 'testing';
+      }
+
       return addCandidateToFunnel(
         vacancyId,
         candidateId,
         hrProfile.id,
-        organization.id
+        organization.id,
+        initialStatus
       );
     },
     onSuccess: () => {
@@ -98,7 +109,10 @@ export const AddCandidateDialog = ({
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t('addCandidate')}</DialogTitle>
+          <div className="flex items-center gap-2">
+            <DialogTitle>{t('addCandidate')}</DialogTitle>
+            <HelpCircle topicId="candidates_base" iconClassName="h-4 w-4" />
+          </div>
           <DialogDescription>{t('addCandidateDescription')}</DialogDescription>
         </DialogHeader>
         <div className="py-4 space-y-4">
@@ -113,10 +127,18 @@ export const AddCandidateDialog = ({
                 key={candidate.id}
                 className="flex items-center justify-between p-2 rounded-md hover:bg-muted transition-colors"
               >
-                <span>{candidate.full_name}</span>
+                <div className="flex flex-col">
+                  <span className="font-medium">{candidate.full_name}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {candidate.tests_completed || 0}/6 {t('common:tests', { defaultValue: 'тестов' })}
+                  </span>
+                </div>
                 <Button
                   size="sm"
-                  onClick={() => addMutation.mutate(candidate.id)}
+                  onClick={() => addMutation.mutate({ 
+                    candidateId: candidate.id, 
+                    testsCompleted: candidate.tests_completed || 0 
+                  })}
                   disabled={addMutation.isPending}
                 >
                   {t('add')}

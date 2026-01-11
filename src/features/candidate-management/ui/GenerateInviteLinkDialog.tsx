@@ -18,6 +18,7 @@ import { Copy, Link2, Loader2, CheckCircle2, UserPlus, AlertCircle } from 'lucid
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { TokenCostBanner } from '@/shared/ui/TokenCostBanner'
 import { useTokenCalculation } from '@/shared/hooks/useTokenCalculation'
+import { HelpCircle } from '@/shared/ui/HelpCircle'
 
 interface GenerateTokenResponse {
   success: boolean
@@ -116,8 +117,9 @@ export function GenerateInviteLinkDialog() {
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
               <Link2 className="h-5 w-5 text-primary" />
             </div>
-            <div>
+            <div className="flex items-center gap-2">
               <DialogTitle className="text-xl">{t('generate_invite_link')}</DialogTitle>
+              <HelpCircle topicId="candidates_base" />
             </div>
           </div>
           <DialogDescription className="text-base">

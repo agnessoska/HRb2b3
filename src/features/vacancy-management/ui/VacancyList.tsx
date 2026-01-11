@@ -19,6 +19,7 @@ import { Briefcase, MapPin, Users, MoreVertical, Eye, Edit, Archive } from 'luci
 import { toast } from 'sonner'
 import { ListContainer, ListItem } from '@/shared/ui/ListTransition'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { HelpCircle } from '@/shared/ui/HelpCircle'
 
 type Vacancy = Database['public']['Tables']['vacancies']['Row']
 
@@ -46,13 +47,15 @@ interface VacancyCardProps {
   vacancy: Vacancy
   onEdit: (vacancy: Vacancy) => void
   onArchive: (vacancy: Vacancy) => void
+  onRestore: (vacancy: Vacancy) => void
 }
 
-function VacancyCard({ vacancy, onEdit, onArchive }: VacancyCardProps) {
+function VacancyCard({ vacancy, onEdit, onArchive, onRestore }: VacancyCardProps) {
   const { t } = useTranslation('vacancies')
   const navigate = useNavigate()
   const statusStyles = getStatusStyles(vacancy.status || 'active')
   const currencySymbol = currencyMap[vacancy.currency || 'USD'] || '$'
+  const isArchived = vacancy.status === 'archived'
 
   const totalCandidates = vacancy.funnel_counts ?
     Object.values(vacancy.funnel_counts as Record<string, number>).reduce((a, b) => a + b, 0) : 0
@@ -82,13 +85,23 @@ function VacancyCard({ vacancy, onEdit, onArchive }: VacancyCardProps) {
                     <Edit className="mr-2 h-4 w-4" />
                     <span>{t('actions.edit')}</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => onArchive(vacancy)}
-                    className="text-destructive focus:text-destructive rounded-lg cursor-pointer"
-                  >
-                    <Archive className="mr-2 h-4 w-4" />
-                    <span>{t('actions.archive')}</span>
-                  </DropdownMenuItem>
+                  {isArchived ? (
+                    <DropdownMenuItem
+                      onClick={() => onRestore(vacancy)}
+                      className="text-success focus:text-success rounded-lg cursor-pointer"
+                    >
+                      <Archive className="mr-2 h-4 w-4 rotate-180" />
+                      <span>{t('actions.restore')}</span>
+                    </DropdownMenuItem>
+                  ) : (
+                    <DropdownMenuItem
+                      onClick={() => onArchive(vacancy)}
+                      className="text-destructive focus:text-destructive rounded-lg cursor-pointer"
+                    >
+                      <Archive className="mr-2 h-4 w-4" />
+                      <span>{t('actions.archive')}</span>
+                    </DropdownMenuItem>
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -119,15 +132,15 @@ function VacancyCard({ vacancy, onEdit, onArchive }: VacancyCardProps) {
           )}
         </div>
         
-        <div className="mt-5 p-4 rounded-xl bg-muted/20 border border-border/50 group/funnel relative overflow-hidden transition-all hover:bg-muted/30">
+        <div className="mt-5 p-4 rounded-2xl bg-muted/20 border border-border/50 group/funnel relative overflow-hidden transition-all hover:bg-muted/30">
           <div className="flex items-center justify-between relative z-10">
-            <div className="flex items-center gap-3">
-              <div className="bg-background/80 p-2 rounded-lg shadow-sm border border-border/20">
-                <Users className="h-4 w-4 text-primary/80" />
+            <div className="flex items-center gap-3 bg-background/80 py-2 px-3 rounded-xl shadow-sm border border-border/20 transition-all group-hover/funnel:bg-background">
+              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                <Users className="h-4 w-4" />
               </div>
-              <div className="flex flex-col">
-                <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">{t('card.candidates')}</span>
-                <span className="text-lg font-extrabold leading-none mt-0.5 tracking-tight">{totalCandidates}</span>
+              <div className="flex flex-col justify-center">
+                <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-tight leading-none mb-1">{t('card.candidates')}</span>
+                <span className="text-base font-black leading-none">{totalCandidates}</span>
               </div>
             </div>
             <Button 
@@ -191,6 +204,17 @@ export function VacancyList() {
     },
   })
 
+  const { mutate: restoreVacancy } = useMutation({
+    mutationFn: updateVacancy,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['vacancies', organizationId] })
+      toast.success(t('restoreSuccess'))
+    },
+    onError: () => {
+      toast.error(t('restoreError'))
+    },
+  })
+
   const handleEdit = (vacancy: Vacancy) => {
     setVacancyToEdit(vacancy)
     setIsEditOpen(true)
@@ -199,6 +223,12 @@ export function VacancyList() {
   const handleArchive = (vacancy: Vacancy) => {
     if (confirm(t('confirmArchive'))) {
       archiveVacancy({ id: vacancy.id, status: 'archived' })
+    }
+  }
+
+  const handleRestore = (vacancy: Vacancy) => {
+    if (confirm(t('confirmRestore'))) {
+      restoreVacancy({ id: vacancy.id, status: 'active' })
     }
   }
 
@@ -241,9 +271,12 @@ export function VacancyList() {
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">{t('list.header')}</h2>
-          <p className="text-sm text-muted-foreground mt-1">
+        <div className="flex flex-col gap-1 flex-1">
+          <div className="flex items-center gap-2">
+            <h2 className="text-2xl font-bold tracking-tight">{t('list.header')}</h2>
+            <HelpCircle topicId="vacancies_management" />
+          </div>
+          <p className="text-sm text-muted-foreground">
             {t('list.description')}
           </p>
         </div>
@@ -282,6 +315,7 @@ export function VacancyList() {
                     vacancy={vacancy}
                     onEdit={handleEdit}
                     onArchive={handleArchive}
+                    onRestore={handleRestore}
                   />
                 </ListItem>
               ))}

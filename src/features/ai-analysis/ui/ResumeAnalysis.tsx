@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { FileSearch, UploadCloud, FileText, X, ChevronsUpDown, Check, Loader2, Briefcase, Sparkles, Languages, FileType2 } from 'lucide-react'
+import { UploadCloud, FileText, X, ChevronsUpDown, Check, Loader2, Briefcase, Sparkles, Languages, FileType2 } from 'lucide-react'
 import { useGetVacancies } from '@/features/vacancy-management/api/getVacancies'
 import { useSettingsStore } from '@/app/store/settings'
 import { useHrProfile } from '@/shared/hooks/useHrProfile'
@@ -25,6 +25,7 @@ import { ResumeAnalysisHistory } from './ResumeAnalysisHistory'
 import { ResumeAnalysisResult } from './ResumeAnalysisResult'
 import type { AnalysisResult, AnalysisData, AnalysisCandidate } from '../types'
 import { TokenCostBanner } from '@/shared/ui/TokenCostBanner'
+import { HelpCircle } from '@/shared/ui/HelpCircle'
 const CHUNK_SIZE = 5;
 const ANALYSIS_STORAGE_KEY = 'resume_analysis_current_result';
 
@@ -279,17 +280,17 @@ export const ResumeAnalysis = () => {
         finalTokens={accumulatedTokens || analyzeResumesMutation.data?.result?.total_tokens || analyzeResumesMutation.data?.total_tokens}
       />
       <div className="lg:col-span-2 order-1">
-        <GlassCard className="overflow-hidden border-none shadow-lg bg-gradient-to-br from-card to-card/50">
-          <div className="p-4 sm:p-8 bg-gradient-to-r from-primary/10 via-purple-500/5 to-background border-b">
+        <GlassCard className="overflow-hidden border shadow-lg bg-card/50">
+          <div className="p-4 sm:p-8 border-b">
             <div className="flex items-center gap-3 sm:gap-4">
-              <div className="p-2 sm:p-3 bg-background/50 backdrop-blur-sm rounded-lg sm:rounded-xl border shadow-sm text-primary shrink-0">
-                <FileSearch className="w-5 h-5 sm:w-8 sm:h-8" />
-              </div>
-              <div>
-                <h2 className="text-lg sm:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-600">
-                  {t('resumeAnalysis.title')}
-                </h2>
-                <p className="text-xs sm:text-base text-muted-foreground mt-0.5 sm:mt-1 line-clamp-2 sm:line-clamp-none">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-3">
+                  <h2 className="text-lg sm:text-2xl font-bold truncate">
+                    {t('resumeAnalysis.title')}
+                  </h2>
+                  <HelpCircle topicId="resume_analysis" iconClassName="h-5 w-5" />
+                </div>
+                <p className="text-xs sm:text-base text-muted-foreground mt-0.5 sm:mt-1 line-clamp-3 sm:line-clamp-none">
                   {t('resumeAnalysis.description')}
                 </p>
               </div>
@@ -491,7 +492,7 @@ export const ResumeAnalysis = () => {
         </GlassCard>
       </div>
 
-      <div className="order-2 lg:sticky lg:top-4 space-y-6">
+      <div className="order-2 lg:sticky lg:top-24 space-y-6">
         <Card className="border-none shadow-lg bg-card/50 backdrop-blur-sm overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
           <CardHeader>

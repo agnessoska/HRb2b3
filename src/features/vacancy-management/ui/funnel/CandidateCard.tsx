@@ -1,6 +1,8 @@
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
+import { supabase } from '@/shared/lib/supabase';
+import { toast } from 'sonner';
 import {
   User,
   MessageSquare,
@@ -31,6 +33,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import type { SmartApplication } from '@/shared/types/extended';
+import { HelpCircle } from '@/shared/ui/HelpCircle';
 
 interface CandidateCardProps {
   application: SmartApplication;
@@ -199,18 +202,24 @@ export const CandidateCard = ({
     if (application.status === 'evaluated') {
       const isComplete = testsCompleted === 6;
       actions.push(
-        <Button
-          key="interview"
-          variant={isComplete ? "default" : "secondary"}
-          size="sm"
-          className="w-full gap-2"
-          onClick={() => isComplete && onInviteToInterview?.(application.id)}
-          disabled={!isComplete}
-          title={!isComplete ? t('tests:testsRequired') : undefined}
-        >
-          <Calendar className="h-4 w-4" />
-          {t('actions.inviteToInterview')}
-        </Button>
+        <div key="interview-action" className="flex items-center gap-2 w-full">
+          <Button
+            variant={isComplete ? "default" : "secondary"}
+            size="sm"
+            className="flex-1 gap-2"
+            onClick={() => isComplete && onInviteToInterview?.(application.id)}
+            disabled={!isComplete}
+            title={!isComplete ? t('tests:testsRequired') : undefined}
+          >
+            <Calendar className="h-4 w-4 shrink-0" />
+            <span className="truncate">{t('actions.inviteToInterview')}</span>
+          </Button>
+          <HelpCircle 
+            topicId="interview_plan" 
+            className="shrink-0" 
+            iconClassName="h-4 w-4"
+          />
+        </div>
       );
       
       if (!isComplete) {
@@ -227,16 +236,22 @@ export const CandidateCard = ({
       if (!application.interview_recommendation && application.latest_interview_id) {
         // Interview not completed yet
         actions.push(
-          <Button
-            key="conduct"
-            variant="default"
-            size="sm"
-            className="w-full gap-2 bg-indigo-600 hover:bg-indigo-700"
-            onClick={() => application.latest_interview_id && onOpenInterview?.(application.latest_interview_id)}
-          >
-            <PlayCircle className="h-4 w-4" />
-            {t('actions.conductInterview')}
-          </Button>
+          <div key="conduct-action" className="flex items-center gap-2 w-full">
+            <Button
+              variant="default"
+              size="sm"
+              className="flex-1 gap-2 bg-indigo-600 hover:bg-indigo-700"
+              onClick={() => application.latest_interview_id && onOpenInterview?.(application.latest_interview_id)}
+            >
+              <PlayCircle className="h-4 w-4 shrink-0" />
+              <span className="truncate">{t('actions.conductInterview')}</span>
+            </Button>
+            <HelpCircle 
+              topicId="interview_plan" 
+              className="shrink-0" 
+              iconClassName="h-4 w-4"
+            />
+          </div>
         );
       } else if (application.interview_recommendation && (application.interview_recommendation === 'hire_strongly' || application.interview_recommendation === 'hire')) {
         // Interview completed with positive recommendation - move to offer
@@ -284,16 +299,17 @@ export const CandidateCard = ({
       // View protocol (if interview exists)
       if (application.latest_interview_id) {
         actions.push(
-          <Button
-            key="protocol"
-            variant="outline"
-            size="sm"
-            className="w-full gap-2"
-            onClick={() => application.latest_interview_id && onOpenInterview?.(application.latest_interview_id)}
-          >
-            <FileText className="h-4 w-4" />
-            {t('actions.viewProtocol')}
-          </Button>
+          <div key="protocol-action" className="flex items-center gap-2 w-full">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1 gap-2"
+              onClick={() => application.latest_interview_id && onOpenInterview?.(application.latest_interview_id)}
+            >
+              <FileText className="h-4 w-4 shrink-0" />
+              <span className="truncate">{t('actions.viewProtocol')}</span>
+            </Button>
+          </div>
         );
       }
     }
@@ -307,7 +323,7 @@ export const CandidateCard = ({
           variant="default"
           size="sm"
           className="w-full gap-2 bg-blue-600 hover:bg-blue-700 shadow-md"
-          onClick={() => navigate(`/hr/chat?candidateId=${application.candidate.id}`)}
+          onClick={handleDiscussOffer}
         >
           <MessageSquare className="h-4 w-4" />
           {t('actions.discussOffer')}
@@ -343,6 +359,56 @@ export const CandidateCard = ({
     }
 
     return actions;
+  };
+
+  const handleDiscussOffer = async () => {
+    // Сначала убеждаемся, что чат существует
+    try {
+      // Пытаемся получить hr_specialist_id текущего пользователя
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const { data: hrProfile } = await supabase
+        .from('hr_specialists')
+        .select('id, organization_id')
+        .eq('user_id', user.id)
+        .single();
+
+      if (!hrProfile) throw new Error('HR profile not found');
+
+      // Проверяем наличие чата
+      const { data: existingRoom } = await supabase
+        .from('chat_rooms')
+        .select('id')
+        .eq('hr_specialist_id', hrProfile.id)
+        .eq('candidate_id', application.candidate.id)
+        .maybeSingle();
+
+      if (!existingRoom) {
+        // Создаем чат, если его нет
+        const { data: newRoom, error: createError } = await supabase
+          .from('chat_rooms')
+          .insert({
+            hr_specialist_id: hrProfile.id,
+            candidate_id: application.candidate.id,
+            organization_id: hrProfile.organization_id
+          })
+          .select('id')
+          .single();
+
+        if (createError) throw createError;
+        if (newRoom) {
+          navigate(`/hr/chat?candidateId=${application.candidate.id}`);
+        }
+      } else {
+        navigate(`/hr/chat?candidateId=${application.candidate.id}`);
+      }
+    } catch (error) {
+      console.error('Error ensuring chat room:', error);
+      toast.error(t('common:error'), {
+        description: t('ai-analysis:errors.chatCreationFailed')
+      });
+    }
   };
 
   const contextActions = renderContextActions();
@@ -405,7 +471,7 @@ export const CandidateCard = ({
                 {t('funnel:profile')}
               </DropdownMenuItem>
               {application.status !== 'rejected' && (
-                <DropdownMenuItem onClick={() => navigate(`/hr/chat?candidateId=${application.candidate.id}`)}>
+                <DropdownMenuItem onClick={handleDiscussOffer}>
                   <MessageSquare className="mr-2 h-4 w-4" />
                   {t('funnel:chat')}
                 </DropdownMenuItem>
@@ -464,7 +530,7 @@ export const CandidateCard = ({
                 variant="ghost"
                 size="icon"
                 className="h-6 w-6 hover:bg-muted"
-                onClick={() => navigate(`/hr/chat?candidateId=${application.candidate.id}`)}
+                onClick={handleDiscussOffer}
                 title={t('funnel:chat')}
               >
                 <MessageSquare className="h-3.5 w-3.5 text-muted-foreground" />

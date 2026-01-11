@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Coins, AlertCircle, Sparkles, Loader2 } from 'lucide-react';
+import { AlertCircle, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -44,9 +44,6 @@ export const TokenCostBanner = ({
         <div className="p-4 space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-primary/10">
-                {isAI ? <Sparkles className="h-4 w-4 text-primary" /> : <Coins className="h-4 w-4 text-primary" />}
-              </div>
               <span className="text-sm font-medium">
                 {isAI ? t('payments:tokenUsage.aiEstimate') : t('payments:tokenUsage.fixedCost')}
               </span>

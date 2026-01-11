@@ -4,7 +4,7 @@ import { supabase } from '@/shared/lib/supabase';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Info, Sparkles } from 'lucide-react';
+import { ArrowLeft, Plus, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   AlertDialog,
@@ -36,6 +36,7 @@ import { useHrProfile } from '@/shared/hooks/useHrProfile';
 import { AIGenerationModal } from '@/shared/ui/AIGenerationModal';
 import type { DocumentType } from '@/features/ai-analysis/api/generateDocument';
 import type { SmartApplication } from '@/shared/types/extended';
+import { HelpCircle } from '@/shared/ui/HelpCircle';
 
 interface DialogState {
   isOpen: boolean;
@@ -409,7 +410,10 @@ export const VacancyFunnel = ({ vacancyId }: VacancyFunnelProps) => {
               <ArrowLeft className="h-4 w-4 text-muted-foreground" />
             </Button>
             <div className="min-w-0 flex flex-col">
-              <h1 className="text-lg font-semibold truncate leading-tight">{vacancy?.title}</h1>
+              <div className="flex items-center gap-2">
+                <h1 className="text-lg font-semibold truncate leading-tight">{vacancy?.title}</h1>
+                <HelpCircle topicId="recruitment_funnel" iconClassName="h-3.5 w-3.5" />
+              </div>
               <p className="text-xs text-muted-foreground truncate">
                 {applications?.length || 0} {t('funnel:candidates')}
               </p>
@@ -510,42 +514,25 @@ export const VacancyFunnel = ({ vacancyId }: VacancyFunnelProps) => {
               {confirmationDialog.type === 'offer_simple' && t('offerSimpleDescription', { name: confirmationDialog.application?.candidate.full_name })}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <div className="space-y-3 py-4">
-            <Alert>
-              {confirmationDialog.type === 'reject' && <Info className="h-4 w-4" />}
-              {confirmationDialog.type === 'offer_simple' && <Sparkles className="h-4 w-4" />}
-              <AlertTitle>
-                {confirmationDialog.type === 'reject' && t('rejectInfo')}
-                {confirmationDialog.type === 'offer_simple' && t('offerSimpleInfo')}
-              </AlertTitle>
-              <AlertDescription>
-                {confirmationDialog.type === 'reject' && t('rejectInfoDescription')}
-                {confirmationDialog.type === 'offer_simple' && t('offerSimpleInfoDescription')}
-              </AlertDescription>
-            </Alert>
-          </div>
-          <AlertDialogFooter className="flex-col-reverse sm:flex-row gap-2">
+          {confirmationDialog.type === 'offer_simple' && (
+            <div className="py-4">
+              <Alert>
+                <Sparkles className="h-4 w-4" />
+                <AlertTitle>{t('offerSimpleInfo')}</AlertTitle>
+                <AlertDescription>{t('offerSimpleInfoDescription')}</AlertDescription>
+              </Alert>
+            </div>
+          )}
+          <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setConfirmationDialog({ type: null, application: null, newStatus: '' })}>
               {t('common:cancel')}
             </AlertDialogCancel>
-            {confirmationDialog.type === 'offer_simple' ? (
-              <AlertDialogAction onClick={() => handleConfirmationAction(false)}>
-                {t('offerSimpleConfirm')}
-              </AlertDialogAction>
-            ) : (
-              <>
-                <Button
-                  variant="outline"
-                  onClick={() => handleConfirmationAction(false)}
-                  className="w-full sm:w-auto"
-                >
-                  {t('rejectWithoutLetter')}
-                </Button>
-                <AlertDialogAction onClick={() => handleConfirmationAction(true)} className="w-full sm:w-auto">
-                  {t('rejectAndSendLetter')}
-                </AlertDialogAction>
-              </>
-            )}
+            <AlertDialogAction 
+              onClick={() => handleConfirmationAction(false)}
+              className={confirmationDialog.type === 'reject' ? 'bg-destructive hover:bg-destructive/90' : ''}
+            >
+              {confirmationDialog.type === 'reject' ? t('status.rejected') : t('offerSimpleConfirm')}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

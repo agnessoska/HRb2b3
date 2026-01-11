@@ -24,6 +24,7 @@ interface AssignToVacancyDialogProps {
   candidateId: string;
   candidateName: string;
   assignedVacancyIds: string[];
+  testsCompleted: number;
 }
 
 export const AssignToVacancyDialog = ({
@@ -32,6 +33,7 @@ export const AssignToVacancyDialog = ({
   candidateId,
   candidateName,
   assignedVacancyIds,
+  testsCompleted,
 }: AssignToVacancyDialogProps) => {
   const { t } = useTranslation(['candidates', 'common', 'vacancies']);
   const queryClient = useQueryClient();
@@ -48,11 +50,21 @@ export const AssignToVacancyDialog = ({
       if (!hrProfile || !organization || !selectedVacancyId) {
         throw new Error('Missing required data');
       }
+
+      // Определяем начальный статус на основе пройденных тестов
+      let initialStatus = 'invited';
+      if (testsCompleted === 6) {
+        initialStatus = 'evaluated';
+      } else if (testsCompleted > 0) {
+        initialStatus = 'testing';
+      }
+
       return addCandidateToFunnel(
         selectedVacancyId,
         candidateId,
         hrProfile.id,
-        organization.id
+        organization.id,
+        initialStatus
       );
     },
     onSuccess: () => {

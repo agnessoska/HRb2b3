@@ -32,6 +32,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { cn } from '@/lib/utils'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
+import { HelpCircle } from '@/shared/ui/HelpCircle'
 
 interface ResumeAnalysisResultProps {
   result: AnalysisResult
@@ -331,9 +332,12 @@ export const ResumeAnalysisResult = ({ result: initialResult, onBack }: ResumeAn
                       <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end pr-2">
                         <div className="flex items-center gap-5 bg-muted/30 border border-border/40 px-5 py-3 rounded-[1.25rem] shadow-sm transition-all duration-300">
                           <div className="flex flex-col items-end justify-center">
-                            <span className="text-[9px] font-bold text-muted-foreground/90 uppercase tracking-[0.2em] mb-1">
-                              {t('ai-analysis:resumeAnalysis.result.matchScore')}
-                            </span>
+                            <div className="flex items-center gap-1 mb-1">
+                              <span className="text-[9px] font-bold text-muted-foreground/90 uppercase tracking-[0.2em]">
+                                {t('ai-analysis:resumeAnalysis.result.matchScore')}
+                              </span>
+                              <HelpCircle topicId="match_score" iconClassName="h-3 w-3" />
+                            </div>
                             <div className={cn(
                               "text-3xl font-bold tabular-nums tracking-tighter leading-none",
                               candidate.match_score >= 80 ? "text-success" :

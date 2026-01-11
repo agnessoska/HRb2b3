@@ -49,6 +49,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { toast } from 'sonner';
 import { motion, type Variants } from 'framer-motion';
+import { HelpCircle } from '@/shared/ui/HelpCircle';
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -511,12 +512,15 @@ const AIAssistantPage = () => {
               <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-primary to-violet-600 flex items-center justify-center text-white shadow-lg shadow-primary/20">
                 <Bot className="w-6 h-6" />
               </div>
-              <div>
-                <h2 className="font-bold text-sm tracking-tight">{t('ai-assistant:assistantName')}</h2>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
-                  <span className="text-[10px] text-muted-foreground uppercase font-semibold tracking-wider">Online</span>
+              <div className="flex items-center gap-2">
+                <div>
+                  <h2 className="font-bold text-sm tracking-tight">{t('ai-assistant:assistantName')}</h2>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
+                    <span className="text-[10px] text-muted-foreground uppercase font-semibold tracking-wider">Online</span>
+                  </div>
                 </div>
+                <HelpCircle topicId="ai_assistant_tools" iconClassName="h-3.5 w-3.5" />
               </div>
             </div>
           </div>

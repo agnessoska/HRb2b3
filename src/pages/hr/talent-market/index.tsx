@@ -12,6 +12,7 @@ import { AcquireCandidateDialog } from '@/features/talent-market/ui/AcquireCandi
 import { useInView } from 'react-intersection-observer';
 import { Loader2, Users } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { HelpCircle } from '@/shared/ui/HelpCircle';
 
 const TalentMarketPage = () => {
   const { t } = useTranslation('talent-market');
@@ -59,7 +60,10 @@ const TalentMarketPage = () => {
   return (
     <div className="container mx-auto py-10">
       <div className="space-y-4 mb-8">
-        <h1 className="text-3xl font-bold">{t('title')}</h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-3xl font-bold">{t('title')}</h1>
+          <HelpCircle topicId="talent_market_global" iconClassName="h-6 w-6" />
+        </div>
         <p className="text-muted-foreground">
           {t('description')}
         </p>

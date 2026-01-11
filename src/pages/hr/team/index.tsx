@@ -1,5 +1,6 @@
 import { Users, Activity } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { HelpCircle } from '@/shared/ui/HelpCircle'
 import { TeamMembersTable } from '@/features/team/ui/TeamMembersTable'
 import { InviteMemberDialog } from '@/features/team/ui/InviteMemberDialog'
 import { InvitationsTable } from '@/features/team/ui/InvitationsTable'
@@ -16,7 +17,10 @@ const TeamPage = () => {
             <Users className="h-6 w-6 text-primary" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
+              <HelpCircle topicId="team_roles" />
+            </div>
             <p className="text-muted-foreground">
               {t('subtitle')}
             </p>

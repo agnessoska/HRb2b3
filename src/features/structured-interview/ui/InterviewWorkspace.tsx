@@ -5,11 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
-import {
-  ArrowLeft,
-  Play,
-  CheckCircle
-} from 'lucide-react'
+import { ArrowLeft, Play, CheckCircle } from 'lucide-react'
+import { HelpCircle } from '@/shared/ui/HelpCircle'
 import { cn } from '@/lib/utils'
 import { InterviewSection } from './InterviewSection'
 import { InterviewCompletionDialog } from './InterviewCompletionDialog'
@@ -209,7 +206,10 @@ export function InterviewWorkspace({
   <CardContent className="p-8">
     <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
       <div className="flex-1 space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">{session.interview_plan.candidate_name}</h2>
+        <div className="flex items-center gap-3">
+          <h2 className="text-3xl font-bold tracking-tight">{session.interview_plan.candidate_name}</h2>
+          <HelpCircle topicId="interview_workspace" iconClassName="h-6 w-6" />
+        </div>
         <p className="text-muted-foreground text-base">{session.interview_plan.vacancy_title}</p>
       </div>
       <div className="flex-shrink-0">

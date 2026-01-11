@@ -8,6 +8,7 @@ import { ResumeAnalysis } from '@/features/ai-analysis/ui/ResumeAnalysis'
 import { FileSearch, Users, Briefcase } from 'lucide-react'
 import { GlassCard } from '@/shared/ui/GlassCard'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { HelpCircle } from '@/shared/ui/HelpCircle'
 
 export default function HRDashboardPage() {
   const { t } = useTranslation('dashboard')
@@ -27,11 +28,14 @@ export default function HRDashboardPage() {
 
   return (
     <div className="space-y-6 sm:space-y-8">
-      <GlassCard className="p-6 border-none shadow-md">
-        <h1 className="text-2xl sm:text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-600">
-          {t('title')}
-        </h1>
-        <p className="mt-2 text-muted-foreground text-sm sm:text-lg">
+      <GlassCard className="p-4 sm:p-6 border-none shadow-md">
+        <div className="flex items-center gap-3">
+          <h1 className="text-xl sm:text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-600 truncate">
+            {t('title')}
+          </h1>
+          <HelpCircle topicId="dashboard" className="shrink-0" iconClassName="h-5 w-5 sm:h-6 sm:w-6" />
+        </div>
+        <p className="mt-1 sm:mt-2 text-muted-foreground text-xs sm:text-lg line-clamp-3 sm:line-clamp-none">
           {t('description')}
         </p>
       </GlassCard>

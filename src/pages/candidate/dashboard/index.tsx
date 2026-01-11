@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTranslation } from 'react-i18next';
+import { HelpCircle } from '@/shared/ui/HelpCircle';
 import { useAuthStore } from '@/app/store/auth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -54,9 +55,12 @@ const CandidateDashboardPage = () => {
 
   return (
     <div className="container mx-auto py-10">
-      <h1 className="text-3xl font-bold mb-8">
-        {t('welcome')}, {isLoading ? '...' : data?.profile?.full_name}
-      </h1>
+      <div className="flex items-center gap-2 mb-8">
+        <h1 className="text-3xl font-bold">
+          {t('welcome')}, {isLoading ? '...' : data?.profile?.full_name}
+        </h1>
+        <HelpCircle topicId="candidate_dashboard" />
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-8">
@@ -161,7 +165,10 @@ const TestingProgressWidget = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t('testingProgress.title')}</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle>{t('testingProgress.title')}</CardTitle>
+          <HelpCircle topicId="candidate_tests_importance" />
+        </div>
       </CardHeader>
       <CardContent>
         {isLoading ? (
@@ -195,7 +202,10 @@ const ProfileStatusWidget = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t('profileVisibility.title')}</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle>{t('profileVisibility.title')}</CardTitle>
+          <HelpCircle topicId="candidate_profile_publicity" />
+        </div>
       </CardHeader>
       <CardContent>
         {isLoading ? (

@@ -16,6 +16,7 @@ import type { Database } from '@/shared/types/database'
 import { Label } from '@/components/ui/label'
 import { useTranslation } from 'react-i18next'
 import { TrendingUp, TrendingDown, Target } from 'lucide-react'
+import { HelpCircle } from '@/shared/ui/HelpCircle'
 
 type Vacancy = Database['public']['Tables']['vacancies']['Row']
 
@@ -171,7 +172,10 @@ export const IdealProfileEditor = ({ vacancy, onSave, isLoading }: IdealProfileE
         <AccordionItem value="big_five">
           <AccordionTrigger className="text-lg font-semibold">
             <div className="flex flex-col items-start gap-1 text-left">
-              <span>{t('idealProfile.bigFive.title')}</span>
+              <div className="flex items-center gap-2">
+                <span>{t('idealProfile.bigFive.title')}</span>
+                <HelpCircle topicId="ideal_profile" iconClassName="h-4 w-4" />
+              </div>
               <span className="text-sm font-normal text-muted-foreground">
                 {t('idealProfile.testDescriptions.bigFive')}
               </span>
@@ -224,7 +228,10 @@ export const IdealProfileEditor = ({ vacancy, onSave, isLoading }: IdealProfileE
         <AccordionItem value="eq">
           <AccordionTrigger className="text-lg font-semibold">
             <div className="flex flex-col items-start gap-1 text-left">
-              <span>{t('idealProfile.eq.title')}</span>
+              <div className="flex items-center gap-2">
+                <span>{t('idealProfile.eq.title')}</span>
+                <HelpCircle topicId="ideal_profile" iconClassName="h-4 w-4" />
+              </div>
               <span className="text-sm font-normal text-muted-foreground">
                 {t('idealProfile.testDescriptions.eq')}
               </span>
@@ -269,7 +276,10 @@ export const IdealProfileEditor = ({ vacancy, onSave, isLoading }: IdealProfileE
         <AccordionItem value="soft_skills">
           <AccordionTrigger className="text-lg font-semibold">
             <div className="flex flex-col items-start gap-1 text-left">
-              <span>{t('idealProfile.softSkills.title')}</span>
+              <div className="flex items-center gap-2">
+                <span>{t('idealProfile.softSkills.title')}</span>
+                <HelpCircle topicId="ideal_profile" iconClassName="h-4 w-4" />
+              </div>
               <span className="text-sm font-normal text-muted-foreground">
                 {t('idealProfile.testDescriptions.softSkills')}
               </span>
@@ -322,7 +332,10 @@ export const IdealProfileEditor = ({ vacancy, onSave, isLoading }: IdealProfileE
         <AccordionItem value="motivation">
           <AccordionTrigger className="text-lg font-semibold">
             <div className="flex flex-col items-start gap-1 text-left">
-              <span>{t('idealProfile.motivation.title')}</span>
+              <div className="flex items-center gap-2">
+                <span>{t('idealProfile.motivation.title')}</span>
+                <HelpCircle topicId="ideal_profile" iconClassName="h-4 w-4" />
+              </div>
               <span className="text-sm font-normal text-muted-foreground">
                 {t('idealProfile.testDescriptions.motivation')}
               </span>
@@ -383,7 +396,10 @@ export const IdealProfileEditor = ({ vacancy, onSave, isLoading }: IdealProfileE
         <AccordionItem value="disc">
           <AccordionTrigger className="text-lg font-semibold">
             <div className="flex flex-col items-start gap-1 text-left">
-              <span>{t('idealProfile.disc.title')}</span>
+              <div className="flex items-center gap-2">
+                <span>{t('idealProfile.disc.title')}</span>
+                <HelpCircle topicId="ideal_profile" iconClassName="h-4 w-4" />
+              </div>
               <span className="text-sm font-normal text-muted-foreground">
                 {t('idealProfile.testDescriptions.disc')}
               </span>
@@ -422,7 +438,10 @@ export const IdealProfileEditor = ({ vacancy, onSave, isLoading }: IdealProfileE
         <AccordionItem value="mbti">
           <AccordionTrigger className="text-lg font-semibold">
             <div className="flex flex-col items-start gap-1 text-left">
-              <span>{t('idealProfile.mbti.title')}</span>
+              <div className="flex items-center gap-2">
+                <span>{t('idealProfile.mbti.title')}</span>
+                <HelpCircle topicId="ideal_profile" iconClassName="h-4 w-4" />
+              </div>
               <span className="text-sm font-normal text-muted-foreground">
                 {t('idealProfile.testDescriptions.mbti')}
               </span>

@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { useTranslation } from 'react-i18next'
 import { ArrowRight, CheckCircle2, Clock, AlertCircle } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { HelpCircle } from '@/shared/ui/HelpCircle'
 import { AssignToVacancyDialog } from './AssignToVacancyDialog'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
@@ -18,12 +19,28 @@ interface CandidateCardProps {
   candidate: CandidateWithVacancies
 }
 
-function getTestStatus(lastUpdatedAt: string | null) {
+function getTestStatus(testsCompleted: number, lastUpdatedAt: string | null) {
+  if (testsCompleted === 0) {
+    return {
+      textKey: 'statuses.notStarted',
+      color: 'bg-muted text-muted-foreground border-muted-foreground/20',
+      icon: Clock,
+    }
+  }
+
+  if (testsCompleted < 6) {
+    return {
+      textKey: 'statuses.inProgress',
+      color: 'bg-primary/10 text-primary border-primary/20',
+      icon: Clock,
+    }
+  }
+
   if (!lastUpdatedAt) {
     return {
       textKey: 'statuses.relevant',
-      color: 'bg-gradient-to-r from-slate-500 to-slate-600',
-      icon: Clock,
+      color: 'bg-gradient-to-r from-emerald-500 to-green-600 text-white',
+      icon: CheckCircle2,
     }
   }
 
@@ -34,11 +51,11 @@ function getTestStatus(lastUpdatedAt: string | null) {
     (now.getMonth() - lastUpdateDate.getMonth())
 
   if (monthsDiff < 1) {
-    return { textKey: 'statuses.relevant', color: 'bg-gradient-to-r from-emerald-500 to-green-600', icon: CheckCircle2 }
+    return { textKey: 'statuses.relevant', color: 'bg-gradient-to-r from-emerald-500 to-green-600 text-white', icon: CheckCircle2 }
   } else if (monthsDiff <= 2) {
-    return { textKey: 'statuses.expiring', color: 'bg-gradient-to-r from-amber-500 to-orange-500', icon: Clock }
+    return { textKey: 'statuses.expiring', color: 'bg-gradient-to-r from-amber-500 to-orange-500 text-white', icon: Clock }
   } else {
-    return { textKey: 'statuses.outdated', color: 'bg-gradient-to-r from-red-500 to-rose-600', icon: AlertCircle }
+    return { textKey: 'statuses.outdated', color: 'bg-gradient-to-r from-red-500 to-rose-600 text-white', icon: AlertCircle }
   }
 }
 
@@ -67,7 +84,7 @@ export function CandidateCard({ candidate }: CandidateCardProps) {
   }
 
   const categoryName = getCategoryName()
-  const testStatus = getTestStatus(candidate.tests_last_updated_at)
+  const testStatus = getTestStatus(testsCompleted, candidate.tests_last_updated_at)
   const StatusIcon = testStatus.icon
   const progressPercentage = (testsCompleted / 6) * 100
 
@@ -87,11 +104,11 @@ export function CandidateCard({ candidate }: CandidateCardProps) {
   ) : null
 
   return (
-    <Card className="group overflow-hidden">
+    <Card className="group overflow-hidden flex flex-col h-full transition-all duration-300 hover:shadow-md border-border/50">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <Avatar className="h-10 w-10 border border-border/50">
+            <Avatar className="h-10 w-10 border border-border/50 shrink-0">
               {avatarUrl && (
                 <AvatarImage 
                   src={avatarUrl} 
@@ -103,15 +120,15 @@ export function CandidateCard({ candidate }: CandidateCardProps) {
                 {initials}
               </AvatarFallback>
             </Avatar>
-            <div>
-              <CardTitle className="text-lg">{candidate.full_name}</CardTitle>
-              <p className="text-sm text-muted-foreground">{categoryName}</p>
+            <div className="min-w-0">
+              <CardTitle className="text-lg truncate">{candidate.full_name}</CardTitle>
+              <p className="text-sm text-muted-foreground truncate">{categoryName}</p>
             </div>
           </div>
         </div>
       </CardHeader>
-      <CardContent className="pb-3">
-        <div className="space-y-3">
+      <CardContent className="pb-4 flex-1">
+        <div className="space-y-4 flex flex-col h-full">
           <div>
             <div className="mb-2 flex items-center justify-between text-sm">
               <span className="font-medium text-muted-foreground">
@@ -128,19 +145,21 @@ export function CandidateCard({ candidate }: CandidateCardProps) {
               />
             </div>
           </div>
-          {testsCompleted > 0 && (
+          
+          <div className="flex-1 flex flex-col justify-end">
             <div className="flex items-center gap-2">
               <div
-                className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium text-white ${testStatus.color}`}
+                className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider border transition-colors ${testStatus.color}`}
               >
                 <StatusIcon className="h-3 w-3" />
                 {t(`card.${testStatus.textKey}`)}
               </div>
+              <HelpCircle topicId="tests_relevance" iconClassName="h-3.5 w-3.5" />
             </div>
-          )}
+          </div>
         </div>
       </CardContent>
-      <CardFooter className="flex gap-2 border-t bg-muted/30 pt-4">
+      <CardFooter className="flex gap-2 border-t bg-muted/30 pt-4 px-5 pb-5 mt-auto">
         <Button variant="outline" size="sm" className="flex-1" asChild>
           <Link to={`/hr/candidate/${candidate.id}`}>{t('card.profile_button')}</Link>
         </Button>
@@ -160,6 +179,7 @@ export function CandidateCard({ candidate }: CandidateCardProps) {
         candidateId={candidate.id}
         candidateName={candidate.full_name || t('common.notAvailable')}
         assignedVacancyIds={candidate.vacancy_ids || []}
+        testsCompleted={testsCompleted}
       />
     </Card>
   )

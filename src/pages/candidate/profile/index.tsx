@@ -8,6 +8,7 @@ import { CandidateProfileForm } from '@/features/candidate-management/ui/Candida
 import { Loader2, ChevronLeft, Save } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useNavigate } from 'react-router-dom'
+import { HelpCircle } from '@/shared/ui/HelpCircle'
 
 export default function CandidateProfilePage() {
   const { t } = useTranslation(['candidates', 'common'])
@@ -42,11 +43,9 @@ export default function CandidateProfilePage() {
           >
             <ChevronLeft className="h-6 w-6" />
           </Button>
-          <div>
+          <div className="flex items-center gap-2">
             <h1 className="text-3xl font-bold tracking-tight">{t('profile.title', 'Мой профиль')}</h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              {t('profile.subtitle', 'Управляйте своими личными данными и навыками')}
-            </p>
+            <HelpCircle topicId="candidate_profile_publicity" />
           </div>
         </div>
         <div className="flex items-center gap-2">

@@ -215,12 +215,16 @@
   "actions": {
     "edit": "Edit",
     "archive": "Archive",
+    "restore": "Restore",
     "view": "View",
     "manage": "Manage",
     "manageCandidate": "Candidates",
     "next": "Next",
     "back": "Back"
   },
+  "restoreSuccess": "Vacancy restored successfully",
+  "restoreError": "Error restoring vacancy",
+  "confirmRestore": "Are you sure you want to restore this vacancy?",
   "salary": {
     "label": "Salary Range",
     "from": "From",

@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { HelpCircle } from '@/shared/ui/HelpCircle';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -60,6 +61,10 @@ export const KanbanColumn = ({
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full" style={{ backgroundColor: statusColors[id] || '#6b7280' }} />
             <h3 className="font-semibold text-sm text-foreground/80 uppercase tracking-wide">{title}</h3>
+            {id === 'testing' && <HelpCircle topicId="funnel_testing" iconClassName="h-3.5 w-3.5" />}
+            {id === 'evaluated' && <HelpCircle topicId="funnel_evaluated" iconClassName="h-3.5 w-3.5" />}
+            {id === 'interview' && <HelpCircle topicId="funnel_interview" iconClassName="h-3.5 w-3.5" />}
+            {id === 'offer' && <HelpCircle topicId="funnel_offer" iconClassName="h-3.5 w-3.5" />}
           </div>
           <Badge variant="secondary" className="ml-2 bg-background/50 font-mono text-xs">
             {count}

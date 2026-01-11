@@ -11,6 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Label } from '@/components/ui/label'
+import { HelpCircle } from '@/shared/ui/HelpCircle'
 import { Loader2 } from 'lucide-react'
 import { Textarea } from '@/components/ui/textarea'
 import { HrProfileSettings } from '@/features/hr-specialist/ui/HrProfileSettings'
@@ -83,7 +84,10 @@ export default function HRProfilePage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{t('organizationSettings')}</CardTitle>
+          <div className="flex items-center gap-2">
+            <CardTitle>{t('organizationSettings')}</CardTitle>
+            <HelpCircle topicId="organization_branding" />
+          </div>
           <CardDescription>{t('organizationSettingsDesc', 'Manage your organization profile and branding')}</CardDescription>
         </CardHeader>
         <CardContent>

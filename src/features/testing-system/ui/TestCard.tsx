@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { differenceInDays, format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import { Calendar, Clock, FileQuestion } from 'lucide-react';
+import { HelpCircle } from '@/shared/ui/HelpCircle';
 
 interface TestCardProps {
   test: TestWithResult;
@@ -70,7 +71,10 @@ export const TestCard = ({ test, onRetake }: TestCardProps) => {
     <Card className="h-full flex flex-col">
       <CardHeader>
         <div className="flex items-start justify-between gap-4">
-          <CardTitle className="text-xl">{test[`name_${lang}`]}</CardTitle>
+          <div className="flex items-center gap-1.5">
+            <CardTitle className="text-xl">{test[`name_${lang}`]}</CardTitle>
+            <HelpCircle topicId={`test_${test.code}`} />
+          </div>
           <Badge
             variant={status.badge as "default" | "destructive" | "outline" | "secondary" | "success" | "warning"}
             className="whitespace-nowrap shrink-0"

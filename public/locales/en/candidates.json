@@ -18,7 +18,9 @@
     "statuses": {
       "relevant": "Relevant",
       "expiring": "Expiring soon",
-      "outdated": "Outdated"
+      "outdated": "Outdated",
+      "notStarted": "Not started",
+      "inProgress": "In progress"
     },
     "viewProfile": "Profile",
     "testing_progress": "Testing Progress",

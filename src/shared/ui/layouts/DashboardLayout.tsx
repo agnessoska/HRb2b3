@@ -173,7 +173,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                   location.pathname.startsWith(link.href) ? "text-foreground font-bold" : "text-foreground/60"
                 )}
               >
-                {link.label}
+                <span>{link.label}</span>
                 {link.href.includes('chat') && unreadCount > 0 && (
                   <Badge variant="destructive" className="rounded-full h-4 min-w-[1rem] flex items-center justify-center px-1 text-[9px] animate-pulse border-none">
                     {unreadCount}

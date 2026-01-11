@@ -27,11 +27,7 @@
     "rejected": "Rejected"
   },
   "rejectCandidate": "Reject candidate?",
-  "rejectDescription": "You are about to reject candidate {{name}}",
-  "rejectInfo": "Recommendation",
-  "rejectInfoDescription": "We recommend sending a polite rejection letter. This helps maintain good relationships and company reputation.",
-  "rejectWithoutLetter": "Reject without letter",
-  "rejectAndSendLetter": "Reject and send letter",
+  "rejectDescription": "You are about to reject candidate {{name}}. They will be moved to \"Rejected\" column.",
   "moveToOffer": "Ready to discuss offer?",
   "offerSimpleDescription": "Candidate {{name}} will be moved to \"Ready for offer\" status",
   "offerSimpleInfo": "Next step",

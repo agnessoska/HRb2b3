@@ -10,10 +10,12 @@
   },
   "card": {
     "testsCompleted": "6 тесттің {{count}} өтілді",
-    "status": {
-      "ok": "Өзекті",
+    "statuses": {
+      "relevant": "Өзекті",
       "expiring": "Жақында ескіреді",
-      "expired": "Ескірген"
+      "outdated": "Ескірген",
+      "notStarted": "Басталған жоқ",
+      "inProgress": "Өтуде"
     },
     "viewProfile": "Профиль",
     "testing_progress": "Тестілеу барысы",

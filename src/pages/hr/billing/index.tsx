@@ -5,6 +5,7 @@ import { getAiOperationsLog } from '@/features/ai-analysis/api/getAiOperationsLo
 import { TransactionsTable } from '@/features/payments/ui/TransactionsTable'
 import { AiOperationsLogTable } from '@/features/ai-analysis/ui/AiOperationsLogTable'
 import { useTranslation } from 'react-i18next'
+import { HelpCircle } from '@/shared/ui/HelpCircle'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
@@ -37,7 +38,10 @@ const BillingPage = () => {
   return (
     <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">{t('title')}</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold">{t('title')}</h1>
+            <HelpCircle topicId="billing_tokens" iconClassName="h-6 w-6" />
+          </div>
           <div className="text-right">
             <p className="text-muted-foreground">{t('currentBalance')}</p>
             <p className="text-2xl font-bold">

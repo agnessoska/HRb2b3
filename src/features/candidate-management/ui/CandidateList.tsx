@@ -7,6 +7,7 @@ import { GenerateInviteLinkDialog } from './GenerateInviteLinkDialog'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Users } from 'lucide-react'
 import { ListContainer, ListItem } from '@/shared/ui/ListTransition'
+import { HelpCircle } from '@/shared/ui/HelpCircle'
 
 export function CandidateList() {
   const { t } = useTranslation('candidates')
@@ -66,16 +67,19 @@ export function CandidateList() {
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">{t('common.candidates')}</h2>
-          <p className="text-sm text-muted-foreground mt-1">
+        <div className="flex flex-col gap-1 flex-1">
+          <div className="flex items-center gap-2">
+            <h2 className="text-2xl font-bold tracking-tight">{t('common.candidates')}</h2>
+            <HelpCircle topicId="candidates_base" />
+          </div>
+          <p className="text-sm text-muted-foreground">
             {t('list.description')}
           </p>
         </div>
         <GenerateInviteLinkDialog />
       </div>
       {candidates && candidates.length > 0 ? (
-        <ListContainer className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <ListContainer className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 auto-rows-fr">
           {candidates.map((candidate) => (
             <ListItem key={candidate.id}>
               <CandidateCard candidate={candidate} />

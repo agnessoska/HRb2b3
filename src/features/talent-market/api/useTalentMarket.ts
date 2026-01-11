@@ -3,14 +3,16 @@ import { supabase } from "@/shared/lib/supabase";
 import type { MarketFilters } from "../ui/TalentMarketFilters";
 import { useAuthStore } from "@/app/store/auth";
 import type { TalentMarketCandidate } from "../types";
+import { useTranslation } from "react-i18next";
 
 const PAGE_LIMIT = 20;
 
 export const useTalentMarket = (filters: MarketFilters) => {
   const { user } = useAuthStore();
+  const { i18n } = useTranslation();
 
   return useInfiniteQuery({
-    queryKey: ['talent-market', filters],
+    queryKey: ['talent-market', filters, i18n.language],
     queryFn: async ({ pageParam = 0 }) => {
       const offset = pageParam * PAGE_LIMIT;
 
@@ -26,12 +28,20 @@ export const useTalentMarket = (filters: MarketFilters) => {
         
         if (scoreError) {
           console.error('Error fetching candidate scores:', scoreError);
-          // Return empty array instead of throwing to avoid infinite retry loops causing UI crashes
           return [];
         }
         
-        // Ensure the returned data matches TalentMarketCandidate structure
-        return (scoredCandidates as unknown) as TalentMarketCandidate[];
+        const scored = scoredCandidates as unknown as TalentMarketCandidate[];
+        return scored.map(c => {
+          const rawCandidateSkills = c.skills as unknown as { name?: string; canonical_name?: string; canonical_skill?: string }[];
+          return {
+            ...c,
+            skills: Array.isArray(rawCandidateSkills) ? rawCandidateSkills.map(s => ({
+              name: s.name || s.canonical_name || s.canonical_skill || '',
+              canonical_name: s.canonical_name || s.canonical_skill || ''
+            })) : []
+          };
+        }) as TalentMarketCandidate[];
       }
 
       let query = supabase
@@ -39,10 +49,12 @@ export const useTalentMarket = (filters: MarketFilters) => {
         .select(`
           id,
           full_name,
-          category:professional_categories(id, name_ru),
+          category:professional_categories(id, name_ru, name_en, name_kk),
           tests_completed,
           tests_last_updated_at,
-          skills:candidate_skills(canonical_skill),
+          skills:candidate_skills(
+            canonical_skill
+          ),
           avatar_url
         `)
         .eq('is_public', true)
@@ -55,33 +67,38 @@ export const useTalentMarket = (filters: MarketFilters) => {
         query = query.gte('tests_completed', filters.minTestsCompleted);
       }
       
-      // Apply sorting
       if (filters.sortBy === 'date') {
         query = query.order('created_at', { ascending: false });
       } else if (filters.sortBy === 'tests') {
         query = query.order('tests_completed', { ascending: false });
       } else {
-        // Default sort (compatibility without vacancy -> date, or just date fallback)
         query = query.order('created_at', { ascending: false });
       }
 
       const { data: candidates, error } = await query;
       if (error) throw error;
 
-      return candidates.map(c => ({
-        candidate_id: c.id,
-        full_name: c.full_name ?? '',
-        category_id: c.category?.id ?? null,
-        tests_completed: c.tests_completed,
-        tests_last_updated_at: c.tests_last_updated_at ?? new Date().toISOString(),
-        professional_compatibility: 0,
-        personal_compatibility: 0,
-        overall_compatibility: 0,
-        compatibility_details: null,
-        skills: c.skills,
-        category: c.category,
-        avatar_url: c.avatar_url,
-      })) as TalentMarketCandidate[];
+      return candidates.map(c => {
+        const rawSkills = c.skills as unknown as { canonical_skill: string }[];
+        
+        return {
+          candidate_id: c.id,
+          full_name: c.full_name ?? '',
+          category_id: c.category?.id ?? null,
+          tests_completed: c.tests_completed,
+          tests_last_updated_at: c.tests_last_updated_at ?? new Date().toISOString(),
+          professional_compatibility: 0,
+          personal_compatibility: 0,
+          overall_compatibility: 0,
+          compatibility_details: null,
+          skills: rawSkills?.map(s => ({
+            name: s.canonical_skill, // Fallback to canonical name since we can't join directly without FK
+            canonical_name: s.canonical_skill
+          })) ?? [],
+          category: c.category,
+          avatar_url: c.avatar_url,
+        };
+      }) as TalentMarketCandidate[];
     },
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => {
@@ -91,6 +108,6 @@ export const useTalentMarket = (filters: MarketFilters) => {
       return allPages.length;
     },
     enabled: !!user,
-    staleTime: 0, // Всегда запрашивать свежие данные, чтобы видеть актуальную совместимость
+    staleTime: 0,
   });
 };

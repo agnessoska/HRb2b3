@@ -120,5 +120,6 @@
     "other": "Other"
   },
   "noCandidatesFound": "No candidates found matching your filters.",
+  "tryAdjustingFilters": "Try changing your search parameters or selecting a different vacancy.",
   "noMoreCandidates": "You have viewed all candidates."
 }

@@ -16,6 +16,7 @@ import { useCreateInvitation } from '../api/createInvitation'
 import { toast } from 'sonner'
 import { TokenCostBanner } from '@/shared/ui/TokenCostBanner'
 import { useTokenCalculation } from '@/shared/hooks/useTokenCalculation'
+import { HelpCircle } from '@/shared/ui/HelpCircle'
 
 export const InviteMemberDialog = () => {
   const { t } = useTranslation(['team', 'common'])
@@ -67,7 +68,10 @@ export const InviteMemberDialog = () => {
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{t('invite.title')}</DialogTitle>
+          <div className="flex items-center gap-2">
+            <DialogTitle>{t('invite.title')}</DialogTitle>
+            <HelpCircle topicId="candidates_base" />
+          </div>
           <DialogDescription>
             {t('invite.description')}
           </DialogDescription>

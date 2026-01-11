@@ -23,6 +23,7 @@ import { GlassCard } from '@/shared/ui/GlassCard'
 import { AIBorder } from '@/shared/ui/AIBorder'
 import { TokenCostBanner } from '@/shared/ui/TokenCostBanner'
 import { useTokenCalculation } from '@/shared/hooks/useTokenCalculation'
+import { HelpCircle } from '@/shared/ui/HelpCircle'
 
 interface IdealProfileGeneratorProps {
   vacancy: Database['public']['Tables']['vacancies']['Row']
@@ -110,9 +111,12 @@ export function IdealProfileGenerator({ vacancy }: IdealProfileGeneratorProps) {
               <Target className="h-8 w-8 text-primary" />
             </div>
             <div className="flex-1">
-              <h2 className="text-2xl font-bold mb-2">
-                {t('idealProfile.generator.whatIs.title')}
-              </h2>
+              <div className="flex items-center gap-2 mb-2">
+                <h2 className="text-2xl font-bold">
+                  {t('idealProfile.generator.whatIs.title')}
+                </h2>
+                <HelpCircle topicId="ideal_profile" />
+              </div>
               <p className="text-muted-foreground leading-relaxed">
                 {t('idealProfile.generator.whatIs.description')}
               </p>

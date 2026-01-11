@@ -19,7 +19,9 @@
     "statuses": {
       "relevant": "Актуально",
       "expiring": "Скоро устареет",
-      "outdated": "Устарело"
+      "outdated": "Устарело",
+      "notStarted": "Не начал",
+      "inProgress": "В процессе"
     },
     "viewProfile": "Профиль",
     "testing_progress": "Прогресс тестирования",

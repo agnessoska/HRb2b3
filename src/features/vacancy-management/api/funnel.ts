@@ -39,14 +39,15 @@ export const addCandidateToFunnel = async (
   vacancyId: string,
   candidateId: string,
   hrId: string,
-  organizationId: string
+  organizationId: string,
+  status: string = 'invited'
 ) => {
   const { data, error } = await supabase.from('applications').insert({
     vacancy_id: vacancyId,
     candidate_id: candidateId,
     added_by_hr_id: hrId,
     organization_id: organizationId,
-    status: 'invited',
+    status: status,
   });
 
   if (error) throw error;

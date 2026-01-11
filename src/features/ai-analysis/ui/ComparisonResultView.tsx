@@ -16,6 +16,7 @@ import {
   Star,
   ArrowLeft
 } from 'lucide-react'
+import { HelpCircle } from '@/shared/ui/HelpCircle'
 
 export interface ComparisonMatrixExtended extends Partial<ComparisonMatrix> {
   categories?: string[]
@@ -238,7 +239,10 @@ export const ComparisonResultView = ({
             <Star className="h-6 w-6 md:h-8 md:w-8 text-primary" />
           </div>
           <div className="flex-1 min-w-0">
-            <h2 className="text-base md:text-2xl font-bold mb-1 md:mb-2">Итоговое сравнение</h2>
+            <div className="flex items-center gap-2 mb-1 md:mb-2">
+              <h2 className="text-base md:text-2xl font-bold">Итоговое сравнение</h2>
+              <HelpCircle topicId="candidate_comparison" />
+            </div>
             <p className="text-xs md:text-base text-muted-foreground leading-relaxed">
               {normalizedData.summary}
             </p>
