@@ -4,6 +4,7 @@
   "dialog": {
     "create_title": "Create a new vacancy",
     "edit_title": "Edit Vacancy",
+    "view_title": "View Vacancy",
     "form": {
       "title": "Position Title",
       "title_placeholder": "e.g., Frontend Developer",
@@ -31,6 +32,7 @@
     },
     "description": "Fill in the details below to post a new job opening.",
     "edit_description": "Update vacancy information.",
+    "view_description": "Vacancy information.",
     "errorLoadingSkills": "Error loading skills",
     "createSuccess": "Vacancy created successfully",
     "updateSuccess": "Vacancy updated successfully",

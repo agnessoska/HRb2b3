@@ -38,16 +38,17 @@ export const QuestionCard = ({
 
   return (
     <Card className={cn(
-      "p-5 transition-all",
-      selectedValue !== undefined && "ring-2 ring-primary"
+      "p-8 transition-all duration-500 border-border/50 rounded-[2rem] bg-card/40 backdrop-blur-md shadow-xl shadow-primary/5 relative overflow-hidden",
+      selectedValue !== undefined && "ring-2 ring-primary/20 border-primary/30"
     )}>
-      <div className="space-y-3">
-        <div className="flex items-start justify-between">
-          <h3 className="text-base font-medium leading-relaxed flex-1">
+      <div className="absolute top-0 left-0 w-1 h-full bg-primary/20" />
+      <div className="space-y-6">
+        <div className="flex items-start justify-between gap-6">
+          <h3 className="text-xl font-bold leading-tight flex-1 text-foreground tracking-tight">
             {questionText}
           </h3>
-          <Badge variant="outline" className="ml-4 flex-shrink-0">
-            {questionNumber}/{totalQuestions}
+          <Badge variant="outline" className="flex-shrink-0 font-black text-[10px] uppercase tracking-[0.2em] px-3 py-1 bg-background/50 border-border/50 rounded-lg">
+            {questionNumber} / {totalQuestions}
           </Badge>
         </div>
         
@@ -64,19 +65,22 @@ export const QuestionCard = ({
                 <div
                   key={index}
                   className={cn(
-                    "relative flex items-center space-x-3 p-3 rounded-lg border cursor-pointer transition-all duration-200",
-                    "hover:bg-accent hover:border-accent-foreground/20 active:scale-[0.99]",
-                    isSelected ? "border-primary bg-primary/5 ring-1 ring-primary/20" : "border-muted"
+                    "relative flex items-center space-x-4 p-5 rounded-2xl border-2 cursor-pointer transition-all duration-300",
+                    "hover:bg-accent/50 hover:border-border active:scale-[0.98]",
+                    isSelected ? "border-primary bg-primary/5 ring-4 ring-primary/10 shadow-lg shadow-primary/5" : "border-transparent bg-muted/10"
                   )}
                   onClick={() => onAnswer(value)}
                 >
                   <div className={cn(
-                    "h-5 w-5 rounded-full border border-primary flex items-center justify-center shrink-0 transition-colors",
-                    isSelected && "bg-primary text-primary-foreground"
+                    "h-6 w-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-all duration-300",
+                    isSelected ? "bg-primary border-primary scale-110 shadow-md shadow-primary/30" : "border-muted-foreground/30 bg-background/50"
                   )}>
-                    {isSelected && <div className="h-2 w-2 rounded-full bg-white" />}
+                    {isSelected && <div className="h-2 w-2 rounded-full bg-white shadow-sm" />}
                   </div>
-                  <span className="text-base flex-1 font-medium">{option}</span>
+                  <span className={cn(
+                    "text-base flex-1 transition-all",
+                    isSelected ? "font-bold text-foreground" : "font-medium text-muted-foreground"
+                  )}>{option}</span>
                 </div>
               )
             })}

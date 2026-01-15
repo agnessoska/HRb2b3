@@ -47,16 +47,16 @@ export const ChatListItem = ({
       <button
         onClick={onClick}
         className={cn(
-          'w-full p-3 rounded-lg transition-all text-left group relative border border-transparent',
+          'w-full p-4 rounded-2xl transition-all text-left group relative border',
           isActive
-            ? 'bg-primary/5 backdrop-blur-sm border-primary/10 shadow-sm'
-            : 'hover:bg-muted/50 hover:border-border/50 hover:shadow-sm'
+            ? 'bg-primary/10 backdrop-blur-md border-primary/20 shadow-lg shadow-primary/5'
+            : 'bg-transparent border-transparent hover:bg-accent/30 hover:border-border/50'
         )}
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           <Avatar className={cn(
-            "w-9 h-9 border-2 border-background shadow-sm transition-transform",
-            isActive ? "scale-105 ring-2 ring-primary/20" : ""
+            "w-12 h-12 border-2 border-background shadow-md transition-all duration-300",
+            isActive ? "scale-110 ring-4 ring-primary/10" : "group-hover:scale-105"
           )}>
             <AvatarImage src={otherPerson.avatar_url || undefined} />
             <AvatarFallback className={cn(
@@ -66,12 +66,12 @@ export const ChatListItem = ({
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between gap-2">
-              <p className="font-medium text-sm truncate text-foreground/90">
+            <div className="flex items-center justify-between gap-2 mb-1">
+              <p className="font-bold text-sm truncate text-foreground group-hover:text-primary transition-colors">
                 {otherPerson.full_name}
               </p>
               {chatRoom.last_message_at && (
-                <span className="text-[10px] text-muted-foreground/70 shrink-0">
+                <span className="text-[10px] font-medium text-muted-foreground/60 shrink-0">
                   {formatDistanceToNow(new Date(chatRoom.last_message_at), {
                     addSuffix: false,
                     locale: locale,
@@ -82,7 +82,7 @@ export const ChatListItem = ({
             <div className="flex items-center justify-between gap-2 mt-0.5">
               <div />
               {unreadCount && unreadCount > 0 ? (
-                <Badge variant="default" className="h-5 min-w-[1.25rem] px-1 flex items-center justify-center text-[10px]">
+                <Badge variant="default" className="h-5 min-w-[1.25rem] px-1.5 flex items-center justify-center text-[10px] font-black rounded-full animate-pulse shadow-lg shadow-primary/20">
                   {unreadCount}
                 </Badge>
               ) : null}

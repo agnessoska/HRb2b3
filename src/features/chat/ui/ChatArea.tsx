@@ -297,22 +297,22 @@ export const ChatArea = ({ chatRoomId, userType, onBack, initialChatRoom }: Chat
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
-      <div className="border-b px-4 shrink-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-10 shadow-sm h-[53px] flex items-center">
-        <div className="flex items-center gap-3 w-full">
+      <div className="border-b border-border/50 px-6 shrink-0 bg-background/95 backdrop-blur-xl z-10 shadow-sm h-[70px] flex items-center">
+        <div className="flex items-center gap-4 w-full">
           {onBack && (
-            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onBack}>
-              <ArrowLeft className="h-4 w-4" />
+            <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-accent/50 transition-colors" onClick={onBack}>
+              <ArrowLeft className="h-5 w-5" />
             </Button>
           )}
-          <div className="flex items-center gap-3 flex-1">
-            <Avatar className="h-8 w-8 ring-1 ring-border/50">
-              <AvatarImage src={otherPerson.avatar_url} />
-              <AvatarFallback className="bg-gradient-to-br from-primary/10 to-primary/5 text-primary text-xs">
+          <div className="flex items-center gap-4 flex-1">
+            <Avatar className="h-10 w-10 border-2 border-background shadow-md">
+              <AvatarImage src={otherPerson.avatar_url} className="object-cover" />
+              <AvatarFallback className="bg-gradient-to-br from-primary/20 to-violet-500/20 text-primary text-xs font-bold">
                 {otherPerson.full_name?.substring(0, 2).toUpperCase() || 'U'}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <h3 className="font-medium text-sm truncate">{otherPerson.full_name || 'User'}</h3>
+              <h3 className="font-bold text-sm tracking-tight truncate">{otherPerson.full_name || 'User'}</h3>
               {isOtherUserTyping && (
                 <p className="text-[10px] text-emerald-500 animate-pulse font-medium">
                   {t('typing')}
@@ -361,11 +361,11 @@ export const ChatArea = ({ chatRoomId, userType, onBack, initialChatRoom }: Chat
         </Button>
       )}
 
-      <div className="p-3 bg-background z-20">
-        <div className="bg-muted/30 rounded-xl border p-1 ring-offset-background focus-within:ring-2 focus-within:ring-ring/20 transition-all">
+      <div className="p-4 bg-background/80 backdrop-blur-lg z-20 border-t border-border/50">
+        <div className="bg-card/50 rounded-2xl border border-border/50 p-1.5 ring-offset-background focus-within:ring-4 focus-within:ring-primary/10 transition-all backdrop-blur-md">
           {selectedFile && (
-            <div className="mx-2 mt-2 p-2 bg-background rounded-md border shadow-sm flex items-center justify-between">
-              <span className="text-xs truncate max-w-[200px] text-muted-foreground">{selectedFile.name}</span>
+            <div className="mx-2 mt-2 p-2.5 bg-background/80 rounded-xl border border-border/50 shadow-sm flex items-center justify-between animate-in slide-in-from-bottom-2">
+              <span className="text-xs font-medium truncate max-w-[200px] text-muted-foreground">{selectedFile.name}</span>
               <Button
                 variant="ghost"
                 size="icon"
@@ -390,11 +390,11 @@ export const ChatArea = ({ chatRoomId, userType, onBack, initialChatRoom }: Chat
             <Button
               variant="ghost"
               size="icon"
-              className="h-9 w-9 flex-shrink-0 text-muted-foreground hover:text-primary hover:bg-transparent"
+              className="h-10 w-10 flex-shrink-0 text-muted-foreground hover:text-primary hover:bg-primary/5 rounded-xl transition-all"
               onClick={() => fileInputRef.current?.click()}
               disabled={isSending}
             >
-              <Paperclip className="h-4 w-4" />
+              <Paperclip className="h-5 w-5" />
             </Button>
             <Textarea
               placeholder={t('typePlaceholder')}
@@ -402,7 +402,7 @@ export const ChatArea = ({ chatRoomId, userType, onBack, initialChatRoom }: Chat
               onChange={e => handleTyping(e.target.value)}
               onKeyDown={handleKeyDown}
               rows={1}
-              className="resize-none min-h-[36px] max-h-[120px] bg-transparent border-0 shadow-none focus-visible:ring-0 p-2 text-sm"
+              className="resize-none min-h-[40px] max-h-[150px] bg-transparent border-0 shadow-none focus-visible:ring-0 px-2 py-2.5 text-sm"
               disabled={isSending && !!selectedFile}
             />
             <Button
@@ -410,7 +410,7 @@ export const ChatArea = ({ chatRoomId, userType, onBack, initialChatRoom }: Chat
               disabled={(!messageText.trim() && !selectedFile) || isSending}
               size="icon"
               className={cn(
-                "h-8 w-8 flex-shrink-0 mb-0.5 mr-0.5 transition-all",
+                "h-9 w-9 flex-shrink-0 mb-0.5 mr-0.5 transition-all rounded-xl shadow-lg shadow-primary/20",
                 (messageText.trim() || selectedFile) ? "opacity-100 scale-100" : "opacity-0 scale-75 pointer-events-none"
               )}
             >

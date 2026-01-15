@@ -51,5 +51,11 @@
     "loadMessages": "Failed to load messages",
     "createConversation": "Failed to create new chat",
     "deleteConversation": "Failed to delete conversation"
+  },
+  "deleteConfirm": {
+    "title": "Delete chat?",
+    "description": "This action cannot be undone. All messages in this chat will be permanently deleted.",
+    "cancel": "Cancel",
+    "confirm": "Delete"
   }
 }

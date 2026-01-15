@@ -208,17 +208,19 @@ export function AuthForm() {
 
   if (showEmailConfirmation) {
     return (
-      <Card className="border-0 shadow-lg max-w-md w-full mx-auto">
+      <Card className="border-border/50 shadow-2xl max-w-md w-full mx-auto bg-background/95 backdrop-blur-xl rounded-3xl">
         <CardHeader className="space-y-1 pb-6 text-center">
-          <Mail className="mx-auto h-12 w-12 text-primary mb-4" />
-          <CardTitle className="text-2xl">{t('checkEmailTitle')}</CardTitle>
+          <div className="mx-auto h-20 w-20 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+            <Mail className="h-10 w-10 text-primary" />
+          </div>
+          <CardTitle className="text-2xl font-bold">{t('checkEmailTitle')}</CardTitle>
           <CardDescription>{t('checkEmailDescription')}</CardDescription>
         </CardHeader>
         <CardContent className="text-center">
-          <p className="text-sm text-muted-foreground mb-6">
+          <p className="text-sm text-muted-foreground mb-8">
             {t('checkEmailInstructions')}
           </p>
-          <Button variant="outline" onClick={() => setShowEmailConfirmation(false)} className="w-full">
+          <Button variant="outline" onClick={() => setShowEmailConfirmation(false)} className="w-full h-12 rounded-xl border-border/50 hover:bg-accent/50 transition-colors">
             {t('backToLogin')}
           </Button>
         </CardContent>
@@ -228,12 +230,14 @@ export function AuthForm() {
 
   if (showForgotPassword) {
     return (
-      <Card className="border-0 shadow-lg max-w-md w-full mx-auto">
+      <Card className="border-border/50 shadow-2xl max-w-md w-full mx-auto bg-background/95 backdrop-blur-xl rounded-3xl">
         <CardHeader className="space-y-1 pb-6">
           <div className="flex justify-center mb-4">
-            <Lock className="h-12 w-12 text-primary" />
+            <div className="h-20 w-20 bg-primary/10 rounded-full flex items-center justify-center">
+              <Lock className="h-10 w-10 text-primary" />
+            </div>
           </div>
-          <CardTitle className="text-2xl text-center">{t('resetPasswordTitle')}</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">{t('resetPasswordTitle')}</CardTitle>
           <CardDescription className="text-center">
             {resetLinkSent ? t('resetLinkSent') : t('resetPasswordDescription')}
           </CardDescription>
@@ -243,7 +247,7 @@ export function AuthForm() {
              <Button variant="outline" onClick={() => {
                setShowForgotPassword(false)
                setResetLinkSent(false)
-             }} className="w-full">
+             }} className="w-full h-12 rounded-xl border-border/50 hover:bg-accent/50 transition-colors">
               {t('backToLogin')}
             </Button>
           ) : (
@@ -256,9 +260,9 @@ export function AuthForm() {
                     <FormItem>
                       <FormLabel>{t('emailLabel')}</FormLabel>
                       <FormControl>
-                        <div className="relative">
-                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input placeholder={t('emailPlaceholder')} className="pl-10" {...field} />
+                        <div className="relative group">
+                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                          <Input placeholder={t('emailPlaceholder')} className="pl-10 h-12 bg-background/50 border-border/50 focus:border-primary transition-all rounded-xl" {...field} />
                         </div>
                       </FormControl>
                       <FormMessage />
@@ -266,11 +270,11 @@ export function AuthForm() {
                   )}
                 />
                 {error && (
-                  <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+                  <div className="rounded-xl bg-destructive/10 border border-destructive/20 p-4 text-sm text-destructive">
                     {error}
                   </div>
                 )}
-                <Button type="submit" className="w-full h-11" disabled={loading}>
+                <Button type="submit" className="w-full h-12 rounded-xl shadow-lg shadow-primary/20" disabled={loading}>
                   {loading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -280,7 +284,7 @@ export function AuthForm() {
                     t('sendResetLink')
                   )}
                 </Button>
-                <Button type="button" variant="ghost" onClick={() => setShowForgotPassword(false)} className="w-full">
+                <Button type="button" variant="ghost" onClick={() => setShowForgotPassword(false)} className="w-full h-12 rounded-xl hover:bg-accent/50">
                   {t('backToLogin')}
                 </Button>
               </form>
@@ -296,31 +300,32 @@ export function AuthForm() {
   return (
     <div className="w-full max-w-md mx-auto space-y-6 px-4 sm:px-0">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-4">
-          <TabsTrigger value="login">{t('loginTab')}</TabsTrigger>
-          <TabsTrigger value="register">{t('registerTab')}</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 h-12 p-1 bg-muted/20 backdrop-blur-lg rounded-2xl border border-border/50 mb-6">
+          <TabsTrigger value="login" className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all h-full py-0 flex items-center justify-center">{t('loginTab')}</TabsTrigger>
+          <TabsTrigger value="register" className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all h-full py-0 flex items-center justify-center">{t('registerTab')}</TabsTrigger>
         </TabsList>
-        <TabsContent value="login">
-          <Card className="border-0 shadow-lg overflow-hidden">
-            <CardHeader className="space-y-1 pb-6 text-center">
-              <CardTitle className="text-2xl font-bold">{t('loginTitle')}</CardTitle>
-              <CardDescription>{t('loginDescription')}</CardDescription>
+        
+        <TabsContent value="login" className="mt-0">
+          <Card className="border-border/50 shadow-2xl overflow-hidden bg-background/95 backdrop-blur-xl rounded-3xl">
+            <CardHeader className="space-y-1 pb-8 text-center pt-8">
+              <CardTitle className="text-3xl font-bold tracking-tight">{t('loginTitle')}</CardTitle>
+              <CardDescription className="text-base">{t('loginDescription')}</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pb-8">
               <Form {...loginForm}>
-                <form onSubmit={loginForm.handleSubmit(onLogin)} className="space-y-4">
+                <form onSubmit={loginForm.handleSubmit(onLogin)} className="space-y-5">
                   <FormField
                     control={loginForm.control}
                     name="email"
                     render={({ field }: { field: ControllerRenderProps<z.infer<typeof loginSchema>, "email"> }) => (
                       <FormItem>
-                        <FormLabel>{t('emailLabel')}</FormLabel>
+                        <FormLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground ml-1">{t('emailLabel')}</FormLabel>
                         <FormControl>
                           <div className="relative group">
-                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                             <Input 
                               placeholder={t('emailPlaceholder')} 
-                              className="pl-10 h-11 bg-background/50 border-muted-foreground/20 focus:border-primary transition-all duration-200" 
+                              className="pl-11 h-12 bg-muted/10 border-border/50 focus:border-primary transition-all duration-200 rounded-xl focus:bg-background" 
                               {...field} 
                             />
                           </div>
@@ -334,12 +339,12 @@ export function AuthForm() {
                     name="password"
                     render={({ field }: { field: ControllerRenderProps<z.infer<typeof loginSchema>, "password"> }) => (
                       <FormItem>
-                        <div className="flex items-center justify-between">
-                          <FormLabel>{t('passwordLabel')}</FormLabel>
+                        <div className="flex items-center justify-between ml-1">
+                          <FormLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('passwordLabel')}</FormLabel>
                           <Button
                             type="button"
                             variant="link"
-                            className="px-0 font-normal text-xs text-muted-foreground hover:text-primary h-auto"
+                            className="px-0 font-medium text-xs text-muted-foreground hover:text-primary h-auto transition-colors"
                             onClick={() => setShowForgotPassword(true)}
                           >
                             {t('forgotPassword')}
@@ -347,10 +352,10 @@ export function AuthForm() {
                         </div>
                         <FormControl>
                           <div className="relative group">
-                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                             <Input 
                               type="password" 
-                              className="pl-10 h-11 bg-background/50 border-muted-foreground/20 focus:border-primary transition-all duration-200" 
+                              className="pl-11 h-12 bg-muted/10 border-border/50 focus:border-primary transition-all duration-200 rounded-xl focus:bg-background" 
                               {...field} 
                             />
                           </div>
@@ -360,14 +365,14 @@ export function AuthForm() {
                     )}
                   />
                   {error && (
-                    <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive border border-destructive/20">
+                    <div className="rounded-xl bg-destructive/10 p-4 text-sm text-destructive border border-destructive/20 animate-in fade-in slide-in-from-top-1">
                       {error}
                     </div>
                   )}
-                  <Button type="submit" className="w-full h-11 font-medium text-base shadow-sm hover:shadow-md transition-all duration-200" disabled={loading}>
+                  <Button type="submit" className="w-full h-12 font-semibold text-base shadow-xl shadow-primary/20 hover:shadow-primary/30 hover:-translate-y-0.5 transition-all rounded-xl mt-2" disabled={loading}>
                     {loading ? (
                       <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                         {t('signingInButton')}
                       </>
                     ) : (
@@ -375,12 +380,12 @@ export function AuthForm() {
                     )}
                   </Button>
                   
-                  <div className="relative py-2">
+                  <div className="relative py-4">
                     <div className="absolute inset-0 flex items-center">
-                      <span className="w-full border-t border-muted" />
+                      <span className="w-full border-t border-border/50" />
                     </div>
-                    <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-card px-2 text-muted-foreground font-medium">
+                    <div className="relative flex justify-center text-xs uppercase tracking-widest">
+                      <span className="bg-background px-4 text-muted-foreground font-semibold">
                         {t('orContinueWith')}
                       </span>
                     </div>
@@ -389,14 +394,14 @@ export function AuthForm() {
                   <Button
                     type="button"
                     variant="outline"
-                    className="w-full h-11 font-medium hover:bg-accent/50 transition-colors"
+                    className="w-full h-12 font-medium hover:bg-accent/50 transition-all rounded-xl border-border/50"
                     onClick={handleGoogleLogin}
                     disabled={loading}
                   >
                     {loading ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                     ) : (
-                      <svg className="mr-2 h-4 w-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512">
+                      <svg className="mr-3 h-5 w-5" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512">
                         <path fill="currentColor" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"></path>
                       </svg>
                     )}
@@ -405,14 +410,14 @@ export function AuthForm() {
                 </form>
               </Form>
 
-              <div className="mt-8 pt-6 border-t text-center">
-                <p className="text-xs text-muted-foreground leading-relaxed">
+              <div className="mt-10 pt-6 border-t border-border/50 text-center">
+                <p className="text-[11px] text-muted-foreground leading-relaxed max-w-[280px] mx-auto uppercase tracking-tighter opacity-70">
                   <Trans
                     t={t}
                     i18nKey="termsAgreement"
                     components={{
-                      1: <Link key="terms" to="/public/terms" className="underline hover:text-primary transition-colors font-medium" />,
-                      3: <Link key="privacy" to="/public/privacy" className="underline hover:text-primary transition-colors font-medium" />
+                      1: <Link key="terms" to="/public/terms" className="underline hover:text-primary transition-colors font-bold" />,
+                      3: <Link key="privacy" to="/public/privacy" className="underline hover:text-primary transition-colors font-bold" />
                     }}
                   />
                 </p>
@@ -420,26 +425,27 @@ export function AuthForm() {
             </CardContent>
           </Card>
         </TabsContent>
-        <TabsContent value="register">
-          <Card className="border-0 shadow-lg overflow-hidden">
-            <CardHeader className="space-y-1 pb-6 flex flex-col items-center text-center">
+
+        <TabsContent value="register" className="mt-0">
+          <Card className="border-border/50 shadow-2xl overflow-hidden bg-background/95 backdrop-blur-xl rounded-3xl">
+            <CardHeader className="space-y-1 pb-8 flex flex-col items-center text-center pt-8">
               {isJoinMode && invitationData.brand_logo_url && (
-                <div className="mb-4 h-16 w-16 rounded-xl overflow-hidden bg-muted/20 flex items-center justify-center border border-border/50 shadow-sm">
+                <div className="mb-6 h-20 w-20 rounded-2xl overflow-hidden bg-muted/20 flex items-center justify-center border border-border/50 shadow-inner p-1">
                   <img
                     src={invitationData.brand_logo_url}
                     alt={invitationData.organization_name}
-                    className="h-full w-full object-cover"
+                    className="h-full w-full object-contain rounded-xl"
                   />
                 </div>
               )}
-              <CardTitle className="text-2xl font-bold">
+              <CardTitle className="text-3xl font-bold tracking-tight">
                   {isJoinMode
                     ? (invitationData.type === 'candidate'
                         ? t('joinAsCandidateTitle', { company: invitationData.organization_name, defaultValue: `Приглашение от ${invitationData.organization_name}` })
                         : t('joinTeamTitle', 'Присоединиться к команде'))
                     : t('registerTitle')}
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-base max-w-[300px]">
                   {isJoinMode
                       ? (invitationData.type === 'candidate'
                           ? t('joinAsCandidateDesc', { company: invitationData.organization_name })
@@ -447,53 +453,54 @@ export function AuthForm() {
                       : t('registerDescription')}
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pb-8">
               <Form {...registerForm}>
-                <form onSubmit={registerForm.handleSubmit(onRegister)} className="space-y-4">
+                <form onSubmit={registerForm.handleSubmit(onRegister)} className="space-y-5">
                   {!isJoinMode && (
-                      <div className="space-y-3">
-                      <Label className="text-sm font-medium">{t('iAm')}</Label>
+                      <div className="space-y-3 mb-2">
+                      <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground ml-1">{t('iAm')}</Label>
                       <RadioGroup
                         defaultValue={role}
                         value={role}
                         onValueChange={(value: Role) => setRole(value)}
-                        className="grid grid-cols-2 gap-3"
+                        className="grid grid-cols-2 gap-4"
                       >
                           <div>
                           <RadioGroupItem value="hr" id="r1" className="peer sr-only" />
                           <Label
                               htmlFor="r1"
-                              className="flex flex-col items-center justify-center rounded-xl border-2 border-muted bg-transparent p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 [&:has([data-state=checked])]:border-primary cursor-pointer transition-all duration-200"
+                              className="flex flex-col items-center justify-center rounded-2xl border-2 border-muted bg-muted/5 p-4 hover:bg-accent/50 hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 cursor-pointer transition-all duration-200 h-24"
                           >
-                              <Briefcase className="mb-2 h-6 w-6 peer-data-[state=checked]:text-primary" />
-                              <span className="text-sm font-medium">{t('hrSpecialist')}</span>
+                              <Briefcase className="mb-2 h-6 w-6 text-muted-foreground peer-data-[state=checked]:text-primary" />
+                              <span className="text-xs font-bold uppercase tracking-wider">{t('hrSpecialist')}</span>
                           </Label>
                           </div>
                           <div>
                           <RadioGroupItem value="candidate" id="r2" className="peer sr-only" />
                           <Label
                               htmlFor="r2"
-                              className="flex flex-col items-center justify-center rounded-xl border-2 border-muted bg-transparent p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 [&:has([data-state=checked])]:border-primary cursor-pointer transition-all duration-200"
+                              className="flex flex-col items-center justify-center rounded-2xl border-2 border-muted bg-muted/5 p-4 hover:bg-accent/50 hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 cursor-pointer transition-all duration-200 h-24"
                           >
-                              <UserCircle2 className="mb-2 h-6 w-6 peer-data-[state=checked]:text-primary" />
-                              <span className="text-sm font-medium">{t('candidate')}</span>
+                              <UserCircle2 className="mb-2 h-6 w-6 text-muted-foreground peer-data-[state=checked]:text-primary" />
+                              <span className="text-xs font-bold uppercase tracking-wider">{t('candidate')}</span>
                           </Label>
                           </div>
                       </RadioGroup>
                       </div>
                   )}
+                  
                   <FormField
                     control={registerForm.control}
                     name="fullName"
                     render={({ field }: { field: ControllerRenderProps<z.infer<typeof registerSchema>, "fullName"> }) => (
                       <FormItem>
-                        <FormLabel>{t('fullNameLabel')}</FormLabel>
+                        <FormLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground ml-1">{t('fullNameLabel')}</FormLabel>
                         <FormControl>
                           <div className="relative group">
-                            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                            <User className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                             <Input 
                               placeholder={t('fullNamePlaceholder')} 
-                              className="pl-10 h-11 bg-background/50 border-muted-foreground/20 focus:border-primary transition-all duration-200" 
+                              className="pl-11 h-12 bg-muted/10 border-border/50 focus:border-primary transition-all duration-200 rounded-xl focus:bg-background" 
                               {...field} 
                             />
                           </div>
@@ -502,20 +509,21 @@ export function AuthForm() {
                       </FormItem>
                     )}
                   />
+                  
                   <FormField
                     control={registerForm.control}
                     name="email"
                     render={({ field }: { field: ControllerRenderProps<z.infer<typeof registerSchema>, "email"> }) => (
                       <FormItem>
-                        <FormLabel>{t('emailLabel')}</FormLabel>
+                        <FormLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground ml-1">{t('emailLabel')}</FormLabel>
                         <FormControl>
                           <div className="relative group">
-                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                             <Input
                               placeholder={t('emailPlaceholder')}
-                              className="pl-10 h-11 bg-background/50 border-muted-foreground/20 focus:border-primary transition-all duration-200"
+                              className="pl-11 h-12 bg-muted/10 border-border/50 focus:border-primary transition-all duration-200 rounded-xl focus:bg-background" 
                               {...field}
-                              disabled={!!isJoinMode && !!invitationData?.email} // Disable only if email is pre-filled from token
+                              disabled={!!isJoinMode && !!invitationData?.email}
                             />
                           </div>
                         </FormControl>
@@ -523,18 +531,19 @@ export function AuthForm() {
                       </FormItem>
                     )}
                   />
+                  
                   <FormField
                     control={registerForm.control}
                     name="password"
                     render={({ field }: { field: ControllerRenderProps<z.infer<typeof registerSchema>, "password"> }) => (
                       <FormItem>
-                        <FormLabel>{t('passwordLabel')}</FormLabel>
+                        <FormLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground ml-1">{t('passwordLabel')}</FormLabel>
                         <FormControl>
                           <div className="relative group">
-                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                             <Input 
                               type="password" 
-                              className="pl-10 h-11 bg-background/50 border-muted-foreground/20 focus:border-primary transition-all duration-200" 
+                              className="pl-11 h-12 bg-muted/10 border-border/50 focus:border-primary transition-all duration-200 rounded-xl focus:bg-background" 
                               {...field} 
                             />
                           </div>
@@ -543,19 +552,20 @@ export function AuthForm() {
                       </FormItem>
                     )}
                   />
+                  
                   {role === 'hr' && !isJoinMode && (
                     <FormField
                       control={registerForm.control}
                       name="organizationName"
                       render={({ field }: { field: ControllerRenderProps<z.infer<typeof registerSchema>, "organizationName"> }) => (
                         <FormItem>
-                          <FormLabel>{t('organizationLabel')}</FormLabel>
+                          <FormLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground ml-1">{t('organizationLabel')}</FormLabel>
                           <FormControl>
                             <div className="relative group">
-                              <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                              <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                               <Input 
                                 placeholder={t('organizationPlaceholder')} 
-                                className="pl-10 h-11 bg-background/50 border-muted-foreground/20 focus:border-primary transition-all duration-200" 
+                                className="pl-11 h-12 bg-muted/10 border-border/50 focus:border-primary transition-all duration-200 rounded-xl focus:bg-background" 
                                 {...field} 
                               />
                             </div>
@@ -565,15 +575,17 @@ export function AuthForm() {
                       )}
                     />
                   )}
+                  
                   {error && (
-                    <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive border border-destructive/20">
+                    <div className="rounded-xl bg-destructive/10 p-4 text-sm text-destructive border border-destructive/20 animate-in fade-in slide-in-from-top-1">
                       {error}
                     </div>
                   )}
-                  <Button type="submit" className="w-full h-11 font-medium text-base shadow-sm hover:shadow-md transition-all duration-200" disabled={loading}>
+                  
+                  <Button type="submit" className="w-full h-12 font-semibold text-base shadow-xl shadow-primary/20 hover:shadow-primary/30 hover:-translate-y-0.5 transition-all rounded-xl mt-2" disabled={loading}>
                     {loading ? (
                       <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                         {t('creatingAccountButton')}
                       </>
                     ) : (
@@ -581,12 +593,12 @@ export function AuthForm() {
                     )}
                   </Button>
 
-                  <div className="relative py-2">
+                  <div className="relative py-4">
                     <div className="absolute inset-0 flex items-center">
-                      <span className="w-full border-t border-muted" />
+                      <span className="w-full border-t border-border/50" />
                     </div>
-                    <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-card px-2 text-muted-foreground font-medium">
+                    <div className="relative flex justify-center text-xs uppercase tracking-widest">
+                      <span className="bg-background px-4 text-muted-foreground font-semibold">
                         {t('orContinueWith')}
                       </span>
                     </div>
@@ -595,14 +607,14 @@ export function AuthForm() {
                   <Button
                     type="button"
                     variant="outline"
-                    className="w-full h-11 font-medium hover:bg-accent/50 transition-colors"
+                    className="w-full h-12 font-medium hover:bg-accent/50 transition-all rounded-xl border-border/50"
                     onClick={handleGoogleLogin}
                     disabled={loading}
                   >
                     {loading ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                     ) : (
-                      <svg className="mr-2 h-4 w-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512">
+                      <svg className="mr-3 h-5 w-5" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512">
                         <path fill="currentColor" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"></path>
                       </svg>
                     )}
@@ -611,14 +623,14 @@ export function AuthForm() {
                 </form>
               </Form>
 
-              <div className="mt-8 pt-6 border-t text-center">
-                <p className="text-xs text-muted-foreground leading-relaxed">
+              <div className="mt-10 pt-6 border-t border-border/50 text-center">
+                <p className="text-[11px] text-muted-foreground leading-relaxed max-w-[280px] mx-auto uppercase tracking-tighter opacity-70">
                   <Trans
                     t={t}
                     i18nKey="termsAgreement"
                     components={{
-                      1: <Link key="terms" to="/public/terms" className="underline hover:text-primary transition-colors font-medium" />,
-                      3: <Link key="privacy" to="/public/privacy" className="underline hover:text-primary transition-colors font-medium" />
+                      1: <Link key="terms" to="/public/terms" className="underline hover:text-primary transition-colors font-bold" />,
+                      3: <Link key="privacy" to="/public/privacy" className="underline hover:text-primary transition-colors font-bold" />
                     }}
                   />
                 </p>

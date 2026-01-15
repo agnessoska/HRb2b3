@@ -33,6 +33,7 @@ export const sendMessageStream = async (
 
     const decoder = new TextDecoder();
     let isDone = false;
+    let buffer = '';
 
     while (!isDone) {
       const { done, value } = await reader.read();
@@ -41,8 +42,9 @@ export const sendMessageStream = async (
         break;
       }
 
-      const chunk = decoder.decode(value);
-      const lines = chunk.split('\n');
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || '';
 
       for (const line of lines) {
         if (line.startsWith('data: ')) {

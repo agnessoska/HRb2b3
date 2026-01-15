@@ -465,20 +465,40 @@ serve(async (req: Request) => {
               const reader = response.body?.getReader()
               if (!reader) throw new Error('Failed to open Gemini stream')
 
+              const decoder = new TextDecoder()
               const currentToolCalls: Array<{ functionCall?: { name: string; args: Record<string, unknown> }; text?: string }> = []
               let currentTextContent = ''
+              let requestInputTokens = 0
+              let requestOutputTokens = 0
+              let buffer = ''
 
               while (true) {
                 const { done, value } = await reader.read()
                 if (done) break
                 
-                const chunk = new TextDecoder().decode(value)
-                const lines = chunk.split('\n')
+                buffer += decoder.decode(value, { stream: true })
+                const lines = buffer.split('\n')
+                // Keep the last partial line in the buffer
+                buffer = lines.pop() || ''
+
                 for (const line of lines) {
-                  if (line.startsWith('data: ')) {
+                  if (line.trim().startsWith('data: ')) {
                     try {
-                      const data = JSON.parse(line.slice(6))
-                      const part = data.candidates[0].content.parts[0]
+                      const data = JSON.parse(line.trim().slice(6))
+                      
+                      // Extract usage metadata if present in the chunk
+                      // Google sends cumulative totals for the current request, so we take the latest
+                      if (data.usageMetadata) {
+                        requestInputTokens = data.usageMetadata.promptTokenCount || 0
+                        requestOutputTokens = data.usageMetadata.candidatesTokenCount || 0
+                      }
+
+                      if (!data.candidates || data.candidates.length === 0) {
+                        continue;
+                      }
+
+                      const part = data.candidates[0].content?.parts?.[0]
+                      if (!part) continue;
                       
                       if (part.text) {
                         const text = part.text
@@ -492,6 +512,21 @@ serve(async (req: Request) => {
                   }
                 }
               }
+
+              // Process any remaining buffer
+              if (buffer.trim().startsWith('data: ')) {
+                try {
+                  const data = JSON.parse(buffer.trim().slice(6))
+                  if (data.usageMetadata) {
+                    requestInputTokens = data.usageMetadata.promptTokenCount || 0
+                    requestOutputTokens = data.usageMetadata.candidatesTokenCount || 0
+                  }
+                } catch { /* ignore */ }
+              }
+
+              // Add cumulative totals from this specific request to the global totals
+              inputTokensTotal += requestInputTokens
+              outputTokensTotal += requestOutputTokens
 
               if (currentToolCalls.length > 0) {
                 // Add model's tool calls to history
@@ -519,8 +554,7 @@ serve(async (req: Request) => {
               }
             }
             
-            inputTokensTotal = Math.ceil(fullPrompt.length / 4) // Simplified
-            outputTokensTotal = Math.ceil(fullResponse.length / 4)
+            // inputTokensTotal and outputTokensTotal were accumulated during the stream chunks
           }
 
           await supabaseAdmin.rpc('deduct_tokens', {
@@ -541,6 +575,10 @@ serve(async (req: Request) => {
           })
 
           if (conversation_id) {
+            const now = new Date()
+            const userCreatedAt = now.toISOString()
+            const assistantCreatedAt = new Date(now.getTime() + 50).toISOString()
+
             await supabaseAdmin.from('ai_assistant_messages').insert([
               {
                 conversation_id,
@@ -548,13 +586,15 @@ serve(async (req: Request) => {
                 content: message || '',
                 attachment_url: attachment_url || null,
                 attachment_name: attachment_name || null,
-                attachment_type: attachment_type || null
+                attachment_type: attachment_type || null,
+                created_at: userCreatedAt
               },
-              { 
-                conversation_id, 
-                role: 'assistant', 
-                content: fullResponse, 
-                tokens_used: inputTokensTotal + outputTokensTotal 
+              {
+                conversation_id,
+                role: 'assistant',
+                content: fullResponse,
+                tokens_used: inputTokensTotal + outputTokensTotal,
+                created_at: assistantCreatedAt
               }
             ])
           }

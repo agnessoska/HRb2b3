@@ -98,7 +98,7 @@ export const TalentMarketFilters = ({ onFilterChange }: TalentMarketFiltersProps
             </SelectTrigger>
             <SelectContent className="rounded-lg border-primary/10 shadow-xl">
               {vacancies?.map((vacancy) => (
-                <SelectItem key={vacancy.id} value={vacancy.id} className="py-2.5 rounded-md focus:bg-primary/5 cursor-pointer text-sm">
+                <SelectItem key={vacancy.id} value={vacancy.id} className="py-2.5 rounded-md focus:bg-accent cursor-pointer text-sm transition-colors">
                   {vacancy.title}
                 </SelectItem>
               ))}
@@ -122,9 +122,9 @@ export const TalentMarketFilters = ({ onFilterChange }: TalentMarketFiltersProps
               <SelectValue placeholder={t('filters.categoryPlaceholder')} />
             </SelectTrigger>
             <SelectContent className="rounded-lg border-primary/10 shadow-xl">
-              <SelectItem value="all" className="py-2.5 rounded-md focus:bg-primary/5 cursor-pointer text-sm">{t('filters.categoryPlaceholder')}</SelectItem>
+              <SelectItem value="all" className="py-2.5 rounded-md focus:bg-accent cursor-pointer text-sm transition-colors">{t('filters.categoryPlaceholder')}</SelectItem>
               {categories?.map((category) => (
-                <SelectItem key={category.id} value={category.id} className="py-2.5 rounded-md focus:bg-primary/5 cursor-pointer text-sm">
+                <SelectItem key={category.id} value={category.id} className="py-2.5 rounded-md focus:bg-accent cursor-pointer text-sm transition-colors">
                   {category[`name_${lang}`]}
                 </SelectItem>
               ))}
@@ -180,9 +180,9 @@ export const TalentMarketFilters = ({ onFilterChange }: TalentMarketFiltersProps
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="rounded-lg border-primary/10 shadow-xl">
-              <SelectItem value="compatibility" className="py-2.5 rounded-md focus:bg-primary/5 cursor-pointer text-sm">{t('filters.sortByCompatibility')}</SelectItem>
-              <SelectItem value="date" className="py-2.5 rounded-md focus:bg-primary/5 cursor-pointer text-sm">{t('filters.sortByDate')}</SelectItem>
-              <SelectItem value="tests" className="py-2.5 rounded-md focus:bg-primary/5 cursor-pointer text-sm">{t('filters.sortByTests')}</SelectItem>
+              <SelectItem value="compatibility" className="py-2.5 rounded-md focus:bg-accent cursor-pointer text-sm transition-colors">{t('filters.sortByCompatibility')}</SelectItem>
+              <SelectItem value="date" className="py-2.5 rounded-md focus:bg-accent cursor-pointer text-sm transition-colors">{t('filters.sortByDate')}</SelectItem>
+              <SelectItem value="tests" className="py-2.5 rounded-md focus:bg-accent cursor-pointer text-sm transition-colors">{t('filters.sortByTests')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -201,11 +201,13 @@ export const TalentMarketFilters = ({ onFilterChange }: TalentMarketFiltersProps
       </div>
       
       {!filters.vacancyId && (
-        <div className="p-3 rounded-xl bg-primary/5 border border-primary/10 flex items-start gap-2.5 animate-in fade-in slide-in-from-top-1 duration-500">
-          <AlertCircle className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-          <div className="space-y-0.5">
-            <p className="text-xs font-bold text-primary">{t('noVacancyAlert.title')}</p>
-            <p className="text-[11px] text-primary/80 leading-relaxed">
+        <div className="p-4 rounded-2xl bg-primary/10 border border-primary/20 flex items-start gap-3 animate-in fade-in slide-in-from-top-1 duration-500 shadow-sm">
+          <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
+            <AlertCircle className="h-4 w-4 text-primary" />
+          </div>
+          <div className="space-y-1 py-0.5">
+            <p className="text-sm font-bold text-primary leading-none">{t('noVacancyAlert.title')}</p>
+            <p className="text-xs text-muted-foreground leading-relaxed">
               {t('noVacancyAlert.description')}
             </p>
           </div>

@@ -29,6 +29,7 @@ const compareCandidates = async (params: CompareCandidatesParams) => {
 export const useCompareCandidates = () => {
   return useMutation({
     mutationFn: compareCandidates,
+    retry: 0,
     onSuccess: () => {
       toast.success('Comparison generated successfully!')
     },

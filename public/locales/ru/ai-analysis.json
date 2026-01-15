@@ -1,5 +1,5 @@
 {
-  "maxFilesError": "Вы можете загрузить максимум 20 файлов.",
+  "maxFilesError": "Вы можете загрузить максимум 40 файлов.",
   "languages": {
     "ru": "Русский",
     "en": "English",
@@ -17,7 +17,7 @@
       "label": "Загрузите резюме",
       "dropFiles": "Отпустите файлы для загрузки",
       "dragAndDrop": "Перетащите файлы сюда или кликните для выбора",
-      "fileRequirements": "PDF, DOC, DOCX файлы, до 5MB каждый, максимум 20 файлов."
+      "fileRequirements": "PDF, DOC, DOCX файлы, до 5MB каждый, максимум 40 файлов."
     },
     "uploadProgress": {
       "uploading": "Загрузка файла {{current}} из {{total}}...",

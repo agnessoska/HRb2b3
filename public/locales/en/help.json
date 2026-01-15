@@ -138,7 +138,11 @@
     },
     "organization_branding": {
       "title": "Branding (White Label)",
-      "description": "Upload a logo and specify your company name. This data will be displayed in emails to candidates, on registration pages, and in the system header for all your employees."
+      "description": "Upload a logo and specify your company name. This data will be displayed for candidates you invite, on registration pages, and in the system header for all your employees."
+    },
+    "culture_code": {
+      "title": "Organization Cultural Code",
+      "description": "Describe the values, mission, and atmosphere in your company. This information helps the AI Assistant better understand your context and provide more accurate candidate recommendations. Can be left blank."
     },
     "tests_relevance": {
       "title": "Test Relevance",

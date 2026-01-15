@@ -26,14 +26,12 @@ import { GenerateStructuredInterviewDialog } from '@/features/ai-analysis/ui/Gen
 import { CompareCandidatesDialog } from '@/features/ai-analysis/ui/CompareCandidatesDialog';
 import { ComparisonResultView } from '@/features/ai-analysis/ui/ComparisonResultView';
 import { ComparisonHistory } from '@/features/ai-analysis/ui/ComparisonHistory';
-import { useGenerateInterviewPlan } from '@/features/structured-interview/api/generateInterviewPlan';
 import { useGetComparisonById } from '@/features/ai-analysis/api/getComparisons';
 import { InterviewWorkspace } from '@/features/structured-interview/ui/InterviewWorkspace';
 import { useGetInterviewSession } from '@/features/structured-interview/api/getInterviewSessions';
 import { useGetApplicationsByVacancy } from '@/features/vacancy-management/api/getApplicationsByVacancy';
 import { useOrganization } from '@/shared/hooks/useOrganization';
 import { useHrProfile } from '@/shared/hooks/useHrProfile';
-import { AIGenerationModal } from '@/shared/ui/AIGenerationModal';
 import type { DocumentType } from '@/features/ai-analysis/api/generateDocument';
 import type { SmartApplication } from '@/shared/types/extended';
 import { HelpCircle } from '@/shared/ui/HelpCircle';
@@ -56,7 +54,7 @@ interface VacancyFunnelProps {
 }
 
 export const VacancyFunnel = ({ vacancyId }: VacancyFunnelProps) => {
-  const { t, i18n } = useTranslation(['funnel', 'common', 'ai-analysis']);
+  const { t } = useTranslation(['funnel', 'common', 'ai-analysis']);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { data: organization } = useOrganization();
@@ -81,7 +79,6 @@ export const VacancyFunnel = ({ vacancyId }: VacancyFunnelProps) => {
   });
 
   // AI Generation states
-  const [isGeneratingInterview, setIsGeneratingInterview] = useState(false);
   const [viewingInterviewId, setViewingInterviewId] = useState<string | null>(null);
   
   const [interviewDialogState, setInterviewDialogState] = useState<{
@@ -110,9 +107,6 @@ export const VacancyFunnel = ({ vacancyId }: VacancyFunnelProps) => {
       return data;
     },
   });
-
-  // AI Mutations
-  const generateInterviewMutation = useGenerateInterviewPlan();
 
   // Group applications by status
   const groupedByStatus = useMemo(() => {
@@ -264,26 +258,16 @@ export const VacancyFunnel = ({ vacancyId }: VacancyFunnelProps) => {
   };
   
   // Confirmed generation after dialog
-  const handleConfirmedInterviewGeneration = async () => {
+  const handleConfirmedInterviewGeneration = async (result: { id: string }) => {
     const { applicationId } = interviewDialogState;
     const application = applications?.find(app => app.id === applicationId);
-    if (!application || !organization || !hrProfile || !applicationId) return;
+    if (!application || !organization || !hrProfile || !applicationId || !result?.id) return;
 
     setInterviewDialogState({ isOpen: false, applicationId: null });
-    setIsGeneratingInterview(true);
 
     try {
-      const result = await generateInterviewMutation.mutateAsync({
-        candidate_id: application.candidate.id,
-        vacancy_id: vacancyId,
-        organization_id: organization.id,
-        hr_specialist_id: hrProfile.id,
-        language: i18n.language as 'ru' | 'en' | 'kk',
-        additional_info: '',
-      });
-
       // Auto-transition to interview status
-      await supabase
+      const { error: updateError } = await supabase
         .from('applications')
         .update({
           status: 'interview',
@@ -292,8 +276,10 @@ export const VacancyFunnel = ({ vacancyId }: VacancyFunnelProps) => {
         })
         .eq('id', applicationId);
 
+      if (updateError) throw updateError;
+
       // Log timeline event
-      await supabase
+      const { error: logError } = await supabase
         .from('application_timeline')
         .insert({
           application_id: applicationId,
@@ -303,31 +289,24 @@ export const VacancyFunnel = ({ vacancyId }: VacancyFunnelProps) => {
           details: { session_id: result.id }
         });
 
+      if (logError) throw logError;
+
       // Invalidate queries
       queryClient.invalidateQueries({ queryKey: ['applications', vacancyId] });
       queryClient.invalidateQueries({ queryKey: ['vacancy', vacancyId] });
 
-      toast.success(t('Interview plan created'), {
-        description: t('Candidate moved to Interview'),
+      toast.success(t('ai-analysis:generateInterview.successTitle'), {
+        description: t('ai-analysis:generateInterview.successDescription'),
         action: {
           label: t('common:view'),
           onClick: () => setViewingInterviewId(result.id)
         }
       });
     } catch (error: unknown) {
-      console.error('Error generating interview:', error);
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      if (errorMessage.includes('all 6 tests')) {
-        toast.error(t('tests:testsRequired'), {
-          description: t('tests:completeAllTestsDesc')
-        });
-      } else {
-        toast.error(t('ai-analysis:errors.interviewGenerationFailed'), {
-          description: errorMessage
-        });
-      }
-    } finally {
-      setIsGeneratingInterview(false);
+      console.error('Error updating application status after interview generation:', error);
+      toast.error(t('common:error'), {
+        description: error instanceof Error ? error.message : String(error)
+      });
     }
   };
 
@@ -399,8 +378,8 @@ export const VacancyFunnel = ({ vacancyId }: VacancyFunnelProps) => {
     <>
       <div className="h-full flex flex-col bg-background md:bg-muted/5">
         {/* Compact Header */}
-        <div className="border-b bg-background z-10 px-4 py-3 flex items-center justify-between gap-4 sticky top-0">
-          <div className="flex items-center gap-3 min-w-0">
+        <div className="border-b border-border/50 bg-background/95 backdrop-blur-xl z-10 px-6 py-4 flex items-center justify-between gap-4 sticky top-0 shadow-sm">
+          <div className="flex items-center gap-4 min-w-0">
             <Button
               variant="ghost"
               size="icon"
@@ -450,16 +429,16 @@ export const VacancyFunnel = ({ vacancyId }: VacancyFunnelProps) => {
           {/* Mobile View */}
           <div className="md:hidden h-full flex flex-col">
              <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
-              <div className="px-4 py-2 border-b bg-background/50 backdrop-blur-sm">
-                <TabsList className="w-full overflow-x-auto justify-start bg-transparent p-0 h-auto gap-2 no-scrollbar">
+              <div className="px-4 py-3 border-b border-border/50 bg-background/80 backdrop-blur-md">
+                <TabsList className="w-full overflow-x-auto justify-start bg-transparent p-0 h-auto gap-3 no-scrollbar">
                   {statuses.map(status => (
-                    <TabsTrigger 
-                      key={status.id} 
-                      value={status.id} 
-                      className="flex-shrink-0 rounded-full border bg-background px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground shadow-sm"
+                    <TabsTrigger
+                      key={status.id}
+                      value={status.id}
+                      className="flex-shrink-0 rounded-2xl border border-border/50 bg-card/50 px-4 py-2 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground shadow-sm transition-all active:scale-95"
                     >
                       {status.label}
-                      <span className="ml-2 text-xs opacity-70 bg-black/10 dark:bg-white/20 px-1.5 py-0.5 rounded-full">
+                      <span className="ml-2 text-xs opacity-70 bg-muted px-1.5 py-0.5 rounded-full">
                         {groupedByStatus[status.id]?.length || 0}
                       </span>
                     </TabsTrigger>
@@ -587,23 +566,14 @@ export const VacancyFunnel = ({ vacancyId }: VacancyFunnelProps) => {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* AI Generation Modals */}
-      <AIGenerationModal
-        isOpen={isGeneratingInterview}
-        onOpenChange={() => {}}
-        isPending={isGeneratingInterview}
-        title={t('ai-analysis:generateInterview.title')}
-        description={t('ai-analysis:generateInterview.description')}
-        simulationMode="slow"
-      />
 
       {/* Interview Workspace Overlay */}
       {viewingInterviewId && (
         <Dialog open={!!viewingInterviewId} onOpenChange={() => setViewingInterviewId(null)}>
-          <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>{t('ai-analysis:generateInterview.title')}</DialogTitle>
-              <DialogDescription>
+          <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto rounded-[2.5rem] border-border/50 bg-background/95 backdrop-blur-2xl shadow-2xl p-0">
+            <DialogHeader className="p-8 pb-0">
+              <DialogTitle className="text-2xl font-bold">{t('ai-analysis:generateInterview.title')}</DialogTitle>
+              <DialogDescription className="text-base">
                 {t('ai-analysis:generateInterview.description')}
               </DialogDescription>
             </DialogHeader>
@@ -645,10 +615,10 @@ export const VacancyFunnel = ({ vacancyId }: VacancyFunnelProps) => {
       
       {viewingComparisonId && viewingComparison && (
         <Dialog open={!!viewingComparisonId} onOpenChange={() => setViewingComparisonId(null)}>
-          <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>{t('ai-analysis:compareCandidates.title')}</DialogTitle>
-              <DialogDescription>
+          <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto rounded-[2.5rem] border-border/50 bg-background/95 backdrop-blur-2xl shadow-2xl p-0">
+            <DialogHeader className="p-8 pb-0">
+              <DialogTitle className="text-2xl font-bold">{t('ai-analysis:compareCandidates.title')}</DialogTitle>
+              <DialogDescription className="text-base">
                 {t('ai-analysis:compareCandidates.description')}
               </DialogDescription>
             </DialogHeader>
@@ -667,10 +637,10 @@ export const VacancyFunnel = ({ vacancyId }: VacancyFunnelProps) => {
       {/* Comparison History Overlay */}
       {showComparisonHistory && (
         <Dialog open={showComparisonHistory} onOpenChange={setShowComparisonHistory}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>{t('funnel:compareHistoryTitle')}</DialogTitle>
-              <DialogDescription>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto rounded-[2.5rem] border-border/50 bg-background/95 backdrop-blur-2xl shadow-2xl p-0">
+            <DialogHeader className="p-8 pb-0">
+              <DialogTitle className="text-2xl font-bold">{t('funnel:compareHistoryTitle')}</DialogTitle>
+              <DialogDescription className="text-base">
                 {t('funnel:compareHistoryDescription')}
               </DialogDescription>
             </DialogHeader>
@@ -712,32 +682,32 @@ const InterviewWorkspaceWrapper = ({ sessionId, onClose }: { sessionId: string; 
 
 const FunnelSkeleton = () => (
   <div className="h-full flex flex-col">
-    <div className="border-b bg-background p-4">
+    <div className="border-b border-border/50 bg-background p-6">
       <div className="flex items-center justify-between max-w-7xl mx-auto">
-        <div className="flex items-center gap-4">
-          <div className="h-9 w-20 bg-muted rounded-md" />
+        <div className="flex items-center gap-6">
+          <div className="h-10 w-10 bg-muted rounded-2xl animate-pulse" />
           <div>
-            <div className="h-8 w-64 bg-muted rounded-md" />
-            <div className="h-4 w-32 bg-muted rounded-md mt-2" />
+            <div className="h-8 w-64 bg-muted rounded-xl animate-pulse" />
+            <div className="h-4 w-32 bg-muted rounded-lg mt-2 animate-pulse" />
           </div>
         </div>
-        <div className="h-9 w-32 bg-muted rounded-md" />
+        <div className="h-10 w-36 bg-muted rounded-xl animate-pulse" />
       </div>
     </div>
-    <div className="flex-1 overflow-x-auto overflow-y-hidden p-4">
-      <div className="inline-flex gap-4 min-h-full">
+    <div className="flex-1 overflow-x-auto overflow-y-hidden p-6">
+      <div className="inline-flex gap-6 min-h-full">
         {[...Array(7)].map((_, i) => (
-          <div key={i} className="flex flex-col w-80 flex-shrink-0 bg-muted/30 rounded-lg">
-            <div className="p-3 border-b bg-background rounded-t-lg">
+          <div key={i} className="flex flex-col w-80 flex-shrink-0 bg-muted/20 rounded-3xl border border-border/50">
+            <div className="p-4 border-b border-border/50 bg-background/50 rounded-t-3xl">
               <div className="flex items-center justify-between">
-                <div className="h-5 w-24 bg-muted rounded-md" />
-                <div className="h-6 w-8 bg-muted rounded-full" />
+                <div className="h-6 w-24 bg-muted rounded-lg animate-pulse" />
+                <div className="h-6 w-10 bg-muted rounded-full animate-pulse" />
               </div>
             </div>
-            <div className="p-2 space-y-2">
-              <div className="h-24 bg-muted rounded-md" />
-              <div className="h-24 bg-muted rounded-md" />
-              <div className="h-24 bg-muted rounded-md" />
+            <div className="p-4 space-y-4">
+              <div className="h-32 bg-muted/50 rounded-2xl animate-pulse" />
+              <div className="h-32 bg-muted/50 rounded-2xl animate-pulse" />
+              <div className="h-32 bg-muted/50 rounded-2xl animate-pulse" />
             </div>
           </div>
         ))}

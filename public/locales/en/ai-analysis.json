@@ -1,5 +1,5 @@
 {
-  "maxFilesError": "You can upload a maximum of 20 files.",
+  "maxFilesError": "You can upload a maximum of 40 files.",
   "languages": {
     "ru": "Русский",
     "en": "English",
@@ -17,7 +17,7 @@
       "label": "Upload Resumes",
       "dropFiles": "Drop files to upload",
       "dragAndDrop": "Drag and drop files here or click to select",
-      "fileRequirements": "PDF files, up to 5MB each, maximum 20 files."
+      "fileRequirements": "PDF, DOC, DOCX files, up to 5MB each, maximum 40 files."
     },
     "uploadProgress": {
       "uploading": "Uploading file {{current}} of {{total}}...",

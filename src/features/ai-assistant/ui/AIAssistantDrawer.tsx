@@ -365,29 +365,30 @@ export const AIAssistantDrawer = () => {
       <SheetTrigger asChild>
         <Button
           size="icon"
-          className="fixed bottom-6 right-6 h-14 w-14 rounded-2xl shadow-2xl bg-gradient-to-br from-primary to-violet-600 text-white hover:scale-105 transition-transform z-50"
+          className="fixed bottom-6 right-6 h-16 w-16 rounded-3xl shadow-[0_20px_50px_rgba(139,92,246,0.3)] bg-gradient-to-br from-primary via-violet-600 to-indigo-600 text-white hover:scale-110 hover:-translate-y-1 transition-all duration-300 z-50 group border-4 border-white/10"
         >
-          <Bot className="w-7 h-7" />
+          <Bot className="w-8 h-8 group-hover:rotate-12 transition-transform duration-300" />
+          <div className="absolute inset-0 rounded-3xl bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
         </Button>
       </SheetTrigger>
-      <SheetContent className="w-full sm:max-w-md p-0 flex flex-col h-full rounded-l-3xl border-l bg-background/95 backdrop-blur-xl">
-        <SheetHeader className="p-4 border-b bg-card/40">
+      <SheetContent className="w-full sm:max-w-md p-0 flex flex-col h-full rounded-l-[2.5rem] border-l border-border/50 bg-background/95 backdrop-blur-2xl shadow-2xl">
+        <SheetHeader className="h-12 px-4 border-b border-border/50 bg-card/30 backdrop-blur-md shrink-0 justify-center">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-primary to-violet-600 flex items-center justify-center text-white shadow-lg shadow-primary/20">
-                <Bot className="w-6 h-6" />
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-violet-600 flex items-center justify-center text-white shadow-lg shadow-primary/20">
+                <Bot className="w-4 h-4" />
               </div>
               <div>
-                <SheetTitle className="text-sm font-bold">{t('ai-assistant:assistantName')}</SheetTitle>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
-                  <span className="text-[10px] text-muted-foreground uppercase font-semibold">Online</span>
+                <SheetTitle className="text-[13px] font-bold leading-none">{t('ai-assistant:assistantName')}</SheetTitle>
+                <div className="flex items-center gap-1 mt-0.5">
+                  <span className="w-1 h-1 rounded-full bg-success animate-pulse" />
+                  <span className="text-[9px] text-muted-foreground uppercase font-bold">Online</span>
                   {focusedEntityName && (
                     <>
-                      <span className="text-muted-foreground mx-1 text-[10px]">•</span>
-                      <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-primary/10 text-primary">
-                        <AlertCircle className="w-2.5 h-2.5" />
-                        <span className="text-[9px] font-bold uppercase tracking-tight truncate max-w-[120px]">
+                      <span className="text-muted-foreground mx-1 text-[9px]">•</span>
+                      <div className="flex items-center gap-1 px-1 py-0.5 rounded bg-primary/10 text-primary">
+                        <AlertCircle className="w-2 h-2" />
+                        <span className="text-[8px] font-bold uppercase tracking-tight truncate max-w-[100px]">
                           {focusedEntityName}
                         </span>
                       </div>
@@ -396,12 +397,12 @@ export const AIAssistantDrawer = () => {
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-1">
-              <Button variant="ghost" size="icon" className="rounded-full" onClick={() => setShowHistory(!showHistory)}>
-                {showHistory ? <MessageSquare className="w-5 h-5" /> : <History className="w-5 h-5" />}
+            <div className="flex items-center gap-0.5">
+              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={() => setShowHistory(!showHistory)}>
+                {showHistory ? <MessageSquare className="w-4 h-4" /> : <History className="w-4 h-4" />}
               </Button>
-              <Button variant="ghost" size="icon" className="rounded-full" onClick={() => { setCurrentConversation(null); setShowHistory(false); }}>
-                <Plus className="w-5 h-5" />
+              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={() => { setCurrentConversation(null); setShowHistory(false); }}>
+                <Plus className="w-4 h-4" />
               </Button>
             </div>
           </div>
@@ -486,18 +487,18 @@ export const AIAssistantDrawer = () => {
                         <Sparkles className="w-8 h-8 text-primary" />
                       </div>
                       <h3 className="text-lg font-bold mb-2">{t('ai-assistant:welcomeTitle')}</h3>
-                      <p className="text-xs text-muted-foreground max-w-xs mb-6">{t('ai-assistant:welcomeDesc')}</p>
+                      <p className="text-xs text-muted-foreground max-w-xs mb-4">{t('ai-assistant:welcomeDesc')}</p>
                       
-                      <div className="w-full space-y-2">
+                      <div className="w-full space-y-1.5">
                         {['q1', 'q2', 'q3', 'q4'].map((q) => (
                           <Button
                             key={q}
                             variant="outline"
-                            className="w-full h-auto py-3 px-4 rounded-xl text-[11px] text-left justify-start border-primary/10 hover:bg-primary/5 transition-all group whitespace-normal"
+                            className="w-full h-auto py-2 px-3.5 rounded-xl text-[10px] text-left justify-start border-primary/10 hover:bg-primary/10 transition-all group whitespace-normal bg-card/50"
                             onClick={() => handleSendMessage(t(`ai-assistant:suggestions.${currentContext.type}.${q}`))}
                           >
                             <span className="flex-1 line-clamp-2">{t(`ai-assistant:suggestions.${currentContext.type}.${q}`)}</span>
-                            <ChevronRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+                            <ChevronRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 text-primary" />
                           </Button>
                         ))}
                       </div>
@@ -520,7 +521,7 @@ export const AIAssistantDrawer = () => {
                       )}>
                         <div className={cn(
                           "w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md overflow-hidden",
-                          msg.role === 'user' ? "bg-white dark:bg-zinc-800 text-primary border" : "bg-gradient-to-br from-primary to-violet-600 text-white"
+                          msg.role === 'user' ? "bg-white dark:bg-accent text-primary border" : "bg-gradient-to-br from-primary to-violet-600 text-white"
                         )}>
                           {msg.role === 'user' ? (
                             hrProfile?.avatar_url ? (
@@ -531,13 +532,13 @@ export const AIAssistantDrawer = () => {
                           ) : <Bot className="w-4 h-4" />}
                         </div>
                         <div className={cn(
-                          "group/msg relative max-w-[85%] px-4 py-3 rounded-2xl text-xs leading-relaxed shadow-sm",
-                          msg.role === 'user' ? "bg-primary text-primary-foreground rounded-tr-none" : "bg-muted/50 border rounded-tl-none prose prose-slate dark:prose-invert max-w-none"
+                          "group/msg relative max-w-[85%] px-5 py-4 rounded-3xl text-[13px] leading-relaxed shadow-sm transition-all",
+                          msg.role === 'user' ? "bg-primary text-primary-foreground rounded-tr-none shadow-xl shadow-primary/10" : "bg-card/50 border border-border/50 rounded-tl-none prose prose-slate dark:prose-invert max-w-none backdrop-blur-sm hover:bg-card/80"
                         )}>
                           {msg.attachment_url && (
-                            <a href={msg.attachment_url} target="_blank" rel="noreferrer" className="flex items-center gap-2 mb-2 p-2 rounded-lg bg-background/50 border border-border/50 text-[10px]">
-                              <FileText className="w-3 h-3" />
-                              <span className="truncate max-w-[120px]">{msg.attachment_name}</span>
+                            <a href={msg.attachment_url} target="_blank" rel="noreferrer" className="flex items-center gap-2 mb-2 p-2 rounded-lg bg-background/50 border border-border/50 text-[10px] hover:border-primary/30 transition-colors">
+                              <FileText className="w-3 h-3 text-primary" />
+                              <span className="truncate max-w-[120px] font-medium">{msg.attachment_name}</span>
                             </a>
                           )}
                           <div className="whitespace-pre-wrap">
@@ -546,7 +547,7 @@ export const AIAssistantDrawer = () => {
                           {msg.role === 'assistant' && (
                             <Button 
                               variant="ghost" size="icon" 
-                              className="absolute -right-8 top-0 opacity-0 group-hover/msg:opacity-100 transition-opacity h-7 w-7"
+                              className="absolute -right-8 top-0 opacity-0 group-hover/msg:opacity-100 transition-opacity h-7 w-7 hover:bg-primary/10 hover:text-primary"
                               onClick={() => handleCopyMessage(msg.content)}
                             >
                               <Copy className="w-3.5 h-3.5" />
@@ -562,11 +563,11 @@ export const AIAssistantDrawer = () => {
                       <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-violet-600 text-white flex items-center justify-center flex-shrink-0 shadow-md">
                         <Bot className="w-4 h-4" />
                       </div>
-                      <div className="max-w-[85%] px-4 py-3 rounded-2xl bg-muted/50 border rounded-tl-none text-xs leading-relaxed shadow-sm prose prose-slate dark:prose-invert max-w-none">
+                      <div className="max-w-[85%] px-5 py-4 rounded-3xl bg-card/50 border border-border/50 rounded-tl-none text-[13px] leading-relaxed shadow-sm prose prose-slate dark:prose-invert max-w-none backdrop-blur-sm">
                         <div className="whitespace-pre-wrap">
                           <ReactMarkdown remarkPlugins={[remarkGfm]}>{streamingText}</ReactMarkdown>
                         </div>
-                        <span className="inline-block w-1 h-3 ml-1 bg-primary animate-pulse" />
+                        <span className="inline-block w-1.5 h-4 ml-1 bg-primary animate-pulse rounded-full align-middle" />
                       </div>
                     </div>
                   )}
@@ -574,14 +575,16 @@ export const AIAssistantDrawer = () => {
                 </div>
               </ScrollArea>
 
-              <div className="p-4 border-t bg-card/40">
-                <div className="space-y-3">
+              <div className="p-4 border-t border-border/50 bg-card/30 backdrop-blur-lg">
+                <div className="space-y-2">
                   {attachment && (
-                    <div className="flex items-center gap-2 p-2 px-3 bg-primary/5 border border-primary/20 rounded-xl">
-                      <FileText className="w-3 h-3 text-primary" />
-                      <span className="text-[10px] font-medium text-primary truncate flex-1">{attachment.name}</span>
-                      <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => setAttachment(null)}>
-                        <X className="w-2.5 h-2.5" />
+                    <div className="flex items-center gap-2 p-1.5 px-3 bg-primary/10 border border-primary/20 rounded-xl animate-in slide-in-from-bottom-1">
+                      <div className="h-5 w-5 rounded-lg bg-primary/20 flex items-center justify-center">
+                        <FileText className="w-3 h-3 text-primary" />
+                      </div>
+                      <span className="text-[10px] font-bold text-primary truncate flex-1">{attachment.name}</span>
+                      <Button variant="ghost" size="icon" className="h-5 w-5 rounded-full hover:bg-primary/20" onClick={() => setAttachment(null)}>
+                        <X className="w-2.5 h-2.5 text-primary" />
                       </Button>
                     </div>
                   )}
@@ -589,7 +592,7 @@ export const AIAssistantDrawer = () => {
                     <input type="file" className="hidden" ref={fileInputRef} onChange={handleFileUpload} />
                     <Button
                       variant="ghost" size="icon"
-                      className="h-10 w-10 rounded-xl border border-primary/10"
+                      className="h-10 w-10 rounded-xl border border-border/50 hover:bg-accent/50 transition-all active:scale-90"
                       onClick={() => fileInputRef.current?.click()}
                       disabled={isStreaming || isUploading}
                     >
@@ -602,21 +605,18 @@ export const AIAssistantDrawer = () => {
                         onChange={(e) => setInputValue(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
                         disabled={isStreaming}
-                        className="h-10 rounded-xl pr-10 text-xs border-primary/10 focus-visible:ring-primary/20"
+                        className="h-10 rounded-xl pr-10 text-sm border-border/50 focus-visible:ring-primary/20 bg-background/50 backdrop-blur-sm"
                       />
                       <Button
                         size="icon"
                         onClick={() => handleSendMessage()}
                         disabled={(!inputValue.trim() && !attachment) || isStreaming}
-                        className="absolute right-1 top-1 h-8 w-8 rounded-lg bg-primary hover:bg-primary/90"
+                        className="absolute right-1.5 top-1.5 h-7 w-7 rounded-lg bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all active:scale-90"
                       >
-                        <Send className="w-4 h-4 text-white" />
+                        <Send className="w-3.5 h-3.5 text-white" />
                       </Button>
                     </div>
                   </div>
-                  <p className="text-[10px] text-center text-muted-foreground mt-3 uppercase tracking-widest font-medium opacity-50">
-                    {t('ai-assistant:disclaimer')}
-                  </p>
                 </div>
               </div>
             </>

@@ -47,6 +47,7 @@ const analyzeResumes = async (payload: AnalyzeResumesPayload): Promise<AnalyzeRe
 export const useAnalyzeResumes = (options?: UseMutationOptions<AnalyzeResumesResponse, Error, AnalyzeResumesPayload>) => {
   return useMutation({
     mutationFn: analyzeResumes,
+    retry: 0,
     ...options,
   })
 }

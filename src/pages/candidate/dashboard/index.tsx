@@ -19,6 +19,7 @@ import { ListContainer, ListItem } from '@/shared/ui/ListTransition';
 import type { TDashboardApplication, TDashboardMessage, TDashboardProfile } from '@/features/candidate-management/types';
 import { TestList } from '@/features/candidate-management/ui/TestList';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { MessageSquare } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ru, enUS, kk } from 'date-fns/locale';
 import i18n from '@/shared/lib/i18n';
@@ -114,15 +115,15 @@ const ProfileCompletenessWidget = ({
   if (score >= 100) return null;
 
   return (
-    <Card className="border-orange-500/50 bg-orange-500/5 overflow-hidden">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-orange-700 dark:text-orange-400 flex justify-between items-center text-lg">
+    <Card className="border-orange-500/20 bg-orange-500/10 dark:bg-orange-500/5 overflow-hidden shadow-xl shadow-orange-500/10 rounded-[2rem] backdrop-blur-xl">
+      <CardHeader className="p-8 pb-4">
+        <CardTitle className="text-orange-700 dark:text-orange-400 flex justify-between items-center text-xl font-black">
           {t('profileCompleteness.title')}
           <span className="text-2xl font-bold">{score}%</span>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <Progress value={score} className="h-2 bg-orange-200" indicatorClassName="bg-orange-500" />
+      <CardContent className="p-8 pt-4 space-y-6">
+        <Progress value={score} className="h-3 bg-orange-200 dark:bg-orange-950/30" indicatorClassName="bg-orange-500" />
         
         {missingFields.length > 0 && (
           <div className="space-y-2">
@@ -134,7 +135,7 @@ const ProfileCompletenessWidget = ({
                 <Badge 
                   key={field.key} 
                   variant="outline" 
-                  className="bg-white/50 dark:bg-black/20 border-orange-200 text-orange-700 dark:text-orange-300 hover:bg-orange-100 transition-colors cursor-default py-0.5 text-[10px]"
+                  className="bg-white/50 dark:bg-orange-500/10 border-orange-200/50 text-orange-700 dark:text-orange-300 hover:bg-orange-100 transition-colors cursor-default py-0.5 text-[10px]"
                 >
                   + {t(`profileCompleteness.fields.${field.key}`)}
                 </Badge>
@@ -163,14 +164,14 @@ const TestingProgressWidget = ({
   const progress = (testsCompleted / 6) * 100;
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="border-border/50 bg-card/40 backdrop-blur-xl rounded-[2rem] shadow-xl shadow-primary/5">
+      <CardHeader className="p-8 pb-4">
         <div className="flex items-center justify-between">
-          <CardTitle>{t('testingProgress.title')}</CardTitle>
-          <HelpCircle topicId="candidate_tests_importance" />
+          <CardTitle className="text-xl font-black tracking-tight">{t('testingProgress.title')}</CardTitle>
+          <HelpCircle topicId="candidate_tests_importance" iconClassName="opacity-50" />
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-8 pt-4">
         {isLoading ? (
           <Skeleton className="h-24 w-full" />
         ) : (
@@ -200,14 +201,14 @@ const ProfileStatusWidget = ({
 }) => {
   const { t } = useTranslation('dashboard');
   return (
-    <Card>
-      <CardHeader>
+    <Card className="border-border/50 bg-card/40 backdrop-blur-xl rounded-[2rem] shadow-xl shadow-primary/5">
+      <CardHeader className="p-8 pb-4">
         <div className="flex items-center justify-between">
-          <CardTitle>{t('profileVisibility.title')}</CardTitle>
-          <HelpCircle topicId="candidate_profile_publicity" />
+          <CardTitle className="text-xl font-black tracking-tight">{t('profileVisibility.title')}</CardTitle>
+          <HelpCircle topicId="candidate_profile_publicity" iconClassName="opacity-50" />
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-8 pt-4">
         {isLoading ? (
           <Skeleton className="h-16 w-full" />
         ) : (
@@ -236,11 +237,11 @@ const ActiveApplicationsWidget = ({
 }) => {
   const { t } = useTranslation('dashboard');
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t('activeApplications.title')}</CardTitle>
+    <Card className="border-border/50 bg-card/40 backdrop-blur-xl rounded-[2rem] shadow-xl shadow-primary/5">
+      <CardHeader className="p-8 pb-4">
+        <CardTitle className="text-2xl font-black tracking-tighter">{t('activeApplications.title')}</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-8 pt-4">
         {isLoading ? (
           <Skeleton className="h-40 w-full" />
         ) : !applications || applications.length === 0 ? (
@@ -286,9 +287,13 @@ const RecentMessagesWidget = ({
   const currentLocale = i18n.language === 'kk' ? kk : i18n.language === 'en' ? enUS : ru;
 
   return (
-    <Card className="overflow-hidden border-none shadow-md bg-gradient-to-br from-card to-muted/20">
-      <CardHeader className="flex flex-row items-center justify-between border-b bg-muted/10 pb-4 px-6">
-        <CardTitle className="text-xl font-bold flex items-center gap-2">
+    <Card className="overflow-hidden border-border/50 shadow-2xl bg-card/40 backdrop-blur-xl rounded-[2.5rem]">
+      <CardHeader className="flex flex-row items-center justify-between border-b border-border/50 bg-primary/5 p-8">
+        <CardTitle className="text-2xl font-black tracking-tighter flex items-center gap-3">
+          <div className="p-2 bg-primary/10 rounded-xl text-primary">
+            <MessageSquare className="h-6 w-6" />
+          </div>
+          {t('recentMessages.title')}
           {t('recentMessages.title')}
           {messages && messages.length > 0 && (
             <Badge variant="secondary" className="rounded-full px-2 h-5 text-[10px]">
@@ -317,10 +322,10 @@ const RecentMessagesWidget = ({
                 key={msg.id} 
                 className={`group transition-all hover:bg-muted/30 ${index !== Math.min(messages.length, 3) - 1 ? 'border-b' : ''}`}
               >
-                <Link to="/candidate/chat" className="flex items-start gap-4 p-4 w-full">
-                  <Avatar className="h-10 w-10 border-2 border-background shadow-sm shrink-0">
+                <Link to="/candidate/chat" className="flex items-start gap-5 p-6 w-full group/msg">
+                  <Avatar className="h-12 w-12 border-4 border-background shadow-lg shrink-0 transition-transform group-hover/msg:scale-110 duration-300">
                     <AvatarImage src={undefined} />
-                    <AvatarFallback className={msg.sender_type === 'hr' ? "bg-primary/10 text-primary font-bold" : "bg-orange-100 text-orange-600 font-bold"}>
+                    <AvatarFallback className={msg.sender_type === 'hr' ? "bg-primary/10 text-primary font-black" : "bg-orange-100 text-orange-600 font-black"}>
                       {msg.sender_type === 'hr' 
                         ? (msg.hr_specialist_name?.[0] || 'H') 
                         : (t('you')[0])}

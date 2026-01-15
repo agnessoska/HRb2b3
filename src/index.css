@@ -74,20 +74,22 @@
   }
 
   .dark {
-    /* Background: Zinc-950 */
-    --background: 240 10% 3.9%;
-    /* Foreground: Zinc-50 */
+    /* Modern Multi-layered Dark Palette */
+    
+    /* Background: Deep Charcoal-Zinc */
+    --background: 240 10% 6%;
+    /* Foreground: Soft Zinc-50 */
     --foreground: 0 0% 98%;
     
-    /* Card: Zinc-900 */
-    --card: 240 10% 3.9%;
+    /* Card: Slightly lighter than background for elevation */
+    --card: 240 10% 10%;
     --card-foreground: 0 0% 98%;
     
     /* Primary: Violet-500 (Bright for Dark Mode) */
     --primary: 263.4 70% 50.4%;
     --primary-foreground: 210 40% 98%;
     
-    /* Secondary: Zinc-800 */
+    /* Secondary: Dark Zinc-800 */
     --secondary: 240 3.7% 15.9%;
     --secondary-foreground: 0 0% 98%;
     
@@ -105,17 +107,22 @@
     --info-foreground: 0 0% 100%;
 
     /* UI Elements */
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
+    /* Border: Subdued Zinc for softness */
+    --border: 240 5% 16%;
+    /* Input: Same as border */
+    --input: 240 5% 16%;
     --ring: 263.4 70% 50.4%;
     
-    --accent: 240 3.7% 15.9%;
+    /* Accent: Interactive Zinc */
+    --accent: 240 5% 20%;
     --accent-foreground: 0 0% 98%;
     
-    --muted: 240 3.7% 15.9%;
+    /* Muted: Subdued background */
+    --muted: 240 5% 12%;
     --muted-foreground: 240 5% 64.9%;
     
-    --popover: 240 10% 3.9%;
+    /* Popover: Highest elevation level */
+    --popover: 240 10% 12%;
     --popover-foreground: 0 0% 98%;
 
     /* Chart colors for data visualization - dark mode */

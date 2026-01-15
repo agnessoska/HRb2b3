@@ -31,7 +31,7 @@ interface GenerateStructuredInterviewDialogProps {
   candidateId: string
   vacancyId: string
   disabled?: boolean
-  onSuccess?: () => void
+  onSuccess?: (data: { id: string }) => void
   children?: React.ReactNode
 }
 
@@ -83,6 +83,8 @@ export function GenerateStructuredInterviewDialog({
   const { calculation } = useTokenCalculation('structured_interview', additionalInfo)
 
   const handleGenerate = () => {
+    if (isPending) return
+
     if (!candidateId || !vacancyId) {
       toast.error(t('errors.missingData'))
       return
@@ -103,13 +105,13 @@ export function GenerateStructuredInterviewDialog({
         additional_info: additionalInfo,
       },
       {
-        onSuccess: () => {
+        onSuccess: (data) => {
           toast.success(t('generateInterview.successTitle'), {
             description: t('generateInterview.successDescription'),
           })
           setAdditionalInfo('')
           setOpen(false)
-          if (onSuccess) onSuccess()
+          if (onSuccess) onSuccess(data)
         },
         onError: (error) => {
           toast.error(t('generateInterview.errorTitle'), {
@@ -123,13 +125,16 @@ export function GenerateStructuredInterviewDialog({
   return (
     <>
       <AIGenerationModal
-        isOpen={isPending || (!!generateInterviewMutation.data && !open)}
+        isOpen={isPending || (!!generateInterviewMutation.data && !open) || generateInterviewMutation.isError}
         onOpenChange={(isOpen) => {
           if (!isOpen && !isPending) {
+            if (generateInterviewMutation.isError) generateInterviewMutation.reset();
             setOpen(false);
           }
         }}
         isPending={isPending}
+        isError={generateInterviewMutation.isError}
+        error={generateInterviewMutation.error?.message}
         title={t('generateInterview.processingTitle', 'Генерация плана интервью')}
         description={t('generateInterview.processingDescription', 'ИИ анализирует результаты тестов и составляет вопросы...')}
         finalTokens={generateInterviewMutation.data?.total_tokens}

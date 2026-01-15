@@ -30,9 +30,10 @@ export const useAIAssistantStore = create<AIAssistantState>((set) => ({
 
   setCurrentConversation: (id) => set((state) => ({
     currentConversationId: id,
-    // Only clear messages if we are actually switching between two different non-null conversations
+    // Only clear messages if we are actually switching between two different conversations
     // If we are moving from null to a new ID (first message), keep the local messages
-    messages: (state.currentConversationId && id && state.currentConversationId !== id) ? [] : state.messages,
+    // If we are moving from an ID to null (closing), clear the messages
+    messages: (state.currentConversationId && state.currentConversationId !== id) ? [] : state.messages,
     streamingText: '',
     isStreaming: false
   })),

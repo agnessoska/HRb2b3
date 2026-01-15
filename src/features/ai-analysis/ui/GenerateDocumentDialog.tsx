@@ -67,8 +67,10 @@ export const GenerateDocumentDialog = ({
   const { calculation } = useTokenCalculation(documentType, additionalInfo)
 
   const handleGenerate = () => {
+    if (isPending) return
+
     if (!candidateId || !hrProfile || !organization) {
-      toast.error(t('errors.missingData'))
+      toast.error(t('ai-analysis:errors.missingData'))
       return
     }
 
@@ -97,13 +99,16 @@ export const GenerateDocumentDialog = ({
   return (
     <>
       <AIGenerationModal
-        isOpen={isPending || (!!generateDocumentMutation.data && !isOpen)}
+        isOpen={isPending || (!!generateDocumentMutation.data && !isOpen) || generateDocumentMutation.isError}
         onOpenChange={(open) => {
           if (!open && !isPending) {
+            if (generateDocumentMutation.isError) generateDocumentMutation.reset();
             onOpenChange(false);
           }
         }}
         isPending={isPending}
+        isError={generateDocumentMutation.isError}
+        error={generateDocumentMutation.error?.message}
         title={t('generateDocument.processingTitle', 'Генерация документа')}
         description={t('generateDocument.processingDescription', 'ИИ составляет документ на основе профиля кандидата и вакансии...')}
         finalTokens={generateDocumentMutation.data?.total_tokens}

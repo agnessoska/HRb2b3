@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getVacancies } from '../api/getVacancies'
 import { updateVacancy } from '../api/updateVacancy'
 import { useOrganization } from '@/shared/hooks/useOrganization'
-import { CreateVacancyDialog } from './CreateVacancyDialog'
+import { CreateVacancyDialog, type VacancyDialogMode } from './CreateVacancyDialog'
 import type { Database } from '@/shared/types/database'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
@@ -45,12 +45,13 @@ function getStatusStyles(status: string) {
 
 interface VacancyCardProps {
   vacancy: Vacancy
+  onView: (vacancy: Vacancy) => void
   onEdit: (vacancy: Vacancy) => void
   onArchive: (vacancy: Vacancy) => void
   onRestore: (vacancy: Vacancy) => void
 }
 
-function VacancyCard({ vacancy, onEdit, onArchive, onRestore }: VacancyCardProps) {
+function VacancyCard({ vacancy, onView, onEdit, onArchive, onRestore }: VacancyCardProps) {
   const { t } = useTranslation('vacancies')
   const navigate = useNavigate()
   const statusStyles = getStatusStyles(vacancy.status || 'active')
@@ -156,10 +157,18 @@ function VacancyCard({ vacancy, onEdit, onArchive, onRestore }: VacancyCardProps
         </div>
       </CardContent>
       
-      <CardFooter className="px-5 pb-5 pt-0">
+      <CardFooter className="px-5 pb-5 pt-0 flex gap-2">
+        <Button
+          variant="outline"
+          className="flex-1 h-11 rounded-xl font-bold border-border/60 hover:border-primary hover:text-primary hover:bg-primary/5 transition-all duration-300 shadow-sm"
+          onClick={() => onView(vacancy)}
+        >
+          <Eye className="mr-2 h-4 w-4" />
+          {t('actions.view')}
+        </Button>
         <Button
           variant="default"
-          className="w-full h-11 rounded-xl font-bold bg-primary hover:bg-primary/90 shadow-md shadow-primary/10 hover:shadow-lg hover:shadow-primary/20 transition-all duration-300"
+          className="flex-1 h-11 rounded-xl font-bold bg-primary hover:bg-primary/90 shadow-md shadow-primary/10 hover:shadow-lg hover:shadow-primary/20 transition-all duration-300"
           onClick={() => navigate(`/hr/vacancy/${vacancy.id}/profile`)}
         >
           {t('actions.manage')}
@@ -176,6 +185,7 @@ export function VacancyList() {
   const queryClient = useQueryClient()
   const [vacancyToEdit, setVacancyToEdit] = useState<Vacancy | null>(null)
   const [isEditOpen, setIsEditOpen] = useState(false)
+  const [dialogMode, setDialogMode] = useState<VacancyDialogMode>('create')
   const [activeTab, setActiveTab] = useState('active')
 
   const {
@@ -215,8 +225,15 @@ export function VacancyList() {
     },
   })
 
+  const handleView = (vacancy: Vacancy) => {
+    setVacancyToEdit(vacancy)
+    setDialogMode('view')
+    setIsEditOpen(true)
+  }
+
   const handleEdit = (vacancy: Vacancy) => {
     setVacancyToEdit(vacancy)
+    setDialogMode('edit')
     setIsEditOpen(true)
   }
 
@@ -232,32 +249,6 @@ export function VacancyList() {
     }
   }
 
-  if (isLoadingOrg || isLoadingVacancies) {
-    return (
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {[1, 2, 3].map((i) => (
-          <Card key={i} className="overflow-hidden">
-            <CardHeader className="pb-3">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 animate-pulse rounded-lg bg-muted" />
-                <div className="flex-1 space-y-2">
-                  <div className="h-4 w-3/4 animate-pulse rounded bg-muted" />
-                  <div className="h-3 w-1/2 animate-pulse rounded bg-muted" />
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <div className="h-3 w-full animate-pulse rounded bg-muted" />
-                <div className="h-3 w-5/6 animate-pulse rounded bg-muted" />
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    )
-  }
-
   if (isError) {
     return (
       <Card className="border-destructive/50 bg-destructive/5">
@@ -270,88 +261,120 @@ export function VacancyList() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex flex-col gap-1 flex-1">
-          <div className="flex items-center gap-2">
-            <h2 className="text-2xl font-bold tracking-tight">{t('list.header')}</h2>
-            <HelpCircle topicId="vacancies_management" />
-          </div>
-          <p className="text-sm text-muted-foreground">
-            {t('list.description')}
-          </p>
-        </div>
-        <CreateVacancyDialog />
-      </div>
-
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="mb-4">
-          <TabsTrigger value="active">
-            {t('statuses.active')}
-            <span className="ml-2 text-xs bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">
-              {vacancies?.filter((v) => (v.status || 'active') === 'active').length || 0}
-            </span>
-          </TabsTrigger>
-          <TabsTrigger value="closed">
-            {t('statuses.closed')}
-            <span className="ml-2 text-xs bg-muted text-muted-foreground px-1.5 py-0.5 rounded-full">
-              {vacancies?.filter((v) => v.status === 'closed').length || 0}
-            </span>
-          </TabsTrigger>
-          <TabsTrigger value="archived">
-            {t('statuses.archived')}
-            <span className="ml-2 text-xs bg-destructive/10 text-destructive px-1.5 py-0.5 rounded-full">
-              {vacancies?.filter((v) => v.status === 'archived').length || 0}
-            </span>
-          </TabsTrigger>
-          <TabsTrigger value="all">{t('statuses.all')}</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value={activeTab} className="mt-0">
-          {filteredVacancies && filteredVacancies.length > 0 ? (
-            <ListContainer className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 auto-rows-fr">
-              {filteredVacancies.map((vacancy) => (
-                <ListItem key={vacancy.id} className="h-full">
-                  <VacancyCard
-                    vacancy={vacancy}
-                    onEdit={handleEdit}
-                    onArchive={handleArchive}
-                    onRestore={handleRestore}
-                  />
-                </ListItem>
-              ))}
-            </ListContainer>
-          ) : (
-            <Card className="border-2 border-dashed border-muted/60 bg-muted/10 hover:bg-muted/20 transition-colors rounded-2xl">
-              <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 animate-pulse">
-                  <Briefcase className="h-8 w-8 text-primary" />
-                </div>
-                <h3 className="mt-6 text-xl font-bold tracking-tight">
-                  {activeTab === 'all' ? t('list.empty_title') : t(`list.empty_${activeTab}`)}
-                </h3>
-                <p className="mt-2 text-base text-muted-foreground max-w-md">
-                  {activeTab === 'all'
-                    ? t('list.empty_description')
-                    : t(`list.empty_${activeTab}_description`)}
-                </p>
-                {activeTab === 'active' && (
-                  <div className="mt-8">
-                    <CreateVacancyDialog />
+      {(isLoadingOrg || isLoadingVacancies) && !isEditOpen ? (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3].map((i) => (
+            <Card key={i} className="overflow-hidden">
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 animate-pulse rounded-lg bg-muted" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 w-3/4 animate-pulse rounded bg-muted" />
+                    <div className="h-3 w-1/2 animate-pulse rounded bg-muted" />
                   </div>
-                )}
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <div className="h-3 w-full animate-pulse rounded bg-muted" />
+                  <div className="h-3 w-5/6 animate-pulse rounded bg-muted" />
+                </div>
               </CardContent>
             </Card>
-          )}
-        </TabsContent>
-      </Tabs>
+          ))}
+        </div>
+      ) : (
+        <>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex flex-col gap-1 flex-1">
+              <div className="flex items-center gap-2">
+                <h2 className="text-2xl font-bold tracking-tight">{t('list.header')}</h2>
+                <HelpCircle topicId="vacancies_management" />
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {t('list.description')}
+              </p>
+            </div>
+            <CreateVacancyDialog />
+          </div>
+
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="mb-4">
+              <TabsTrigger value="active">
+                {t('statuses.active')}
+                <span className="ml-2 text-xs bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">
+                  {vacancies?.filter((v) => (v.status || 'active') === 'active').length || 0}
+                </span>
+              </TabsTrigger>
+              <TabsTrigger value="closed">
+                {t('statuses.closed')}
+                <span className="ml-2 text-xs bg-muted text-muted-foreground px-1.5 py-0.5 rounded-full">
+                  {vacancies?.filter((v) => v.status === 'closed').length || 0}
+                </span>
+              </TabsTrigger>
+              <TabsTrigger value="archived">
+                {t('statuses.archived')}
+                <span className="ml-2 text-xs bg-destructive/10 text-destructive px-1.5 py-0.5 rounded-full">
+                  {vacancies?.filter((v) => v.status === 'archived').length || 0}
+                </span>
+              </TabsTrigger>
+              <TabsTrigger value="all">{t('statuses.all')}</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value={activeTab} className="mt-0">
+              {filteredVacancies && filteredVacancies.length > 0 ? (
+                <ListContainer className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 auto-rows-fr">
+                  {filteredVacancies.map((vacancy) => (
+                    <ListItem key={vacancy.id} className="h-full">
+                      <VacancyCard
+                        vacancy={vacancy}
+                        onView={handleView}
+                        onEdit={handleEdit}
+                        onArchive={handleArchive}
+                        onRestore={handleRestore}
+                      />
+                    </ListItem>
+                  ))}
+                </ListContainer>
+              ) : (
+                <Card className="border-2 border-dashed border-muted/60 bg-muted/10 hover:bg-muted/20 transition-colors rounded-2xl">
+                  <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 animate-pulse">
+                      <Briefcase className="h-8 w-8 text-primary" />
+                    </div>
+                    <h3 className="mt-6 text-xl font-bold tracking-tight">
+                      {activeTab === 'all' ? t('list.empty_title') : t(`list.empty_${activeTab}`)}
+                    </h3>
+                    <p className="mt-2 text-base text-muted-foreground max-w-md">
+                      {activeTab === 'all'
+                        ? t('list.empty_description')
+                        : t(`list.empty_${activeTab}_description`)}
+                    </p>
+                    {activeTab === 'active' && (
+                      <div className="mt-8">
+                        <CreateVacancyDialog />
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
+          </Tabs>
+        </>
+      )}
 
       <CreateVacancyDialog
         isOpen={isEditOpen}
         onOpenChange={(open) => {
           setIsEditOpen(open)
-          if (!open) setVacancyToEdit(null)
+          if (!open) {
+            setVacancyToEdit(null)
+            setDialogMode('create')
+          }
         }}
+        onModeChange={setDialogMode}
         vacancyToEdit={vacancyToEdit}
+        initialMode={dialogMode}
       />
     </div>
   )

@@ -95,8 +95,8 @@ export const ResumeAnalysis = () => {
   })
 
   const onDrop = (acceptedFiles: File[]) => {
-    if (files.length + acceptedFiles.length > 20) {
-      toast.error(t('maxFilesError'))
+    if (files.length + acceptedFiles.length > 40) {
+      toast.error(t('maxFilesError', { count: 40 }))
       return
     }
     setFiles(prevFiles => [...prevFiles, ...acceptedFiles.filter(af => !prevFiles.some(pf => pf.name === af.name))])
@@ -270,22 +270,32 @@ export const ResumeAnalysis = () => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
       <AIGenerationModal
-        isOpen={isUploading || analyzeResumesMutation.isPending}
-        onOpenChange={() => {}} // Locked
+        isOpen={isUploading || analyzeResumesMutation.isPending || analyzeResumesMutation.isError}
+        onOpenChange={(open) => {
+          if (!open && !isUploading && !analyzeResumesMutation.isPending) {
+            if (analyzeResumesMutation.isError) analyzeResumesMutation.reset();
+          }
+        }}
         isPending={isUploading || analyzeResumesMutation.isPending}
+        isError={analyzeResumesMutation.isError}
+        error={analyzeResumesMutation.error?.message}
         title={isUploading ? t('resumeAnalysis.uploadingTitle', 'Загрузка файлов') : t('resumeAnalysis.processingTitle', 'Анализ резюме')}
         description={isUploading ? uploadStatus : t('resumeAnalysis.processingDescription', 'ИИ анализирует резюме и сопоставляет их с вакансиями...')}
         progress={isUploading ? uploadProgress : undefined}
+        itemsCount={files.length}
         simulationMode="slow"
         finalTokens={accumulatedTokens || analyzeResumesMutation.data?.result?.total_tokens || analyzeResumesMutation.data?.total_tokens}
       />
       <div className="lg:col-span-2 order-1">
-        <GlassCard className="overflow-hidden border shadow-lg bg-card/50">
-          <div className="p-4 sm:p-8 border-b">
-            <div className="flex items-center gap-3 sm:gap-4">
+        <GlassCard className="overflow-hidden border-border/50 shadow-2xl bg-card/40 rounded-[2.5rem] backdrop-blur-2xl">
+          <div className="p-6 sm:p-10 border-b border-border/50 bg-primary/5">
+            <div className="flex items-center gap-4 sm:gap-6">
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-3">
-                  <h2 className="text-lg sm:text-2xl font-bold truncate">
+                <div className="flex items-center gap-4 mb-2">
+                  <div className="p-3 bg-primary rounded-2xl shadow-lg shadow-primary/20">
+                    <UploadCloud className="h-6 w-6 text-white" />
+                  </div>
+                  <h2 className="text-xl sm:text-3xl font-black tracking-tighter">
                     {t('resumeAnalysis.title')}
                   </h2>
                   <HelpCircle topicId="resume_analysis" iconClassName="h-5 w-5" />
@@ -311,7 +321,7 @@ export const ResumeAnalysis = () => {
                     variant="outline"
                     role="combobox"
                     aria-expanded={openPopover}
-                    className="w-full justify-between h-auto min-h-[48px] px-4 rounded-xl hover:bg-accent/50 hover:border-primary/50 transition-all"
+                    className="w-full justify-between h-auto min-h-[56px] px-5 rounded-2xl border-border/50 bg-background/50 hover:bg-background transition-all shadow-inner"
                   >
                     <div className="flex flex-wrap gap-2">
                       {selectedVacanciesDetails.length > 0 ? (
@@ -373,19 +383,19 @@ export const ResumeAnalysis = () => {
                 </div>
                 <span className={cn(
                   "text-xs font-medium px-2 py-0.5 rounded-full transition-colors",
-                  files.length >= 20 ? "bg-destructive/10 text-destructive" : "bg-muted text-muted-foreground"
+                  files.length >= 40 ? "bg-destructive/10 text-destructive" : "bg-muted text-muted-foreground"
                 )}>
-                  {files.length} / 20
+                  {files.length} / 40
                 </span>
               </div>
               
               <div
                 {...getRootProps()}
                 className={cn(
-                  "relative border-2 border-dashed rounded-2xl transition-all duration-300 ease-in-out min-h-[200px]",
+                  "relative border-2 border-dashed rounded-3xl transition-all duration-500 ease-in-out min-h-[220px]",
                   isDragActive
-                    ? "border-primary bg-primary/5 scale-[1.01] shadow-lg ring-2 ring-primary/20"
-                    : "border-border/60 hover:border-primary/50 hover:bg-muted/30",
+                    ? "border-primary bg-primary/5 scale-[1.02] shadow-2xl ring-4 ring-primary/10"
+                    : "border-border/40 hover:border-primary/30 hover:bg-primary/5",
                   files.length > 0 ? "p-4" : "p-10 flex flex-col items-center justify-center text-center"
                 )}
               >
@@ -397,7 +407,7 @@ export const ResumeAnalysis = () => {
                       {files.map((file) => (
                         <div
                           key={file.name}
-                          className="group relative flex items-center gap-3 p-3 bg-background/80 backdrop-blur-sm border rounded-xl shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-200"
+                          className="group relative flex items-center gap-4 p-4 bg-background/60 backdrop-blur-md border border-border/50 rounded-2xl shadow-sm hover:shadow-xl hover:border-primary/30 transition-all duration-300 animate-in fade-in zoom-in-95"
                           onClick={(e) => e.stopPropagation()}
                         >
                           <div className="h-10 w-10 rounded-lg bg-red-500/10 flex items-center justify-center flex-shrink-0 text-red-500">
@@ -423,7 +433,7 @@ export const ResumeAnalysis = () => {
                       ))}
                     </div>
                     
-                    {files.length < 20 && (
+                    {files.length < 40 && (
                       <div className="flex items-center justify-center py-6 border-2 border-dashed border-muted-foreground/10 rounded-xl hover:bg-muted/30 hover:border-primary/30 transition-all cursor-pointer group">
                         <div className="flex flex-col items-center gap-2 text-muted-foreground group-hover:text-primary transition-colors">
                           <UploadCloud className="h-6 w-6 mb-1 animate-bounce duration-1000" />
@@ -448,7 +458,7 @@ export const ResumeAnalysis = () => {
                     ) : (
                       <>
                         <p className="font-medium text-lg mb-2">{t('resumeAnalysis.uploadResumes.dragAndDrop')}</p>
-                        <p className="text-sm text-muted-foreground max-w-xs">{t('resumeAnalysis.uploadResumes.fileRequirements', 'PDF, DOC, DOCX файлы, до 5MB каждый, максимум 20 файлов.')}</p>
+                        <p className="text-sm text-muted-foreground max-w-xs">{t('resumeAnalysis.uploadResumes.fileRequirements', 'PDF, DOC, DOCX файлы, до 5MB каждый, максимум 40 файлов.')}</p>
                       </>
                     )}
                   </div>
@@ -493,15 +503,17 @@ export const ResumeAnalysis = () => {
       </div>
 
       <div className="order-2 lg:sticky lg:top-24 space-y-6">
-        <Card className="border-none shadow-lg bg-card/50 backdrop-blur-sm overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-primary" />
+        <Card className="border border-border/50 shadow-2xl bg-card/40 backdrop-blur-xl overflow-hidden rounded-[2rem]">
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent pointer-events-none opacity-50" />
+          <CardHeader className="p-8 pb-4 relative z-10">
+            <CardTitle className="flex items-center gap-3 text-xl font-black tracking-tight">
+              <div className="p-2 bg-primary/10 rounded-xl">
+                <Sparkles className="w-5 h-5 text-primary" />
+              </div>
               {t('resumeAnalysis.summary.title')}
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6 relative">
+          <CardContent className="p-8 pt-4 space-y-8 relative z-10">
             <TokenCostBanner
               operationType="resume_analysis"
               multiplier={files.length || 1}

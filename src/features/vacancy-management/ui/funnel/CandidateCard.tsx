@@ -23,7 +23,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -416,20 +415,20 @@ export const CandidateCard = ({
 
   return (
     <Card
-      className="relative overflow-hidden bg-card/60 hover:bg-card/80 backdrop-blur-sm transition-all duration-200 group shadow-sm hover:shadow-md border border-border/50 rounded-xl"
+      className="relative overflow-hidden bg-card/40 hover:bg-card/60 backdrop-blur-md transition-all duration-300 group shadow-sm hover:shadow-xl hover:shadow-primary/5 border border-border/50 rounded-[1.5rem]"
     >
-      <CardContent className="p-3 space-y-3">
+      <CardContent className="p-4 space-y-4">
         {/* Header: Avatar, Name, Menu */}
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-3 min-w-0">
-            <Avatar className="h-9 w-9 border-2 border-background shadow-sm">
-              <AvatarImage src={avatarUrl || undefined} />
-              <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/10 text-primary text-xs font-bold">
+            <Avatar className="h-10 w-10 border-2 border-background shadow-md transition-transform group-hover:scale-110 duration-300">
+              <AvatarImage src={avatarUrl || undefined} className="object-cover" />
+              <AvatarFallback className="bg-gradient-to-br from-primary/20 to-violet-500/20 text-primary text-xs font-black">
                 {getInitials(application.candidate.full_name)}
               </AvatarFallback>
             </Avatar>
             <div className="min-w-0 flex-1">
-              <h4 className="text-sm font-semibold truncate leading-none mb-1">
+              <h4 className="text-sm font-bold truncate leading-none mb-1.5 group-hover:text-primary transition-colors">
                 {application.candidate.full_name}
               </h4>
               <p className="text-xs text-muted-foreground truncate">
@@ -482,21 +481,26 @@ export const CandidateCard = ({
 
         {/* Dynamic Badges */}
         {dynamicBadges.length > 0 && (
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-2">
             {dynamicBadges}
           </div>
         )}
 
         {/* Progress Bar for Testing */}
         {application.status === 'testing' && (
-          <div className="space-y-1">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-muted-foreground">{t('progress.testsProgress')}</span>
-              <span className="font-medium">{testsCompleted}/6</span>
+          <div className="space-y-2 py-1">
+            <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70">
+              <span>{t('progress.testsProgress')}</span>
+              <span className="text-primary">{testsCompleted}/6</span>
             </div>
-            <Progress value={(testsCompleted / 6) * 100} className="h-1.5" />
+            <div className="h-1.5 w-full bg-muted/30 rounded-full overflow-hidden border border-border/50">
+              <div
+                className="h-full bg-primary transition-all duration-1000 ease-out rounded-full"
+                style={{ width: `${(testsCompleted / 6) * 100}%` }}
+              />
+            </div>
             {testsCompleted === 5 && (
-              <p className="text-xs text-amber-600 animate-pulse">
+              <p className="text-[10px] text-amber-500 font-bold animate-pulse text-center">
                 {t('progress.almostDone')}
               </p>
             )}
@@ -505,21 +509,21 @@ export const CandidateCard = ({
 
         {/* Context Actions */}
         {contextActions.length > 0 && (
-          <div className="space-y-2 pt-2 border-t border-border/40">
+          <div className="space-y-2 pt-3 border-t border-border/20">
             {contextActions}
           </div>
         )}
 
         {/* Footer: Date & Standard Actions */}
-        <div className="flex items-center justify-between pt-2 border-t border-border/40">
-          <span className="text-[10px] text-muted-foreground">
+        <div className="flex items-center justify-between pt-3 border-t border-border/20">
+          <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/50">
             {format(new Date(application.created_at), 'dd MMM yyyy')}
           </span>
-          <div className="flex gap-1">
+          <div className="flex gap-1.5">
             <Button
               variant="ghost"
               size="icon"
-              className="h-6 w-6 hover:bg-muted"
+              className="h-7 w-7 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors"
               onClick={() => navigate(`/hr/candidate/${application.candidate.id}`)}
               title={t('funnel:profile')}
             >

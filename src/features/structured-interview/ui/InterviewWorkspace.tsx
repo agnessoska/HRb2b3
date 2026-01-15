@@ -116,8 +116,8 @@ export function InterviewWorkspace({
     <div className="space-y-6">
       {/* Sticky Header */}
       <div className={cn(
-        "bg-background/95 backdrop-blur-sm border-b shadow-sm py-4",
-        isInDialog ? "px-0" : "sticky top-16 z-40 -mx-6 px-6"
+        "bg-background/95 backdrop-blur-xl border-b border-border/50 shadow-sm py-6",
+        isInDialog ? "px-0" : "sticky top-16 z-40 -mx-6 px-8"
       )}>
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           {!isInDialog && (
@@ -202,37 +202,38 @@ export function InterviewWorkspace({
         )}
       </div>
 {/* Interview Header Info */}
-<Card>
-  <CardContent className="p-8">
-    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-      <div className="flex-1 space-y-2">
-        <div className="flex items-center gap-3">
-          <h2 className="text-3xl font-bold tracking-tight">{session.interview_plan.candidate_name}</h2>
-          <HelpCircle topicId="interview_workspace" iconClassName="h-6 w-6" />
-        </div>
-        <p className="text-muted-foreground text-base">{session.interview_plan.vacancy_title}</p>
-      </div>
-      <div className="flex-shrink-0">
-        <div className="text-center px-6 py-4 rounded-xl bg-muted/50 border">
-          <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
-            {t('duration', 'Продолжительность')}
+      <Card className="bg-card/50 border-border/50 shadow-xl shadow-primary/5 rounded-[2rem] overflow-hidden">
+        <CardContent className="p-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
+            <div className="flex-1 space-y-3">
+              <div className="flex items-center gap-4">
+                <h2 className="text-4xl font-black tracking-tighter">{session.interview_plan.candidate_name}</h2>
+                <HelpCircle topicId="interview_workspace" iconClassName="h-6 w-6 opacity-50" />
+              </div>
+              <p className="text-muted-foreground text-lg font-medium">{session.interview_plan.vacancy_title}</p>
+            </div>
+            <div className="flex-shrink-0">
+              <div className="text-center px-8 py-6 rounded-3xl bg-primary/5 border border-primary/10 backdrop-blur-sm shadow-inner relative overflow-hidden group">
+                <div className="text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-2">
+                  {t('duration', 'Продолжительность')}
+                </div>
+                <div className="text-5xl font-black text-primary tracking-tighter group-hover:scale-110 transition-transform duration-500">
+                  {session.interview_plan.estimated_duration}
+                </div>
+                <div className="text-xs font-bold text-primary/60 mt-1 uppercase tracking-widest">{t('minutes', 'мин')}</div>
+                <div className="absolute -bottom-4 -right-4 w-12 h-12 bg-primary/10 rounded-full blur-xl" />
+              </div>
+            </div>
           </div>
-          <div className="text-4xl font-bold">
-            {session.interview_plan.estimated_duration}
-          </div>
-          <div className="text-sm text-muted-foreground mt-1">{t('minutes', 'мин')}</div>
-        </div>
-      </div>
-    </div>
-  </CardContent>
-</Card>
+        </CardContent>
+      </Card>
 
       {/* Final Assessment Card (only for completed interviews) */}
       {isCompleted && sessionData.completion && (
-        <Card className="border-emerald-200 bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-950/20 dark:to-green-950/20">
-          <CardContent className="pt-6">
+        <Card className="border-emerald-500/20 bg-emerald-500/5 dark:bg-emerald-500/10 overflow-hidden shadow-xl shadow-emerald-500/10 rounded-[2rem]">
+          <CardContent className="p-8">
             <div className="flex items-start gap-4">
-              <div className="p-3 rounded-full bg-emerald-100 dark:bg-emerald-900/30">
+              <div className="p-3 rounded-full bg-emerald-500/10">
                 <CheckCircle className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
               </div>
               <div className="flex-1 space-y-3">
@@ -262,7 +263,7 @@ export function InterviewWorkspace({
                   </Badge>
                 </div>
 
-                <div className="rounded-lg bg-white/50 dark:bg-black/20 p-4 border border-emerald-200 dark:border-emerald-800">
+                <div className="rounded-lg bg-emerald-500/5 dark:bg-emerald-500/10 p-4 border border-emerald-500/20">
                   <p className="text-sm font-medium text-emerald-900 dark:text-emerald-100 mb-2">
                     {t('overallImpression', 'Итоговое впечатление')}:
                   </p>

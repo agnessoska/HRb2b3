@@ -28,17 +28,17 @@ export const TokenBalance = ({ className }: TokenBalanceProps) => {
     <Link
       to="/hr/buy-tokens"
       className={cn(
-        "flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 hover:bg-primary/20 transition-colors border border-primary/20 group whitespace-nowrap relative",
+        "flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 hover:bg-primary/20 transition-all border border-primary/20 group whitespace-nowrap relative shadow-sm dark:bg-primary/20 dark:border-primary/40 dark:shadow-primary/5",
         className
       )}
       title={`${t('buyTokens')} (${fullBalance})`}
     >
       <Coins className={cn(
-        "w-4 h-4 text-primary group-hover:scale-110 transition-transform flex-shrink-0",
+        "w-4 h-4 text-primary dark:text-violet-400 group-hover:scale-110 transition-transform flex-shrink-0",
         isFetching && !isLoading && "animate-bounce"
       )} />
       <span className={cn(
-        "text-sm font-medium text-primary transition-opacity",
+        "text-sm font-bold text-primary dark:text-violet-300 transition-opacity",
         isFetching && !isLoading ? "opacity-50" : "opacity-100"
       )}>
         {formattedBalance}

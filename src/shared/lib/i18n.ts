@@ -37,7 +37,7 @@ i18n
     backend: {
       // Path where translation files are located
       // Added version query param to bust cache
-      loadPath: '/locales/{{lng}}/{{ns}}.json?v=20260109-help-v5',
+      loadPath: '/locales/{{lng}}/{{ns}}.json?v=20260114-landing-v1',
     },
   })
 

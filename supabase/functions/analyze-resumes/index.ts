@@ -124,10 +124,28 @@ async function callAI(config: AIConfig, prompt: string): Promise<{ response: str
     }
 
     const data = await res.json()
+    
+    if (!data.candidates || data.candidates.length === 0) {
+      console.error('Google AI API returned no candidates:', data)
+      if (data.promptFeedback?.blockReason) {
+        throw new Error(`Google AI API blocked the request: ${data.promptFeedback.blockReason}`)
+      }
+      throw new Error('Google AI API returned an empty response')
+    }
+
+    const candidate = data.candidates[0]
+    if (candidate.finishReason === 'SAFETY' || candidate.finishReason === 'OTHER') {
+      throw new Error(`AI generation stopped prematurely: ${candidate.finishReason}`)
+    }
+
+    if (!candidate.content?.parts?.[0]?.text) {
+      throw new Error('Google AI API response structure is missing text parts')
+    }
+
     return {
-      response: data.candidates[0].content.parts[0].text,
-      inputTokens: 0,
-      outputTokens: 0,
+      response: candidate.content.parts[0].text,
+      inputTokens: data.usageMetadata?.promptTokenCount || 0,
+      outputTokens: data.usageMetadata?.candidatesTokenCount || 0,
     }
   } else {
     throw new Error(`Unsupported AI provider: ${config.provider}`)

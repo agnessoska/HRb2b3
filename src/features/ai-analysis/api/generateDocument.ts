@@ -42,6 +42,7 @@ export const useGenerateDocument = () => {
 
   return useMutation({
     mutationFn: generateDocument,
+    retry: 0,
     onSuccess: (data) => {
       toast.success(t('generateDocument.success', 'Документ успешно сгенерирован!'))
       queryClient.invalidateQueries({ queryKey: ['documents', data.candidate_id] })

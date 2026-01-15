@@ -87,6 +87,60 @@ async function callAI(config: AIConfig, prompt: string): Promise<{ response: str
       inputTokens: msg.usage.input_tokens,
       outputTokens: msg.usage.output_tokens,
     }
+  } else if (config.provider === 'google') {
+    // @ts-expect-error Deno global
+    const API_KEY = Deno.env.get('GEMINI_API_KEY')
+    if (!API_KEY) throw new Error('GEMINI_API_KEY is not set in Supabase secrets')
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${config.model_name}:generateContent?key=${API_KEY}`
+
+    const body = {
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: {
+        temperature: config.temperature,
+        maxOutputTokens: config.max_output_tokens,
+        ...(config.thinking_budget && {
+          thinkingConfig: {
+            thinkingBudget: config.thinking_budget,
+          },
+        }),
+      },
+    }
+
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    })
+
+    if (!res.ok) {
+      const error = await res.json()
+      throw new Error(`Google AI API error: ${error.error.message}`)
+    }
+
+    const data = await res.json()
+    
+    if (!data.candidates || data.candidates.length === 0) {
+      console.error('Google AI API returned no candidates:', data)
+      if (data.promptFeedback?.blockReason) {
+        throw new Error(`Google AI API blocked the request: ${data.promptFeedback.blockReason}`)
+      }
+      throw new Error('Google AI API returned an empty response')
+    }
+
+    const candidate = data.candidates[0]
+    if (candidate.finishReason === 'SAFETY' || candidate.finishReason === 'OTHER') {
+      throw new Error(`AI generation stopped prematurely: ${candidate.finishReason}`)
+    }
+
+    if (!candidate.content?.parts?.[0]?.text) {
+      throw new Error('Google AI API response structure is missing text parts')
+    }
+
+    return {
+      response: candidate.content.parts[0].text,
+      inputTokens: data.usageMetadata?.promptTokenCount || 0,
+      outputTokens: data.usageMetadata?.candidatesTokenCount || 0,
+    }
   } else {
     throw new Error(`Unsupported AI provider: ${config.provider}`)
   }

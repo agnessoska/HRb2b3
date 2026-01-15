@@ -32,21 +32,21 @@ export function InterviewHistory({ candidateId, onViewSession }: InterviewHistor
         return {
           icon: CheckCircle,
           color: 'text-emerald-600',
-          bgColor: 'bg-emerald-50 dark:bg-emerald-950/20',
+          bgColor: 'bg-emerald-50 dark:bg-emerald-500/10',
           label: t('status.completed', 'Завершено')
         }
       case 'in_progress':
         return {
           icon: PlayCircle,
           color: 'text-blue-600',
-          bgColor: 'bg-blue-50 dark:bg-blue-950/20',
+          bgColor: 'bg-blue-50 dark:bg-blue-500/10',
           label: t('status.inProgress', 'В процессе')
         }
       case 'planned':
         return {
           icon: CalendarClock,
           color: 'text-gray-600',
-          bgColor: 'bg-gray-50 dark:bg-gray-950/20',
+          bgColor: 'bg-gray-50 dark:bg-muted',
           label: t('status.planned', 'Запланировано')
         }
       default:
@@ -81,7 +81,7 @@ export function InterviewHistory({ candidateId, onViewSession }: InterviewHistor
       <Card className="border-dashed">
         <CardContent className="flex flex-col items-center justify-center py-12 text-center">
           <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center mb-4">
-            <MessageSquare className="h-8 w-8 text-muted-foreground" />
+            < MessageSquare className="h-8 w-8 text-muted-foreground" />
           </div>
           <h3 className="font-semibold text-lg mb-2">
             {t('history.empty', 'Нет интервью')}

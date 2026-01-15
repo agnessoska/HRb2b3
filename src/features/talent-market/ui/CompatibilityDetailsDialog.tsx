@@ -38,19 +38,19 @@ const getMatchColor = (match: number) => {
 };
 
 const DataNotAvailable = ({ t }: { t: TFunction<"talent-market"> }) => (
-  <div className="flex flex-col items-center justify-center p-12 text-center space-y-4 bg-muted/30 rounded-xl border border-dashed">
+  <div className="flex flex-col items-center justify-center p-12 text-center space-y-4 bg-muted/30 rounded-xl border border-dashed text-muted-foreground">
     <div className="p-3 bg-muted rounded-full">
-      <X className="h-6 w-6 text-muted-foreground" />
+      <X className="h-6 w-6" />
     </div>
     <div className="space-y-1">
       <p className="font-medium">{t('detailsDialog.dataNotAvailable')}</p>
-      <p className="text-sm text-muted-foreground">{t('detailsDialog.dataNotAvailableDesc')}</p>
+      <p className="text-sm">{t('detailsDialog.dataNotAvailableDesc')}</p>
     </div>
   </div>
 );
 
 const ComparisonCard = ({ name, description, match, ideal, candidate, t }: { name: string, description: string, match: number, ideal: number, candidate: number, t: TFunction<"talent-market"> }) => (
-  <Card className="p-4">
+  <Card className="p-4 border-border/50">
     <div className="space-y-3">
       <div className="flex items-start justify-between">
         <div className="flex-1 min-w-0 pr-4">
@@ -99,10 +99,10 @@ const ComparisonCard = ({ name, description, match, ideal, candidate, t }: { nam
           </div>
         </div>
       </div>
-      <div className="text-sm mt-2">
-        {match >= 80 && <p className="text-emerald-600">✓ {t('detailsDialog.compatibility.excellent')}</p>}
-        {match >= 60 && match < 80 && <p className="text-amber-600">~ {t('detailsDialog.compatibility.good')}</p>}
-        {match < 60 && <p className="text-blue-600">⚠ {t('detailsDialog.compatibility.moderate')}</p>}
+      <div className="text-sm mt-2 font-medium">
+        {match >= 80 && <p className="text-emerald-600 dark:text-emerald-500">✓ {t('detailsDialog.compatibility.excellent')}</p>}
+        {match >= 60 && match < 80 && <p className="text-amber-600 dark:text-amber-500">~ {t('detailsDialog.compatibility.good')}</p>}
+        {match < 60 && <p className="text-blue-600 dark:text-blue-500">⚠ {t('detailsDialog.compatibility.moderate')}</p>}
       </div>
     </div>
   </Card>
@@ -132,7 +132,7 @@ const MBTIComparison = ({ details, t, tTests }: { details?: { ideal: string; can
   ];
   return (
     <div className="space-y-6">
-      <Card className="p-6">
+      <Card className="p-6 border-border/50">
         <div className="grid grid-cols-2 gap-8"><div className="text-center"><p className="text-sm text-muted-foreground mb-2">{t('detailsDialog.mbti.idealType')}</p><p className="text-4xl font-bold">{details.ideal}</p></div><div className="text-center"><p className="text-sm text-muted-foreground mb-2">{t('detailsDialog.mbti.candidateType')}</p><p className="text-4xl font-bold">{details.candidate}</p></div></div>
         <Separator className="my-4" />
         <div className="text-center"><p className="text-sm text-muted-foreground mb-2">{t('detailsDialog.mbti.match')}</p><p className="text-3xl font-bold text-primary">{details.match}%</p><p className="text-sm text-muted-foreground mt-2">{t('detailsDialog.mbti.matchesCount', { count: idealLetters.filter((l, i) => l === candidateLetters[i]).length })} {t('detailsDialog.outOf4Letters')}</p></div>
@@ -142,7 +142,7 @@ const MBTIComparison = ({ details, t, tTests }: { details?: { ideal: string; can
         {dichotomies.map((dich, index) => {
           const matches = idealLetters[index] === candidateLetters[index];
           return (
-            <Card key={index} className="p-4"><div className="flex items-center justify-between"><div className="flex-1"><p className="font-medium">{dich.name}</p><div className="flex gap-4 mt-2"><div><span className="text-sm text-muted-foreground">{t('detailsDialog.ideal')}: </span><span className="font-semibold">{idealLetters[index]}</span></div><div><span className="text-sm text-muted-foreground">{t('detailsDialog.candidate')}: </span><span className="font-semibold">{candidateLetters[index]}</span></div></div></div><div>{matches ? <Badge variant="success"><Check className="h-3 w-3 mr-1" />{t('detailsDialog.matches')}</Badge> : <Badge variant="secondary"><X className="h-3 w-3 mr-1" />{t('detailsDialog.doesNotMatch')}</Badge>}</div></div></Card>
+            <Card key={index} className="p-4 border-border/50"><div className="flex items-center justify-between"><div className="flex-1"><p className="font-medium">{dich.name}</p><div className="flex gap-4 mt-2"><div><span className="text-sm text-muted-foreground">{t('detailsDialog.ideal')}: </span><span className="font-semibold">{idealLetters[index]}</span></div><div><span className="text-sm text-muted-foreground">{t('detailsDialog.candidate')}: </span><span className="font-semibold">{candidateLetters[index]}</span></div></div></div><div>{matches ? <Badge variant="success"><Check className="h-3 w-3 mr-1" />{t('detailsDialog.matches')}</Badge> : <Badge variant="secondary"><X className="h-3 w-3 mr-1" />{t('detailsDialog.doesNotMatch')}</Badge>}</div></div></Card>
           )
         })}
       </div>
@@ -226,21 +226,21 @@ const ProfessionalComparison = ({
   if (vacancySkills.length === 0) {
     return (
       <div className="space-y-8">
-        <div className="p-6 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-4">
+        <div className="p-6 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-start gap-4">
           <AlertCircle className="h-6 w-6 text-amber-600 shrink-0" />
           <div className="space-y-1">
-            <p className="font-bold text-amber-900">{t('detailsDialog.noVacancyRequirementsTitle')}</p>
-            <p className="text-sm text-amber-800">{t('detailsDialog.noVacancyRequirementsDesc')}</p>
+            <p className="font-bold text-amber-900 dark:text-amber-100">{t('detailsDialog.noVacancyRequirementsTitle')}</p>
+            <p className="text-sm text-amber-800 dark:text-amber-200/80">{t('detailsDialog.noVacancyRequirementsDesc')}</p>
           </div>
         </div>
 
         <div className="space-y-4">
-          <h4 className="font-bold text-slate-600">
+          <h4 className="font-bold text-muted-foreground uppercase text-[10px] tracking-widest">
             {t('detailsDialog.candidateSkills')}
           </h4>
           <div className="flex flex-wrap gap-2">
             {candidateSkills.map((s, idx) => (
-              <Badge key={s.canonical_name || idx} variant="secondary" className="py-1 px-3 rounded-lg text-sm">
+              <Badge key={s.canonical_name || idx} variant="secondary" className="py-1 px-3 rounded-lg text-sm bg-secondary hover:bg-secondary transition-colors">
                 {s.name}
               </Badge>
             ))}
@@ -255,13 +255,13 @@ const ProfessionalComparison = ({
       {/* Совпадения */}
       {matched.length > 0 ? (
         <div className="space-y-4">
-          <h4 className="font-bold text-emerald-600 flex items-center gap-2">
-            <div className="p-1 bg-emerald-100 rounded-full"><Check className="h-4 w-4" /></div>
+          <h4 className="font-bold text-emerald-600 dark:text-emerald-500 flex items-center gap-2 uppercase text-[10px] tracking-widest">
+            <div className="p-1 bg-emerald-500/10 rounded-full"><Check className="h-3 w-3" /></div>
             {t('detailsDialog.matchedSkills')}
           </h4>
           <div className="flex flex-wrap gap-2">
             {matched.map((s, idx) => (
-              <Badge key={s.canonical_skill || idx} variant="success" className="py-1.5 px-3 rounded-lg text-sm">
+              <Badge key={s.canonical_skill || idx} variant="success" className="py-1.5 px-3 rounded-lg text-sm transition-transform hover:scale-105">
                 {s.name} {s.is_required && <span className="ml-1 text-[10px] opacity-70">(*)</span>}
               </Badge>
             ))}
@@ -269,8 +269,8 @@ const ProfessionalComparison = ({
         </div>
       ) : (
         <div className="space-y-4">
-          <h4 className="font-bold text-slate-400 flex items-center gap-2">
-            <div className="p-1 bg-slate-100 rounded-full"><X className="h-4 w-4" /></div>
+          <h4 className="font-bold text-muted-foreground flex items-center gap-2 uppercase text-[10px] tracking-widest opacity-60">
+            <div className="p-1 bg-muted rounded-full"><X className="h-3 w-3" /></div>
             {t('detailsDialog.matchedSkills')}
           </h4>
           <p className="text-sm text-muted-foreground italic px-1">{t('detailsDialog.noMatchedSkills')}</p>
@@ -280,13 +280,13 @@ const ProfessionalComparison = ({
       {/* Не хватает */}
       {missing.length > 0 ? (
         <div className="space-y-4">
-          <h4 className="font-bold text-rose-600 flex items-center gap-2">
-            <div className="p-1 bg-rose-100 rounded-full"><X className="h-4 w-4" /></div>
+          <h4 className="font-bold text-rose-600 dark:text-rose-500 flex items-center gap-2 uppercase text-[10px] tracking-widest">
+            <div className="p-1 bg-rose-500/10 rounded-full"><X className="h-3 w-3" /></div>
             {t('detailsDialog.missingSkills')}
           </h4>
           <div className="flex flex-wrap gap-2">
             {missing.map((s, idx) => (
-              <Badge key={s.canonical_skill || idx} variant="destructive" className="py-1.5 px-3 rounded-lg text-sm bg-rose-50 text-rose-700 border-rose-200">
+              <Badge key={s.canonical_skill || idx} variant="destructive" className="py-1.5 px-3 rounded-lg text-sm">
                 {s.name} {s.is_required && <span className="ml-1 text-[10px] opacity-70">(*)</span>}
               </Badge>
             ))}
@@ -295,13 +295,13 @@ const ProfessionalComparison = ({
       ) : null}
 
       {/* Дополнительно */}
-      <div className="space-y-4 pt-4 border-t border-dashed">
-        <h4 className="font-bold text-slate-600">
+      <div className="space-y-4 pt-6 border-t border-dashed">
+        <h4 className="font-bold text-muted-foreground uppercase text-[10px] tracking-widest opacity-80">
           {t('detailsDialog.additionalSkills')}
         </h4>
         <div className="flex flex-wrap gap-2 opacity-80">
           {additional.map((s, idx) => (
-            <Badge key={s.canonical_name || idx} variant="secondary" className="py-1 px-3 rounded-lg text-sm">
+            <Badge key={s.canonical_name || idx} variant="secondary" className="py-1 px-3 rounded-lg text-sm bg-secondary hover:bg-secondary transition-colors">
               {s.name}
             </Badge>
           ))}
@@ -345,50 +345,56 @@ export const CompatibilityDetailsDialog = ({ candidate, vacancyId, isOpen, onClo
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl h-[90vh] md:h-auto md:max-h-[85vh] flex flex-col p-0 gap-0 overflow-hidden rounded-2xl">
-        <div className="p-6 overflow-y-auto custom-scrollbar flex-1 min-h-0">
-          <DialogHeader className="mb-6">
-            <DialogTitle>{t('detailsDialog.title', { name: scoredCandidate.full_name })}</DialogTitle>
-            <DialogDescription>{t('detailsDialog.description')}</DialogDescription>
+      <DialogContent className="max-w-4xl h-[90vh] md:h-auto md:max-h-[85vh] flex flex-col p-0 gap-0 overflow-hidden rounded-[2rem] border-border/50 bg-background/95 backdrop-blur-xl shadow-2xl">
+        <div className="p-8 overflow-y-auto custom-scrollbar flex-1 min-h-0">
+          <DialogHeader className="mb-8">
+            <DialogTitle className="text-2xl font-bold">{t('detailsDialog.title', { name: scoredCandidate.full_name })}</DialogTitle>
+            <DialogDescription className="text-muted-foreground">{t('detailsDialog.description')}</DialogDescription>
           </DialogHeader>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4 border-b mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4 border-b border-border/50 mb-8">
             <Card
               className={cn(
-                "p-4 text-center cursor-pointer transition-all border-2",
-                mode === 'professional' ? "border-primary bg-primary/5 ring-4 ring-primary/10 scale-[1.02]" : "hover:border-primary/50"
+                "p-5 text-center cursor-pointer transition-all border-2 relative overflow-hidden rounded-2xl",
+                mode === 'professional'
+                  ? "border-primary bg-primary/5 dark:bg-primary/10 ring-4 ring-primary/10 scale-[1.02] shadow-xl shadow-primary/5"
+                  : "bg-muted/5 border-transparent hover:bg-muted/10 hover:border-border/50"
               )}
               onClick={() => setMode('professional')}
             >
-              <div className="flex items-center justify-center gap-1.5 mb-1">
-                <p className="text-sm text-muted-foreground">{t('detailsDialog.professional')}</p>
-                <HelpCircle topicId="match_score_professional" iconClassName="h-3.5 w-3.5" />
+              <div className="flex items-center justify-center gap-1.5 mb-2">
+                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground/80">{t('detailsDialog.professional')}</p>
+                <HelpCircle topicId="match_score_professional" iconClassName="h-3.5 w-3.5 opacity-60" />
               </div>
-              <p className="text-2xl font-bold">{scoredCandidate.professional_compatibility}%</p>
-              <p className="text-xs text-muted-foreground mt-1">{t('detailsDialog.professionalWeight')}</p>
+              <p className="text-3xl font-black text-foreground tracking-tighter">{scoredCandidate.professional_compatibility}%</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50 mt-2">{t('detailsDialog.professionalWeight')}</p>
             </Card>
   
             <Card
               className={cn(
-                "p-4 text-center cursor-pointer transition-all border-2",
-                mode === 'personal' ? "border-primary bg-primary/5 ring-4 ring-primary/10 scale-[1.02]" : "hover:border-primary/50"
+                "p-5 text-center cursor-pointer transition-all border-2 relative overflow-hidden rounded-2xl",
+                mode === 'personal'
+                  ? "border-primary bg-primary/5 dark:bg-primary/10 ring-4 ring-primary/10 scale-[1.02] shadow-xl shadow-primary/5"
+                  : "bg-muted/5 border-transparent hover:bg-muted/10 hover:border-border/50"
               )}
               onClick={() => setMode('personal')}
             >
-              <div className="flex items-center justify-center gap-1.5 mb-1">
-                <p className="text-sm text-muted-foreground">{t('detailsDialog.personal')}</p>
-                <HelpCircle topicId="match_score_personal" iconClassName="h-3.5 w-3.5" />
+              <div className="flex items-center justify-center gap-1.5 mb-2">
+                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground/80">{t('detailsDialog.personal')}</p>
+                <HelpCircle topicId="match_score_personal" iconClassName="h-3.5 w-3.5 opacity-60" />
               </div>
-              <p className="text-2xl font-bold">{scoredCandidate.personal_compatibility}%</p>
-              <p className="text-xs text-muted-foreground mt-1">{t('detailsDialog.personalWeight')}</p>
+              <p className="text-3xl font-black text-foreground tracking-tighter">{scoredCandidate.personal_compatibility}%</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50 mt-2">{t('detailsDialog.personalWeight')}</p>
             </Card>
   
-            <Card className="p-4 text-center bg-primary/5 border-2 border-transparent">
-              <div className="flex items-center justify-center gap-1.5 mb-1">
-                <p className="text-sm text-muted-foreground">{t('detailsDialog.overall')}</p>
-                <HelpCircle topicId="match_score_detailed" iconClassName="h-3.5 w-3.5" />
+            <Card className="p-5 text-center bg-primary border-2 border-primary shadow-xl shadow-primary/20 relative overflow-hidden rounded-2xl">
+              <div className="flex items-center justify-center gap-1.5 mb-2 relative z-10">
+                <p className="text-xs font-bold uppercase tracking-widest text-primary-foreground/80">{t('detailsDialog.overall')}</p>
+                <HelpCircle topicId="match_score_detailed" iconClassName="h-3.5 w-3.5 text-primary-foreground/60" />
               </div>
-              <p className="text-3xl font-bold text-primary">{scoredCandidate.overall_compatibility}%</p>
+              <p className="text-4xl font-black text-primary-foreground relative z-10 tracking-tighter">{scoredCandidate.overall_compatibility}%</p>
+              <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-white/10 rounded-full blur-2xl" />
+              <div className="absolute -top-4 -left-4 w-16 h-16 bg-black/10 rounded-full blur-xl" />
             </Card>
           </div>
   
@@ -401,22 +407,26 @@ export const CompatibilityDetailsDialog = ({ candidate, vacancyId, isOpen, onClo
               />
             ) : (
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="hidden md:grid w-full grid-cols-6">
+                <TabsList className="hidden md:grid w-full grid-cols-6 h-14 bg-muted/30 p-1.5 rounded-2xl border border-border/50">
                   {tests.map((test) => (
-                    <TabsTrigger key={test.id} value={test.id} className="text-xs px-1">
+                    <TabsTrigger
+                      key={test.id}
+                      value={test.id}
+                      className="text-[10px] uppercase font-bold tracking-widest px-1 rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-md transition-all"
+                    >
                       {test.name}
-                      <span className="ml-1 text-[10px] text-muted-foreground">({test.weight}%)</span>
+                      <div className="text-[8px] opacity-50 mt-0.5">{test.weight}%</div>
                     </TabsTrigger>
                   ))}
                 </TabsList>
                 <div className="md:hidden mb-4">
                   <Select value={activeTab} onValueChange={setActiveTab}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>{tests.map((test) => (<SelectItem key={test.id} value={test.id}>{test.name} ({test.weight}%)</SelectItem>))}</SelectContent>
+                    <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
+                    <SelectContent className="rounded-xl">{tests.map((test) => (<SelectItem key={test.id} value={test.id} className="rounded-lg">{test.name} ({test.weight}%)</SelectItem>))}</SelectContent>
                   </Select>
                 </div>
 
-                <div className="mt-4">
+                <div className="mt-6">
                   <TabsContent value="bigFive">
                     <BigFiveComparison
                       details={(scoredCandidate.compatibility_details as unknown as CompatibilityDetails)?.bigFive}
@@ -465,8 +475,8 @@ export const CompatibilityDetailsDialog = ({ candidate, vacancyId, isOpen, onClo
           </div>
         </div>
 
-        <DialogFooter className="p-6 bg-muted/20 border-t">
-          <Button variant="outline" onClick={onClose}>{t('detailsDialog.close')}</Button>
+        <DialogFooter className="p-8 bg-muted/20 border-t border-border/50 backdrop-blur-md">
+          <Button variant="outline" onClick={onClose} className="rounded-xl px-10 h-12 font-bold border-border/50 hover:bg-background transition-colors">{t('detailsDialog.close')}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -9,6 +9,16 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Plus,
   Send,
   MessageSquare,
@@ -102,6 +112,7 @@ const AIAssistantPage = () => {
   const [editTitleValue, setEditTitleValue] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [attachment, setAttachment] = useState<{ url: string; name: string; type: string } | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
 
@@ -216,18 +227,25 @@ const AIAssistantPage = () => {
     }
   };
 
-  const handleDeleteChat = async (e: React.MouseEvent, id: string) => {
+  const handleRequestDelete = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
+    setDeleteConfirmId(id);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteConfirmId) return;
     try {
-      await deleteConversation(id);
-      setConversations(conversations.filter(c => c.id !== id));
-      if (currentConversationId === id) {
+      await deleteConversation(deleteConfirmId);
+      setConversations(conversations.filter(c => c.id !== deleteConfirmId));
+      if (currentConversationId === deleteConfirmId) {
         setCurrentConversation(null);
       }
       toast.success(t('ai-assistant:chatDeleted'));
     } catch (err) {
       console.error('Failed to delete conversation:', err);
       toast.error(t('ai-assistant:errors.deleteConversation'));
+    } finally {
+      setDeleteConfirmId(null);
     }
   };
 
@@ -395,17 +413,17 @@ const AIAssistantPage = () => {
         "flex flex-col bg-card/60 backdrop-blur-md border rounded-3xl transition-all duration-300",
         isSidebarOpen ? "w-full md:w-80" : "w-0 overflow-hidden border-none"
       )}>
-        <div className="p-4 flex items-center justify-between">
-          <div className="flex items-center gap-2 font-semibold px-2">
-            <History className="w-5 h-5 text-primary" />
-            <span>{t('ai-assistant:history')}</span>
+        <div className="h-12 px-4 flex items-center justify-between">
+          <div className="flex items-center gap-2 font-semibold">
+            <History className="w-4 h-4 text-primary" />
+            <span className="text-[13px]">{t('ai-assistant:history')}</span>
           </div>
-          <Button variant="ghost" size="icon" onClick={handleCreateNewChat} className="rounded-full hover:bg-primary/10">
-            <Plus className="w-5 h-5" />
+          <Button variant="ghost" size="icon" onClick={handleCreateNewChat} className="h-8 w-8 rounded-full hover:bg-primary/10">
+            <Plus className="w-4 h-4" />
           </Button>
         </div>
         <Separator className="bg-border/50" />
-        <ScrollArea className="flex-1 px-2">
+        <ScrollArea className="flex-1 px-3">
           <div className="py-4 space-y-1">
             {isLoadingConversations ? (
               Array.from({ length: 5 }).map((_, i) => (
@@ -449,18 +467,20 @@ const AIAssistantPage = () => {
                     </div>
                   ) : (
                     <>
-                      <div className="font-medium text-sm truncate pr-14">
-                        {conv.title || t('ai-assistant:untitled')}
+                      <div className="flex flex-col pr-16">
+                        <div className="font-medium text-sm truncate">
+                          {conv.title || t('ai-assistant:untitled')}
+                        </div>
+                        <div className={cn(
+                          "text-[10px] mt-1 opacity-70",
+                          currentConversationId === conv.id ? "text-primary-foreground" : "text-muted-foreground"
+                        )}>
+                          {format(new Date(conv.updated_at), 'PPP', { locale: currentLocale })}
+                        </div>
                       </div>
                       <div className={cn(
-                        "text-[10px] mt-1 opacity-70",
-                        currentConversationId === conv.id ? "text-primary-foreground" : "text-muted-foreground"
-                      )}>
-                        {format(new Date(conv.updated_at), 'PPP', { locale: currentLocale })}
-                      </div>
-                      <div className={cn(
-                        "absolute right-1 top-1/2 -translate-y-1/2 flex items-center opacity-0 group-hover:opacity-100 transition-opacity",
-                        editingConvId === conv.id && "opacity-100"
+                        "absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-0.5 transition-opacity",
+                        editingConvId === conv.id ? "opacity-100" : "opacity-0 group-hover:opacity-100"
                       )}>
                         <Button
                           variant="ghost"
@@ -476,7 +496,7 @@ const AIAssistantPage = () => {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={(e) => handleDeleteChat(e, conv.id)}
+                          onClick={(e) => handleRequestDelete(e, conv.id)}
                           className={cn(
                             "h-8 w-8 rounded-full",
                             currentConversationId === conv.id ? "hover:bg-white/20 text-white" : "hover:bg-destructive/10 text-destructive"
@@ -498,45 +518,45 @@ const AIAssistantPage = () => {
         "flex-1 flex flex-col bg-card/40 backdrop-blur-sm border rounded-3xl overflow-hidden relative",
         isSidebarOpen && "hidden md:flex"
       )}>
-        <div className="p-4 border-b bg-card/40 flex items-center justify-between">
+        <div className="h-12 px-4 border-b bg-card/40 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Button 
-              variant="ghost" 
-              size="icon" 
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="rounded-full"
+              className="h-8 w-8 rounded-full"
             >
-              {isSidebarOpen ? <ChevronLeft className="w-5 h-5" /> : <History className="w-5 h-5" />}
+              {isSidebarOpen ? <ChevronLeft className="w-4 h-4" /> : <History className="w-4 h-4" />}
             </Button>
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-primary to-violet-600 flex items-center justify-center text-white shadow-lg shadow-primary/20">
-                <Bot className="w-6 h-6" />
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-violet-600 flex items-center justify-center text-white shadow-lg shadow-primary/20">
+                <Bot className="w-4 h-4" />
               </div>
               <div className="flex items-center gap-2">
                 <div>
-                  <h2 className="font-bold text-sm tracking-tight">{t('ai-assistant:assistantName')}</h2>
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
-                    <span className="text-[10px] text-muted-foreground uppercase font-semibold tracking-wider">Online</span>
+                  <h2 className="font-bold text-[13px] tracking-tight leading-none">{t('ai-assistant:assistantName')}</h2>
+                  <div className="flex items-center gap-1 mt-0.5">
+                    <span className="w-1 h-1 rounded-full bg-success animate-pulse" />
+                    <span className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Online</span>
                   </div>
                 </div>
-                <HelpCircle topicId="ai_assistant_tools" iconClassName="h-3.5 w-3.5" />
+                <HelpCircle topicId="ai_assistant_tools" iconClassName="h-3 w-3" />
               </div>
             </div>
           </div>
           
-          <div className="hidden sm:flex items-center gap-3">
+          <div className="hidden sm:flex items-center gap-2">
              {totalTokensUsed > 0 && (
-               <div className="px-3 py-1.5 rounded-full bg-muted border flex items-center gap-2 animate-in fade-in zoom-in duration-300">
-                 <Cpu className="w-3.5 h-3.5 text-muted-foreground" />
-                 <span className="text-[11px] font-medium text-muted-foreground">
-                   {t('ai-assistant:totalUsage')}: {formatTokens(totalTokensUsed)}
+               <div className="px-2 py-0.5 rounded-full bg-muted border flex items-center gap-1.5 animate-in fade-in zoom-in duration-300">
+                 <Cpu className="w-2.5 h-2.5 text-muted-foreground" />
+                 <span className="text-[9px] font-bold text-muted-foreground">
+                   {formatTokens(totalTokensUsed)}
                  </span>
                </div>
              )}
-             <div className="px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 flex items-center gap-2">
-                <Sparkles className="w-3.5 h-3.5 text-primary" />
-                <span className="text-[11px] font-medium text-primary">Advanced HR Intelligence</span>
+             <div className="px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20 flex items-center gap-1.5">
+                <Sparkles className="w-2.5 h-2.5 text-primary" />
+                <span className="text-[9px] font-bold text-primary tracking-tight">Advanced HR Intelligence</span>
              </div>
           </div>
         </div>
@@ -550,8 +570,8 @@ const AIAssistantPage = () => {
                 initial="hidden"
                 animate="visible"
               >
-                <motion.div variants={itemVariants} className="w-full mb-10">
-                  <div className="flex flex-wrap justify-center gap-6 px-4 max-w-6xl mx-auto">
+                <motion.div variants={itemVariants} className="w-full mb-6">
+                  <div className="flex flex-wrap justify-center gap-4 px-4 max-w-6xl mx-auto">
                     {[
                       { icon: LayoutDashboard, title: 'vacancies', color: 'text-blue-500' },
                       { icon: Users, title: 'candidates', color: 'text-emerald-500' },
@@ -561,13 +581,13 @@ const AIAssistantPage = () => {
                     ].map((cap) => (
                       <div
                         key={cap.title}
-                        className="group w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.33%-16px)] p-8 rounded-[32px] bg-card/20 border border-primary/5 flex flex-col items-center lg:items-start text-center lg:text-left transition-all duration-300 hover:bg-card/40 hover:border-primary/10 hover:shadow-2xl hover:shadow-primary/5 hover:-translate-y-1.5"
+                        className="group w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.33%-16px)] p-5 rounded-2xl bg-card/20 border border-primary/5 flex flex-col items-center lg:items-start text-center lg:text-left transition-all duration-300 hover:bg-card/40 hover:border-primary/10 hover:shadow-2xl hover:shadow-primary/5 hover:-translate-y-1"
                       >
-                        <div className={cn("w-16 h-14 rounded-2xl bg-background shadow-sm flex items-center justify-center mb-6 border border-primary/5 transition-transform duration-300 group-hover:scale-110", cap.color)}>
-                          <cap.icon className="w-7 h-7" />
+                        <div className={cn("w-12 h-10 rounded-xl bg-background shadow-sm flex items-center justify-center mb-4 border border-primary/5 transition-transform duration-300 group-hover:scale-110", cap.color)}>
+                          <cap.icon className="w-5 h-5" />
                         </div>
-                        <h5 className="font-bold text-lg mb-3 leading-tight tracking-tight">{t(`ai-assistant:capabilities.${cap.title}`)}</h5>
-                        <p className="text-[13px] text-muted-foreground leading-relaxed font-medium opacity-80">
+                        <h5 className="font-bold text-base mb-2 leading-tight tracking-tight">{t(`ai-assistant:capabilities.${cap.title}`)}</h5>
+                        <p className="text-[12px] text-muted-foreground leading-relaxed font-medium opacity-80">
                           {t(`ai-assistant:capabilities.${cap.title}Desc`)}
                         </p>
                       </div>
@@ -575,28 +595,28 @@ const AIAssistantPage = () => {
                   </div>
                 </motion.div>
 
-                <motion.div variants={itemVariants} className="mb-12">
-                  <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 text-amber-700 dark:text-amber-400 text-[11px] font-bold shadow-sm">
-                    <Coins className="w-4 h-4" />
+                <motion.div variants={itemVariants} className="mb-6">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 text-amber-700 dark:text-amber-400 text-[10px] font-bold shadow-sm">
+                    <Coins className="w-3.5 h-3.5" />
                     {t('ai-assistant:tokenWarning')}
                   </div>
                 </motion.div>
 
                 <motion.div variants={itemVariants} className="w-full">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-2xl mx-auto px-4 md:px-0">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full max-w-2xl mx-auto px-4 md:px-0">
                     {['q1', 'q2', 'q3', 'q4'].map((q) => {
                       const ctx = (searchParams.get('context_type') as ContextType) || 'global';
                       return (
                         <Button
                           key={q}
                           variant="ghost"
-                          className="h-auto py-4 px-5 rounded-2xl text-xs text-left justify-start border bg-card/30 hover:bg-primary/5 hover:border-primary/30 transition-all whitespace-normal shadow-sm group"
+                          className="h-auto py-2.5 px-4 rounded-xl text-[11px] text-left justify-start border bg-card/30 hover:bg-primary/5 hover:border-primary/30 transition-all whitespace-normal shadow-sm group"
                           onClick={() => {
                             setInputValue(t(`ai-assistant:suggestions.${ctx}.${q}`));
                           }}
                         >
-                          <div className="w-8 h-8 rounded-lg bg-background/50 flex items-center justify-center mr-3 border group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                            <Sparkles className="w-3.5 h-3.5" />
+                          <div className="w-7 h-7 rounded-lg bg-background/50 flex items-center justify-center mr-2.5 border group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                            <Sparkles className="w-3 h-3" />
                           </div>
                           <span className="line-clamp-2 flex-1 font-medium">{t(`ai-assistant:suggestions.${ctx}.${q}`)}</span>
                         </Button>
@@ -705,19 +725,19 @@ const AIAssistantPage = () => {
           </div>
         </ScrollArea>
 
-        <div className="p-4 md:p-6 bg-card/40 border-t">
-          <div className="max-w-3xl mx-auto space-y-3">
+        <div className="p-2 md:p-2 bg-card/40 border-t">
+          <div className="max-w-3xl mx-auto">
             {attachment && (
-              <div className="flex items-center gap-2 p-2 px-3 bg-primary/5 border border-primary/20 rounded-2xl animate-in fade-in zoom-in duration-200">
-                <FileText className="w-4 h-4 text-primary" />
-                <span className="text-xs font-medium text-primary truncate max-w-[200px]">{attachment.name}</span>
-                <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full hover:bg-primary/10" onClick={() => setAttachment(null)}>
-                  <X className="w-3 h-3 text-primary" />
+              <div className="flex items-center gap-2 p-1 px-2.5 bg-primary/5 border border-primary/20 rounded-lg animate-in fade-in zoom-in duration-200 mb-1.5">
+                <FileText className="w-3 h-3 text-primary" />
+                <span className="text-[10px] font-medium text-primary truncate max-w-[200px]">{attachment.name}</span>
+                <Button variant="ghost" size="icon" className="h-4 w-4 rounded-full hover:bg-primary/10" onClick={() => setAttachment(null)}>
+                  <X className="w-2 h-2 text-primary" />
                 </Button>
               </div>
             )}
-            <div className="flex gap-3">
-              <div className="relative flex-1 flex gap-2">
+            <div className="flex gap-2 items-center">
+              <div className="relative flex-1 flex gap-1.5">
                 <input
                   type="file"
                   className="hidden"
@@ -727,11 +747,11 @@ const AIAssistantPage = () => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-14 w-14 rounded-2xl border border-primary/10 hover:bg-primary/5 flex-shrink-0"
+                  className="h-9 w-9 rounded-lg border border-primary/10 hover:bg-primary/5 flex-shrink-0"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isStreaming || isUploading}
                 >
-                  {isUploading ? <Loader2 className="w-5 h-5 animate-spin text-primary" /> : <Paperclip className="w-5 h-5 text-primary" />}
+                  {isUploading ? <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" /> : <Paperclip className="w-4 h-4 text-primary" />}
                 </Button>
                 <Input
                   placeholder={t('ai-assistant:inputPlaceholder')}
@@ -739,24 +759,41 @@ const AIAssistantPage = () => {
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
                   disabled={isStreaming}
-                  className="h-14 rounded-2xl pr-14 border-primary/20 focus-visible:ring-primary/30"
+                  className="h-9 rounded-lg pr-10 border-primary/20 focus-visible:ring-primary/30 text-xs"
                 />
                 <Button
                   size="icon"
                   onClick={handleSendMessage}
                   disabled={(!inputValue.trim() && !attachment) || isStreaming}
-                  className="absolute right-2 top-2 h-10 w-10 rounded-xl bg-primary hover:bg-primary/90 transition-all shadow-lg shadow-primary/20"
+                  className="absolute right-1 top-1 h-7 w-7 rounded-md bg-primary hover:bg-primary/90 transition-all shadow-lg shadow-primary/20"
                 >
-                  <Send className="w-5 h-5" />
+                  <Send className="w-3.5 h-3.5" />
                 </Button>
               </div>
             </div>
           </div>
-          <p className="text-[10px] text-center text-muted-foreground mt-3 uppercase tracking-widest font-medium opacity-50">
-            {t('ai-assistant:disclaimer')}
-          </p>
         </div>
       </div>
+
+      <AlertDialog open={!!deleteConfirmId} onOpenChange={(open) => !open && setDeleteConfirmId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('ai-assistant:deleteConfirm.title')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('ai-assistant:deleteConfirm.description')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('ai-assistant:deleteConfirm.cancel')}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {t('ai-assistant:deleteConfirm.confirm')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

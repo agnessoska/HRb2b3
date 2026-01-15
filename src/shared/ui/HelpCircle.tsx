@@ -40,7 +40,7 @@ export function HelpCircle({ topicId, className, iconClassName }: HelpCircleProp
       <PopoverContent
         side="top"
         align="center"
-        className="z-[100] w-80 p-5 rounded-2xl border-2 border-border shadow-[0_20px_50px_rgba(0,0,0,0.2)] bg-white dark:bg-zinc-950 opacity-100"
+        className="z-[100] w-80 p-6 rounded-[2rem] border-2 border-border/50 shadow-2xl bg-popover/95 backdrop-blur-xl animate-in fade-in zoom-in-95 duration-200"
       >
         <div className="space-y-2">
           <h4 className="font-bold text-lg leading-none tracking-tight text-foreground">

@@ -13,7 +13,7 @@ export const useUpdateOrganization = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ id, name, logoFile }: UpdateOrganizationParams) => {
+    mutationFn: async ({ id, name, logoFile, cultureDescription }: UpdateOrganizationParams) => {
       let logoUrl = null
 
       if (logoFile) {
@@ -38,13 +38,9 @@ export const useUpdateOrganization = () => {
       if (logoUrl) {
         updateData.brand_logo_url = logoUrl
       }
-      if (typeof name !== 'undefined') {
-        updateData.name = name
-      }
-      // @ts-expect-error: culture_description is added via mutation params but not strictly typed yet
-      if (typeof arguments[0].cultureDescription !== 'undefined') {
-         // @ts-expect-error: culture_description is added via mutation params but not strictly typed yet
-        updateData.culture_description = arguments[0].cultureDescription
+      
+      if (typeof cultureDescription !== 'undefined') {
+        updateData.culture_description = cultureDescription
       }
 
       const { data, error } = await supabase

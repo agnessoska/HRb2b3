@@ -21,6 +21,8 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/shared/lib/supabase';
 import { TokenBalance } from '../TokenBalance';
 import { useUnreadMessagesCount } from '@/features/chat/hooks/useUnreadMessagesCount';
+import { useHrProfile } from '@/shared/hooks/useHrProfile';
+import { useQuery } from '@tanstack/react-query';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -34,6 +36,29 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
   const role = user?.user_metadata?.role;
   const [isOpen, setIsOpen] = React.useState(false);
   const { count: unreadCount } = useUnreadMessagesCount();
+  const { data: hrProfile } = useHrProfile();
+
+  const { data: candidateProfile } = useQuery({
+    queryKey: ['candidateProfile', user?.id],
+    queryFn: async () => {
+      if (!user || role !== 'candidate') return null;
+      const { data } = await supabase
+        .from('candidates')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+      return data;
+    },
+    enabled: !!user && role === 'candidate'
+  });
+
+  const avatarUrl = role === 'hr'
+    ? (hrProfile?.avatar_url || user?.user_metadata?.avatar_url)
+    : (candidateProfile?.avatar_url || user?.user_metadata?.avatar_url);
+
+  const fullName = role === 'hr'
+    ? (hrProfile?.full_name || user?.user_metadata?.full_name || 'User')
+    : (candidateProfile?.full_name || user?.user_metadata?.full_name || 'User');
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -79,8 +104,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                         <AvatarFallback className="rounded-sm">{organization.name?.substring(0, 2).toUpperCase() || 'HR'}</AvatarFallback>
                       </Avatar>
                     ) : (
-                      <div className="h-8 w-8 rounded-sm bg-primary/10 flex items-center justify-center">
-                        <span className="text-xs font-bold text-primary">HR</span>
+                      <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground shadow-sm">
+                        <span className="text-lg font-black italic tracking-tighter select-none">L</span>
                       </div>
                     )}
                     <SheetTitle className="font-bold">{organization?.name || t('hrPlatform')}</SheetTitle>
@@ -128,13 +153,13 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                   
                   <div className="flex items-center justify-between pt-4 border-t">
                      <div className="flex items-center gap-3">
-                       <Avatar className="h-8 w-8">
-                          <AvatarImage src="" />
-                          <AvatarFallback>{user?.user_metadata?.full_name?.substring(0, 2).toUpperCase() || 'U'}</AvatarFallback>
+                       <Avatar className="h-9 w-9">
+                          <AvatarImage src={avatarUrl} alt={fullName} className="object-cover" />
+                          <AvatarFallback>{fullName.substring(0, 2).toUpperCase() || 'U'}</AvatarFallback>
                         </Avatar>
                         <div className="flex flex-col">
-                          <span className="text-sm font-medium">{user?.user_metadata?.full_name}</span>
-                          <span className="text-xs text-muted-foreground truncate max-w-[140px]">{user?.email}</span>
+                          <span className="text-sm font-semibold">{fullName}</span>
+                          <span className="text-[11px] text-muted-foreground truncate max-w-[140px]">{user?.email}</span>
                         </div>
                      </div>
                      <Button variant="ghost" size="icon" onClick={handleSignOut}>
@@ -154,8 +179,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                   <AvatarFallback className="rounded-sm">{organization.name?.substring(0, 2).toUpperCase() || 'HR'}</AvatarFallback>
                 </Avatar>
               ) : (
-                <div className="h-8 w-8 rounded-sm bg-primary/10 flex items-center justify-center">
-                  <span className="text-xs font-bold text-primary">HR</span>
+                <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground shadow-sm">
+                  <span className="text-lg font-black italic tracking-tighter select-none">L</span>
                 </div>
               )}
               <span className="font-bold hidden md:inline-block">{organization?.name || t('hrPlatform')}</span>

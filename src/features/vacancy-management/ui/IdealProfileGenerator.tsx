@@ -38,6 +38,7 @@ export function IdealProfileGenerator({ vacancy }: IdealProfileGeneratorProps) {
 
   const generateIdealProfileMutation = useMutation({
     mutationFn: generateIdealProfile,
+    retry: 0,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vacancy', vacancy.id] })
     },
@@ -48,7 +49,7 @@ export function IdealProfileGenerator({ vacancy }: IdealProfileGeneratorProps) {
   const { mutate, isPending } = generateIdealProfileMutation
 
   const handleGenerate = () => {
-    if (!hrProfile || !vacancy) return
+    if (!hrProfile || !vacancy || isPending) return
     mutate({
       vacancy_id: vacancy.id,
       organization_id: vacancy.organization_id,
@@ -95,9 +96,15 @@ export function IdealProfileGenerator({ vacancy }: IdealProfileGeneratorProps) {
   return (
     <>
       <AIGenerationModal
-        isOpen={isPending}
-        onOpenChange={() => {}}
+        isOpen={isPending || generateIdealProfileMutation.isError}
+        onOpenChange={(open) => {
+          if (!open && !isPending) {
+            if (generateIdealProfileMutation.isError) generateIdealProfileMutation.reset();
+          }
+        }}
         isPending={isPending}
+        isError={generateIdealProfileMutation.isError}
+        error={generateIdealProfileMutation.error?.message}
         title={t('idealProfile.generator.processingTitle')}
         description={t('idealProfile.generator.processingDescription')}
         finalTokens={generateIdealProfileMutation.data?.total_tokens}
